@@ -1,0 +1,24 @@
+<classpath>
+  <classpathentry path="org.eclipse.jdt.launching.JRE_CONTAINER" kind="con"/>
+  <classpathentry path="src/main/java" excluding="**/.svn/|**/CVS/" kind="src"/>
+  <classpathentry path="target/classes" kind="output"/>
+  <classpathentry path="M2_REPO/backport-util-concurrent/backport-util-concurrent/3.1/backport-util-concurrent-3.1.jar" kind="var"/>
+  <classpathentry path="M2_REPO/javax/activation/activation/1.1.1/activation-1.1.1.jar" kind="var"/>
+  <classpathentry path="M2_REPO/javax/mail/mail/1.4.1/mail-1.4.1.jar" kind="var"/>
+  <classpathentry path="M2_REPO/jmock/jmock/1.2.0/jmock-1.2.0.jar" kind="var"/>
+  <classpathentry path="M2_REPO/junit/junit/4.3.1/junit-4.3.1.jar" kind="var"/>
+  <classpathentry path="M2_REPO/org/apache/axis2/axis2-adb/1.4/axis2-adb-1.4.jar" kind="var"/>
+  <classpathentry path="M2_REPO/org/apache/axis2/axis2-json/1.4/axis2-json-1.4.jar" kind="var"/>
+  <classpathentry path="M2_REPO/org/apache/axis2/axis2-kernel/1.4/axis2-kernel-1.4.jar" kind="var"/>
+  <classpathentry path="M2_REPO/org/apache/axis2/axis2-xmlbeans/1.4/axis2-xmlbeans-1.4.jar" kind="var"/>
+  <classpathentry path="M2_REPO/org/apache/neethi/neethi/2.0.4/neethi-2.0.4.jar" kind="var"/>
+  <classpathentry path="M2_REPO/org/apache/ws/commons/axiom/axiom-api/1.2.7/axiom-api-1.2.7.jar" kind="var"/>
+  <classpathentry path="M2_REPO/org/apache/ws/commons/axiom/axiom-dom/1.2.7/axiom-dom-1.2.7.jar" kind="var"/>
+  <classpathentry path="M2_REPO/org/apache/ws/commons/axiom/axiom-impl/1.2.7/axiom-impl-1.2.7.jar" kind="var"/>
+  <classpathentry path="M2_REPO/org/slf4j/jcl104-over-slf4j/1.4.3/jcl104-over-slf4j-1.4.3.jar" kind="var"/>
+  <classpathentry path="M2_REPO/org/slf4j/slf4j-api/1.4.3/slf4j-api-1.4.3.jar" kind="var"/>
+  <classpathentry path="M2_REPO/org/slf4j/slf4j-log4j12/1.4.3/slf4j-log4j12-1.4.3.jar" kind="var"/>
+  <classpathentry path="M2_REPO/org/springframework/spring/2.5.5/spring-2.5.5.jar" kind="var"/>
+  <classpathentry path="M2_REPO/stax/stax-api/1.0.1/stax-api-1.0.1.jar" kind="var"/>
+  <classpathentry path="/security" combineaccessrules="false" kind="src"/>
+</classpath>
