@@ -6,11 +6,8 @@ require "buildr/cobertura"
 # Keep this structure to allow the build system to update version numbers.
 VERSION_NUMBER = "6.0.0.34-SNAPSHOT"
 
-require "rsc/build/dependencies.rb"
-require "rsc/build/repositories.rb"
-# leave this require after dependencies.rb so the same jpa version is used throughout the whole build
-require "rsc/buildr-tasks/openjpa"
-require "rsc/buildr-tasks/generate_sql"
+require "dependencies.rb"
+require "repositories.rb"
 
 desc "Securities"
 define "securities" do
@@ -19,11 +16,6 @@ define "securities" do
   
   compile.options.target = "1.5"
 
-  define "dao-nutsNbolts" do
-    compile.with projects("security", "web-nutsNbolts"), APACHE_JPA, SLF4J
-    package :jar
-  end
-   
   desc "Security Framework"
   define "security" do
     compile.with CAS_CLIENT, DOM4J, CASTOR, LOG4J, SLF4J, SPRING[:core], XERCES
