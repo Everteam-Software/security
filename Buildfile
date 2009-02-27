@@ -1,5 +1,3 @@
-require "rubygems"
-require "buildr"
 require "buildr/xmlbeans"
 require "buildr/cobertura"
 
@@ -59,7 +57,6 @@ define "securities" do
     end
   end
 
-  
   desc "Security Web-Service"
   define "security-ws-service" do
     compile.with projects("security", "security-ws-common"), AXIOM, AXIS2, SLF4J, SPRING[:core], STAX_API  
