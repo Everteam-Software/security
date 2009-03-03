@@ -67,7 +67,7 @@ define "securities" do
   define "web-nutsNbolts" do
     libs = AXIS2, APACHE_COMMONS[:lang], INTALIO_STATS, JSON_NAGGIT, JSP_API, LOG4J, SERVLET_API, SLF4J, SPRING[:core], SPRING[:webmvc]
     test_libs = libs + [JUNIT, INSTINCT, SPRING_MOCK, AXIOM, project("security-ws-client"), STAX_API, WSDL4J, WS_COMMONS_SCHEMA]
-    compile.with test_libs
+    compile.with projects("security"), test_libs
     package :jar
   end
 end
