@@ -17,7 +17,6 @@ import static org.intalio.tempo.security.ws.Constants.TOKEN_NS;
 import javax.xml.namespace.QName;
 
 public class TokenConstants {
-
     public static final String TOKEN_PREFIX = "tokenws";
 
     public static final QName AUTHENTICATE_USER = new QName(TOKEN_NS.getNamespaceURI(), "authenticateUser", TOKEN_PREFIX);
@@ -45,4 +44,10 @@ public class TokenConstants {
     public static final QName PROXY_TICKET = new QName(TOKEN_NS.getNamespaceURI(), "proxyTicket", TOKEN_PREFIX);
 
     public static final QName SERVICE_URL = new QName(TOKEN_NS.getNamespaceURI(), "serviceURL", TOKEN_PREFIX);
+
+    public static final QName OPENSSO_TICKET = new QName(TOKEN_NS.getNamespaceURI(), "openssoTicket", TOKEN_PREFIX);
+
+    public static final QName OPENSSO_TOKEN = new QName(TOKEN_NS.getNamespaceURI(), "openssoToken", TOKEN_PREFIX);
+
+    public static final QName GETTOKEN_FROM_OPSSSOTOKEN = new QName(TOKEN_NS.getNamespaceURI(), "getTokenFromOpenSSOToken", TOKEN_PREFIX);
 }
