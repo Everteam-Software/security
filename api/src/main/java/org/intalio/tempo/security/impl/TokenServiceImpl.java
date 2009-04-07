@@ -20,9 +20,17 @@ import org.intalio.tempo.security.authentication.AuthenticationException;
 import org.intalio.tempo.security.rbac.RBACException;
 import org.intalio.tempo.security.token.TokenService;
 import org.intalio.tempo.security.util.IdentifierUtils;
+import org.intalio.tempo.security.util.MD5;
 import org.intalio.tempo.security.util.PropertyUtils;
 import org.intalio.tempo.security.util.StringArrayUtils;
 import org.intalio.tempo.security.util.TimeExpirationMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.iplanet.sso.SSOToken;
+import com.iplanet.sso.SSOTokenManager;
+import com.sun.identity.idm.AMIdentity;
+import com.sun.identity.idm.IdUtils;
 
 import edu.yale.its.tp.cas.client.ProxyTicketValidator;
 
@@ -33,6 +41,8 @@ import edu.yale.its.tp.cas.client.ProxyTicketValidator;
  * @author <a href="http://www.intalio.com">&copy; Intalio Inc.</a>
  */
 public class TokenServiceImpl implements TokenService {
+	Logger _logger = LoggerFactory.getLogger(TokenServiceImpl.class);
+	
     Realms _realms;
     TokenHandler _tokenHandler;
 
@@ -41,9 +51,12 @@ public class TokenServiceImpl implements TokenService {
     boolean _passwordAsAProperty;
     // should we NOT put the roles in the token, and cache them in memory instead
     boolean cacheRoles = false;
+    // cache token properties
+    boolean cacheProperties = false;
 
     // check every minute, expire after one hour
     TimeExpirationMap userAndRoles = new TimeExpirationMap(1000 * 60 * 30, 1000 * 60);
+    TimeExpirationMap tokenAndProperties = new TimeExpirationMap(1000 * 60 * 30, 1000 * 60);
 
     public TokenServiceImpl() {
         // nothing
@@ -71,6 +84,14 @@ public class TokenServiceImpl implements TokenService {
         this.cacheRoles = cacheRoles;
     }
 
+    public final boolean isCacheProperties() {
+    	return cacheProperties;
+    }
+
+    public final void setCacheProperties(boolean cacheProperties) {
+    	this.cacheProperties = cacheProperties;
+    }
+    
     public void setPasswordAsAProperty(Boolean asAProperty) {
         _passwordAsAProperty = asAProperty;
     }
@@ -169,7 +190,19 @@ public class TokenServiceImpl implements TokenService {
      * @return properties encoded in token
      */
     public Property[] getTokenProperties(String token) throws AuthenticationException, RemoteException {
-        Property[] props = _tokenHandler.parseToken(token);
+        if(token==null) return null;
+
+        String hash = MD5.compute(token);
+
+        if(cacheProperties) {
+            Property[] props = (Property[]) tokenAndProperties.get(hash);
+            if(props!=null) {
+                _logger.debug("Retrieving token properties from cache for:"+hash);
+                return props;
+            }
+        }
+
+    	Property[] props = _tokenHandler.parseToken(token);
         Map<String, Object> map = PropertyUtils.toMap(props);
         String user = ((Property) map.get(AuthenticationConstants.PROPERTY_USER)).getValue().toString();
         Property rolesForUser = null;
@@ -190,7 +223,13 @@ public class TokenServiceImpl implements TokenService {
         if(this.cacheRoles) userAndRoles.put(user, rolesForUser);
         
         map.put(AuthenticationConstants.PROPERTY_ROLES, rolesForUser);
-        return map.values().toArray(new Property[map.size()]);
+        Property[] propsArray = map.values().toArray(new Property[map.size()]);
+
+        if(this.cacheProperties) {
+            _logger.debug("Caching token properties to cache for:"+hash);
+            tokenAndProperties.put(hash, propsArray);
+        }
+        return propsArray;
     }
 
     public ProxyTicketValidator getProxyTicketValidator() {
@@ -213,13 +252,41 @@ public class TokenServiceImpl implements TokenService {
             String user = pv.getUser();
 
             if (user == null) {
-                throw new AuthenticationException("Authentication failed: User" + user + "'");
+                throw new AuthenticationException("Authentication failed: Null User");
             }
             return createToken(user);
         } else {
-            throw new AuthenticationException("Authentication failed! Proxy ticket authentication faild!");
+            throw new AuthenticationException("Authentication failed! Proxy ticket authentication failed!");
         }
 
     }
 
+    public String getTokenFromOpenSSOToken(String tokenId)
+    	throws AuthenticationException, RBACException, RemoteException {
+		try {
+		    SSOTokenManager tokenManager = SSOTokenManager.getInstance();
+		    SSOToken token = tokenManager.createSSOToken(
+		                    tokenId);
+		    if (token == null) {
+		            throw new AuthenticationException(
+		                            "Failed to get the sso token with token ID: " + tokenId);
+		    }
+		
+		    // check the token validity
+		    SSOTokenManager manager = tokenManager;
+		    if (!manager.isValidToken(token)) {
+		            throw new AuthenticationException("Token with ID: " + tokenId
+		                            + " is invalid.");
+		    }
+		
+		    // get the user with sso token
+		    AMIdentity userIdentity = IdUtils.getIdentity(token);
+		    String user = userIdentity.getName();
+		
+		    return createToken(user);
+		} catch (Exception e) {
+		    _logger.error("OpenSSO Token Error",e);
+		    throw new AuthenticationException("Authentication failed! OpenSSO ticket authentication failed!");
+		}
+	}
 }

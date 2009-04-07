@@ -119,3 +119,4 @@ APACHE_JPA = [
   "serp:serp:jar:1.13.1"
 ]
 
+OPENSSO_CLIENT_SDK = "com.sun:openssoclientsdk:jar:3.0"
