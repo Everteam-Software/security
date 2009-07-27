@@ -67,7 +67,7 @@ public class TokenHandler implements AuthenticationConstants {
      * prevent replay attacks.
      */
     private String _secret;
-    
+
     /**
      * Should we use compression for the generated token
      */
@@ -123,7 +123,7 @@ public class TokenHandler implements AuthenticationConstants {
 
     /**
      * Parse the properties contained in a token.
-     * 
+     *
      * @param props
      *            Properties
      * @return cryptographic token
@@ -177,7 +177,7 @@ public class TokenHandler implements AuthenticationConstants {
     /**
      * Return a Based64 encoded hash of the given timestamp, nonce and password
      * (or password equivalent).
-     * 
+     *
      * @param properties
      *            TODO
      */
@@ -219,7 +219,7 @@ public class TokenHandler implements AuthenticationConstants {
 
     /**
      * Parse the cryptographic token and return its properties.
-     * 
+     *
      * @param token
      *            Token
      * @return properties
@@ -297,8 +297,8 @@ public class TokenHandler implements AuthenticationConstants {
     protected String encode(String token) {
         token = PREFIX + token + SUFFIX;
         try {
-            if(this._compressToken) {
-                return Base64u.encodeBytes(token.getBytes("UTF-8"), Base64u.GZIP|Base64u.DONT_BREAK_LINES );    
+            if (_compressToken) {
+                return Base64u.encodeBytes(token.getBytes("UTF-8"), Base64u.GZIP|Base64u.DONT_BREAK_LINES );
             } else {
                 Base64Encoder encoder = new Base64Encoder();
                 encoder.translate( token.getBytes( "UTF-8" ) );
@@ -313,20 +313,20 @@ public class TokenHandler implements AuthenticationConstants {
      * Decode token from non-human readable format
      */
     protected String decode(String token) {
-        if(!this._compressToken) {
+        if (!_compressToken) {
             Base64Decoder decoder = new Base64Decoder();
             decoder.translate( token );
             try {
                 token = new String( decoder.getByteArray(), "UTF-8" );
             } catch ( UnsupportedEncodingException except ) {
                 throw new RuntimeException( except.toString() );
-            }    
+            }
         } else {
             try {
                 token = new String(Base64u.decode(token), "UTF-8");
             } catch (UnsupportedEncodingException e) {
                 throw new IllegalArgumentException("Token is corrupted");
-            }    
+            }
         }
 
         if (!token.startsWith(PREFIX)) {
