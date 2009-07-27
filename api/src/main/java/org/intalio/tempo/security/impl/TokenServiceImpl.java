@@ -52,14 +52,14 @@ public class TokenServiceImpl implements TokenService {
     boolean _passwordAsAProperty;
 
     // if true, roles are not encoded in token and cached in memory instead
-    boolean cacheRoles = false;
+    boolean _cacheRoles = false;
 
     // cache token properties
-    boolean cacheProperties = false;
+    boolean _cacheProperties = false;
 
     // check every minute, expire after one hour
-    TimeExpirationMap userAndRoles = new TimeExpirationMap(1000 * 60 * 30, 1000 * 60);
-    TimeExpirationMap tokenAndProperties = new TimeExpirationMap(1000 * 60 * 30, 1000 * 60);
+    TimeExpirationMap _userAndRoles = new TimeExpirationMap(1000 * 60 * 30, 1000 * 60);
+    TimeExpirationMap _tokenAndProperties = new TimeExpirationMap(1000 * 60 * 30, 1000 * 60);
 
     public TokenServiceImpl() {
         // nothing
@@ -80,19 +80,19 @@ public class TokenServiceImpl implements TokenService {
     }
 
     public final boolean isCacheRoles() {
-        return cacheRoles;
+        return _cacheRoles;
     }
 
     public final void setCacheRoles(boolean cacheRoles) {
-        this.cacheRoles = cacheRoles;
+        _cacheRoles = cacheRoles;
     }
 
     public final boolean isCacheProperties() {
-        return cacheProperties;
+        return _cacheProperties;
     }
 
     public final void setCacheProperties(boolean cacheProperties) {
-        this.cacheProperties = cacheProperties;
+        _cacheProperties = cacheProperties;
     }
 
     public void setPasswordAsAProperty(Boolean asAProperty) {
@@ -133,7 +133,7 @@ public class TokenServiceImpl implements TokenService {
 
         props.add(userProp);
         props.add(issueProp);
-        if (!cacheRoles) {
+        if (!_cacheRoles) {
             String[] roles = _realms.authorizedRoles(user);
             props.add(new Property(AuthenticationConstants.PROPERTY_ROLES, StringArrayUtils.toCommaDelimited(roles)));
         }
@@ -193,24 +193,26 @@ public class TokenServiceImpl implements TokenService {
      * @return properties encoded in token
      */
     public Property[] getTokenProperties(String token) throws AuthenticationException, RemoteException {
-        if(token==null) return null;
+        if (token==null) return null;
 
         String hash = MD5.compute(token);
 
-        if(cacheProperties) {
-            Property[] props = (Property[]) tokenAndProperties.get(hash);
-            if(props!=null) {
+        if (_cacheProperties) {
+            Property[] props = (Property[]) _tokenAndProperties.get(hash);
+            if (props!=null) {
                 _logger.debug("Retrieving token properties from cache for:"+hash);
                 return props;
             }
         }
 
-            Property[] props = _tokenHandler.parseToken(token);
+        Property[] props = _tokenHandler.parseToken(token);
         Map<String, Object> map = PropertyUtils.toMap(props);
+
+        // check for cache roles
         String user = ((Property) map.get(AuthenticationConstants.PROPERTY_USER)).getValue().toString();
         Property rolesForUser = null;
-        if (this.cacheRoles) {
-            rolesForUser = (Property) userAndRoles.get(user);
+        if (_cacheRoles) {
+            rolesForUser = (Property) _userAndRoles.get(user);
             if (rolesForUser == null) {
                 try {
                     String[] roles = _realms.authorizedRoles(user);
@@ -218,15 +220,15 @@ public class TokenServiceImpl implements TokenService {
                 } catch (RBACException e) {
                     throw new AuthenticationException("Could not get roles for user:"+user);
                 }
-                userAndRoles.put(user, rolesForUser);
+                _userAndRoles.put(user, rolesForUser);
             }
             map.put(AuthenticationConstants.PROPERTY_ROLES, rolesForUser);
         }
 
         Property[] propsArray = map.values().toArray(new Property[map.size()]);
-        if(this.cacheProperties) {
+        if (_cacheProperties) {
             _logger.debug("Caching token properties to cache for:"+hash);
-            tokenAndProperties.put(hash, propsArray);
+            _tokenAndProperties.put(hash, propsArray);
         }
         return propsArray;
     }
