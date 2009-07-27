@@ -37,20 +37,23 @@ import edu.yale.its.tp.cas.client.ProxyTicketValidator;
 /**
  * Implementation of TokenIssuer that uses local authentication and RBAC
  * services.
- * 
+ *
  * @author <a href="http://www.intalio.com">&copy; Intalio Inc.</a>
  */
 public class TokenServiceImpl implements TokenService {
-	Logger _logger = LoggerFactory.getLogger(TokenServiceImpl.class);
-	
+    Logger _logger = LoggerFactory.getLogger(TokenServiceImpl.class);
+
     Realms _realms;
     TokenHandler _tokenHandler;
 
     String _validateURL;
+
     // should we try to put the password in the token itself
     boolean _passwordAsAProperty;
-    // should we NOT put the roles in the token, and cache them in memory instead
+
+    // if true, roles are not encoded in token and cached in memory instead
     boolean cacheRoles = false;
+
     // cache token properties
     boolean cacheProperties = false;
 
@@ -85,13 +88,13 @@ public class TokenServiceImpl implements TokenService {
     }
 
     public final boolean isCacheProperties() {
-    	return cacheProperties;
+        return cacheProperties;
     }
 
     public final void setCacheProperties(boolean cacheProperties) {
-    	this.cacheProperties = cacheProperties;
+        this.cacheProperties = cacheProperties;
     }
-    
+
     public void setPasswordAsAProperty(Boolean asAProperty) {
         _passwordAsAProperty = asAProperty;
     }
@@ -107,7 +110,7 @@ public class TokenServiceImpl implements TokenService {
     /**
      * Internal (non-public) method to create a token without credential
      * verification.
-     * 
+     *
      * @param user
      *            user identifier
      * @return cryptographic token
@@ -127,23 +130,23 @@ public class TokenServiceImpl implements TokenService {
         // add all user properties to token properties
         Property[] userProps = _realms.userProperties(user);
         List<Property> props = new ArrayList<Property>();
-        
+
         props.add(userProp);
         props.add(issueProp);
-        if(!cacheRoles) {
+        if (!cacheRoles) {
             String[] roles = _realms.authorizedRoles(user);
             props.add(new Property(AuthenticationConstants.PROPERTY_ROLES, StringArrayUtils.toCommaDelimited(roles)));
         }
-        if((password != null && _passwordAsAProperty)) 
+        if ((password != null && _passwordAsAProperty))
             props.add(new Property(AuthenticationConstants.PROPERTY_PASSWORD, password));
-        for(Property p : userProps) props.add(p);
+        for (Property p : userProps) props.add(p);
         return _tokenHandler.createToken(props.toArray(new Property[props.size()]));
     }
 
     /**
      * Authenticate a user and return a cryptographic token containing session
      * information.
-     * 
+     *
      * @param user
      *            user identifier
      * @param password
@@ -167,7 +170,7 @@ public class TokenServiceImpl implements TokenService {
     /**
      * Authenticate a user and return a cryptographic token containing session
      * information.
-     * 
+     *
      * @param user
      *            user identifier
      * @param credentials
@@ -184,7 +187,7 @@ public class TokenServiceImpl implements TokenService {
 
     /**
      * Return the properties encoded in the cryptographic token.
-     * 
+     *
      * @param token
      *            token
      * @return properties encoded in token
@@ -202,29 +205,25 @@ public class TokenServiceImpl implements TokenService {
             }
         }
 
-    	Property[] props = _tokenHandler.parseToken(token);
+            Property[] props = _tokenHandler.parseToken(token);
         Map<String, Object> map = PropertyUtils.toMap(props);
         String user = ((Property) map.get(AuthenticationConstants.PROPERTY_USER)).getValue().toString();
         Property rolesForUser = null;
-        if(this.cacheRoles) rolesForUser = (Property) userAndRoles.get(user);
-        if(rolesForUser!=null) {
-            // if we have the roles in cache
+        if (this.cacheRoles) {
+            rolesForUser = (Property) userAndRoles.get(user);
+            if (rolesForUser == null) {
+                try {
+                    String[] roles = _realms.authorizedRoles(user);
+                    rolesForUser = new Property(AuthenticationConstants.PROPERTY_ROLES, StringArrayUtils.toCommaDelimited(roles));
+                } catch (RBACException e) {
+                    throw new AuthenticationException("Could not get roles for user:"+user);
+                }
+                userAndRoles.put(user, rolesForUser);
+            }
             map.put(AuthenticationConstants.PROPERTY_ROLES, rolesForUser);
-        } else {
-            try {
-                String[] roles = _realms.authorizedRoles(user);
-                rolesForUser = new Property(AuthenticationConstants.PROPERTY_ROLES, StringArrayUtils.toCommaDelimited(roles));
-            } catch (RBACException e) {
-                throw new AuthenticationException("Could not get roles for user:"+user);
-            }    
         }
 
-        // cache only if needed
-        if(this.cacheRoles) userAndRoles.put(user, rolesForUser);
-        
-        map.put(AuthenticationConstants.PROPERTY_ROLES, rolesForUser);
         Property[] propsArray = map.values().toArray(new Property[map.size()]);
-
         if(this.cacheProperties) {
             _logger.debug("Caching token properties to cache for:"+hash);
             tokenAndProperties.put(hash, propsArray);
@@ -262,31 +261,31 @@ public class TokenServiceImpl implements TokenService {
     }
 
     public String getTokenFromOpenSSOToken(String tokenId)
-    	throws AuthenticationException, RBACException, RemoteException {
-		try {
-		    SSOTokenManager tokenManager = SSOTokenManager.getInstance();
-		    SSOToken token = tokenManager.createSSOToken(
-		                    tokenId);
-		    if (token == null) {
-		            throw new AuthenticationException(
-		                            "Failed to get the sso token with token ID: " + tokenId);
-		    }
-		
-		    // check the token validity
-		    SSOTokenManager manager = tokenManager;
-		    if (!manager.isValidToken(token)) {
-		            throw new AuthenticationException("Token with ID: " + tokenId
-		                            + " is invalid.");
-		    }
-		
-		    // get the user with sso token
-		    AMIdentity userIdentity = IdUtils.getIdentity(token);
-		    String user = userIdentity.getName();
-		
-		    return createToken(user);
-		} catch (Exception e) {
-		    _logger.error("OpenSSO Token Error",e);
-		    throw new AuthenticationException("Authentication failed! OpenSSO ticket authentication failed!");
-		}
-	}
+        throws AuthenticationException, RBACException, RemoteException {
+        try {
+            SSOTokenManager tokenManager = SSOTokenManager.getInstance();
+            SSOToken token = tokenManager.createSSOToken(
+                            tokenId);
+            if (token == null) {
+                    throw new AuthenticationException(
+                                    "Failed to get the sso token with token ID: " + tokenId);
+            }
+
+            // check the token validity
+            SSOTokenManager manager = tokenManager;
+            if (!manager.isValidToken(token)) {
+                    throw new AuthenticationException("Token with ID: " + tokenId
+                                    + " is invalid.");
+            }
+
+            // get the user with sso token
+            AMIdentity userIdentity = IdUtils.getIdentity(token);
+            String user = userIdentity.getName();
+
+            return createToken(user);
+        } catch (Exception e) {
+            _logger.error("OpenSSO Token Error",e);
+            throw new AuthenticationException("Authentication failed! OpenSSO ticket authentication failed!");
+        }
+    }
 }
