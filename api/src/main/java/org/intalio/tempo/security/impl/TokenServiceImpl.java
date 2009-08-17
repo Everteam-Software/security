@@ -17,6 +17,8 @@ import java.util.Map;
 import org.intalio.tempo.security.Property;
 import org.intalio.tempo.security.authentication.AuthenticationConstants;
 import org.intalio.tempo.security.authentication.AuthenticationException;
+import org.intalio.tempo.security.ldap.LDAPSecurityProvider;
+import org.intalio.tempo.security.provider.SecurityProvider;
 import org.intalio.tempo.security.rbac.RBACException;
 import org.intalio.tempo.security.token.TokenService;
 import org.intalio.tempo.security.util.IdentifierUtils;
@@ -283,11 +285,33 @@ public class TokenServiceImpl implements TokenService {
             // get the user with sso token
             AMIdentity userIdentity = IdUtils.getIdentity(token);
             String user = userIdentity.getName();
+		    String dn = userIdentity.getRealm();
+		    String realm = findRealmByDN(dn);
+		    
+		    if(realm != null) {
+		        user = IdentifierUtils.normalize(user, realm, false, '\\');
+		    }
 
             return createToken(user);
         } catch (Exception e) {
             _logger.error("OpenSSO Token Error",e);
             throw new AuthenticationException("Authentication failed! OpenSSO ticket authentication failed!");
         }
+    }
+
+    private String findRealmByDN(String dn) {
+    	String realm = null;
+    	
+    	for (SecurityProvider provider : _realms.getSecurityProviders()) {
+    		if(provider instanceof LDAPSecurityProvider) {
+    			String[] realms = ((LDAPSecurityProvider) provider).getRealmsByDN(dn);
+    			
+    			if(realms.length > 0) {
+    				realm = realms[0];
+    				break;
+    			}
+    		}
+    	}
+    	return realm;
     }
 }

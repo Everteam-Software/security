@@ -17,8 +17,7 @@ import java.util.HashMap;
 import java.util.Properties;
 import java.util.Random;
 
-import org.castor.util.Base64Decoder;
-import org.castor.util.Base64Encoder;
+import org.apache.commons.codec.binary.Base64;
 import org.intalio.tempo.security.Property;
 import org.intalio.tempo.security.authentication.AuthenticationConstants;
 import org.intalio.tempo.security.authentication.AuthenticationException;
@@ -300,9 +299,9 @@ public class TokenHandler implements AuthenticationConstants {
             if (_compressToken) {
                 return Base64u.encodeBytes(token.getBytes("UTF-8"), Base64u.GZIP|Base64u.DONT_BREAK_LINES );
             } else {
-                Base64Encoder encoder = new Base64Encoder();
-                encoder.translate( token.getBytes( "UTF-8" ) );
-                return new String( encoder.getCharArray() );
+            	byte[] bytes = Base64.encodeBase64(token.getBytes( "UTF-8" ));
+            	String encode = new String(bytes, "UTF-8"); 
+            	return encode;
             }
         } catch (UnsupportedEncodingException except) {
             throw new RuntimeException(except.toString());
@@ -317,7 +316,8 @@ public class TokenHandler implements AuthenticationConstants {
             Base64Decoder decoder = new Base64Decoder();
             decoder.translate( token );
             try {
-                token = new String( decoder.getByteArray(), "UTF-8" );
+            	byte[] decode = Base64.decodeBase64(token.getBytes("UTF-8"));
+				token = new String(decode, "UTF-8");
             } catch ( UnsupportedEncodingException except ) {
                 throw new RuntimeException( except.toString() );
             }
