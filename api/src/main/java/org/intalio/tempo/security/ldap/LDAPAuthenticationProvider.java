@@ -253,7 +253,7 @@ implements AuthenticationProvider, LDAPProperties {
                 env.put( Context.SECURITY_CREDENTIALS, cred.getValue() );
 
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Authenticate env:"+env);
+                    LOG.debug("Authenticate env: "+env);
                 }
 
                 // workaround for the fact that Sun's JNDI provider does an
@@ -271,9 +271,8 @@ implements AuthenticationProvider, LDAPProperties {
                 ctx = new InitialDirContext(env);
 
                 String lookup = _userBase+", "+_dn;
-                lookup = _dn;
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Authenticate lookup:"+lookup);
+                    LOG.debug("Authenticate lookup: "+lookup);
                 }
                 ctx.lookup(lookup);
                 ctx.close();
