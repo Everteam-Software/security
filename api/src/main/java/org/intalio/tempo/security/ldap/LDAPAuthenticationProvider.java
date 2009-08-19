@@ -35,29 +35,29 @@ import org.slf4j.LoggerFactory;
 
 /**
  * LDAPAuthenticationProvider
- * 
+ *
  * @author <a href="http://www.intalio.com">&copy; Intalio Inc.</a>
  */
-public class LDAPAuthenticationProvider 
+public class LDAPAuthenticationProvider
 implements AuthenticationProvider, LDAPProperties {
 
     final static Logger LOG = LoggerFactory.getLogger("tempo.security");
 
     private final static Property[] EMPTY_PROPERTIES = new Property[0];
-    
+
     private Map                     _env;
-    
+
     private String                  _realm;
-    
+
     private LDAPQueryEngine         _engine;
-    
+
     private String                  _dn;
-    
+
     private String                  _principleSyntax;
-    
+
     private LDAPAuthentication      _queryRuntime;
-    
-    
+
+
     /**
      * Constructor
      */
@@ -113,7 +113,7 @@ implements AuthenticationProvider, LDAPProperties {
         // nothing
     }
 
-    private static Map<String,String> readProperties(String keyRoot, Map<String,String> source) 
+    private static Map<String,String> readProperties(String keyRoot, Map<String,String> source)
     throws IllegalArgumentException {
         Map<String,String> result = null;
         for (int i=0; true; i++) {
@@ -144,7 +144,7 @@ implements AuthenticationProvider, LDAPProperties {
         return result;
     }
 
-    private static String getNonNull(String key, Map map) 
+    private static String getNonNull(String key, Map map)
     throws IllegalArgumentException {
         Object res = map.get(key);
         if (res!=null)
@@ -155,15 +155,15 @@ implements AuthenticationProvider, LDAPProperties {
         sb.append(" cannot be null!");
         throw new IllegalArgumentException(sb.toString());
     }
-    
+
     class LDAPAuthentication implements AuthenticationQuery, AuthenticationRuntime {
 
         private String _userBase;
-        
+
         private String _userId;
-        
+
         private Map<String,String> _userCredential;
-        
+
         LDAPAuthentication( Map<String,String> config ) throws IllegalArgumentException {
             _userBase = getNonNull(SECURITY_LDAP_USER_BASE, config);
             _userId   = getNonNull(SECURITY_LDAP_USER_ID, config);
@@ -173,17 +173,18 @@ implements AuthenticationProvider, LDAPProperties {
             _principleSyntax = (String)config.get(SECURITY_LDAP_PRINCIPAL_SYNTAX);
             if (_principleSyntax==null || _principleSyntax.length()==0) {
                 _principleSyntax = "dn";
-            } else if (!_principleSyntax.equals("dn") && !_principleSyntax.equals("url")) {
-                throw new IllegalArgumentException("Property, "+SECURITY_LDAP_USER_CREDENTIAL+" does not allow value of "+_principleSyntax+". Only 'dn' or 'url' is supported.");
+            } else if (!_principleSyntax.equals("dn") && !_principleSyntax.equals("url")
+                && !_principleSyntax.equals("user")) {
+                throw new IllegalArgumentException("Property, "+SECURITY_LDAP_USER_CREDENTIAL+" does not allow value of "+_principleSyntax+". Only 'dn', 'url' and 'user' are supported.");
             }
         }
 
         /**
          * @see org.intalio.tempo.security.authentication.AuthenticationQuery#getUserCredentials(java.lang.String)
          */
-        public Property[] getUserCredentials(String user) 
+        public Property[] getUserCredentials(String user)
         throws AuthenticationException, RemoteException {
-            
+
             user = IdentifierUtils.stripRealm(user);
             try {
                 short found;
@@ -206,10 +207,10 @@ implements AuthenticationProvider, LDAPProperties {
         /**
          * @see AuthenticationRuntime#authenticate(String, Property[])
          */
-        public boolean authenticate(String user, Property[] credentials) 
+        public boolean authenticate(String user, Property[] credentials)
         throws UserNotFoundException, AuthenticationException, RemoteException {
             DirContext ctx;
-            
+
             user = IdentifierUtils.stripRealm(user);
             try {
                 if (LOG.isDebugEnabled())
@@ -231,21 +232,31 @@ implements AuthenticationProvider, LDAPProperties {
                 // query doesn't work, as password is encrypted
                 //return _engine.queryExist(user, (String)cred.getValue(), _userBase, _userId, cred.getName(), _userCredential);
                 Properties env = new Properties();
-                env.put( Context.SECURITY_AUTHENTICATION, _env.get(Context.SECURITY_AUTHENTICATION) );
-                env.put( Context.INITIAL_CONTEXT_FACTORY, _env.get(Context.INITIAL_CONTEXT_FACTORY) );
-                env.put( Context.PROVIDER_URL, _env.get(Context.PROVIDER_URL));
-                
-                if (_principleSyntax.equals("url"))
+                copyProperty(env, Context.SECURITY_AUTHENTICATION);
+                copyProperty(env, Context.INITIAL_CONTEXT_FACTORY);
+                copyProperty(env, Context.PROVIDER_URL);
+
+                copyProperty(env, "javax.security.sasl.qop");
+                copyProperty(env, "java.naming.security.sasl.realm");
+                copyProperty(env, "javax.security.sasl.strength");
+
+                if (_principleSyntax.equals("url")) {
                     env.put( Context.SECURITY_PRINCIPAL, user+"@"+toDot(_dn));
-                else
+                } else if (_principleSyntax.equals("dn")) {
                     env.put( Context.SECURITY_PRINCIPAL, _userId+"="+user+","+_userBase+", "+_dn);
+                } else if (_principleSyntax.equals("user")) {
+                    env.put( Context.SECURITY_PRINCIPAL, user);
+                } else {
+                    throw new IllegalArgumentException("Property, "+SECURITY_LDAP_USER_CREDENTIAL+" does not allow value of '"+_principleSyntax+"'");
+                }
+
                 env.put( Context.SECURITY_CREDENTIALS, cred.getValue() );
 
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Authenticate env:"+env);
                 }
 
-                // workaround for the fact that Sun's JNDI provider does an 
+                // workaround for the fact that Sun's JNDI provider does an
                 // anonymous bind if no password is supplied for simple authentication
                 // see http://java.sun.com/products/jndi/tutorial/ldap/faq/_context.html
                 String auth = (String) env.get( Context.SECURITY_AUTHENTICATION );
@@ -258,7 +269,13 @@ implements AuthenticationProvider, LDAPProperties {
 
                 // use the same way as obtaining _context to authenticate
                 ctx = new InitialDirContext(env);
-                ctx.lookup( _userBase+", "+_dn );
+
+                String lookup = _userBase+", "+_dn;
+                lookup = _dn;
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Authenticate lookup:"+lookup);
+                }
+                ctx.lookup(lookup);
                 ctx.close();
                 return true;
             } catch (NamingException ne) {
@@ -267,11 +284,12 @@ implements AuthenticationProvider, LDAPProperties {
                 return false;
             }
         }
-        
+
+
         /**
          * Convert an idenitifer from LDAP distingish name syntax to url-like
          * syntax. For example, from cn=admin,dc=intalio,dc=com to admin@intalio.com.
-         * 
+         *
          * @param dn
          * @return
          */
@@ -291,7 +309,7 @@ implements AuthenticationProvider, LDAPProperties {
                     } else {
                         throw new IllegalArgumentException("The syntax is of dn invalid: "+dn);
                     }
-                } else { 
+                } else {
                     comma = dn.indexOf(',', index);
                     if (res==null)
                         res = new StringBuffer();
@@ -300,7 +318,7 @@ implements AuthenticationProvider, LDAPProperties {
                     if (comma==-1) {
                         res.append(dn.substring(index).trim());
                         break;
-                    } else { 
+                    } else {
                         res.append(dn.substring(index, comma).trim());
                     }
                     prev = comma + 1;
@@ -308,5 +326,13 @@ implements AuthenticationProvider, LDAPProperties {
             }
             return res.toString();
         }
+
+        private void copyProperty(Properties env, String propName) {
+            String value = (String) _env.get(propName);
+            if (value != null) {
+                env.put(propName, value);
+            }
+        }
+
     }
 }
