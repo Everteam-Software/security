@@ -20,7 +20,7 @@ java.naming.security.principal=administrator
 # The credentials or password of the connection
 # For example: 'password'.
 #
-java.naming.security.credentials=Q@source12
+java.naming.security.credentials=secret
 
 #
 # Authetication method to connect to the LDAP Server
