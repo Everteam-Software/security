@@ -1,5 +1,5 @@
 #
-# Configuration for Apache Directory Server
+# Configuration for Microsoft Active Directory (example)
 #
 
 security.ldap.principal.syntax=user
