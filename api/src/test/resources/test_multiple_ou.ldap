@@ -1,0 +1,80 @@
+dn: dc=intalio,dc=com
+objectClass: extensibleObject
+objectClass: domain
+objectClass: top
+dc: intalio
+
+dn: ou=People,dc=intalio,dc=com
+objectClass: organizationalUnit
+objectClass: top
+description: People
+ou: People
+
+dn: cn=admin,ou=People,dc=intalio,dc=com
+objectClass: organizationalPerson
+objectClass: person
+objectClass: inetOrgPerson
+objectClass: top
+cn: admin
+givenName: ADMIN
+mail: admin@intalio.org
+ou: People
+sn: Administrator
+userPassword:: Y2hhbmdlaXQ=
+
+dn: ou=Roles,dc=intalio,dc=com
+objectClass: organizationalUnit
+objectClass: top
+description: Roles
+ou: Roles
+
+dn: cn=ProcessManager,ou=Roles,dc=intalio,dc=com
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: ProcessManager
+ou: Roles
+uniqueMember: cn=admin,ou=People,dc=intalio,dc=com
+
+dn: cn=ProcessAdministrator,ou=Roles,dc=intalio,dc=com
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: ProcessAdministrator
+ou: Roles
+uniqueMember: cn=admin,ou=People,dc=intalio,dc=com
+
+dn: ou=People2,dc=intalio,dc=com
+objectClass: organizationalUnit
+objectClass: top
+description: People
+ou: People2
+
+dn: cn=admin2,ou=People2,dc=intalio,dc=com
+objectClass: organizationalPerson
+objectClass: person
+objectClass: inetOrgPerson
+objectClass: top
+cn: admin2
+givenname: ADMIN
+mail: admin@intalio.org
+ou: People
+sn: Administrator
+userpassword:: Y2hhbmdlaXQ=
+
+dn: ou=People3,ou=People2,dc=intalio,dc=com
+objectClass: organizationalUnit
+objectClass: top
+description: People
+ou: People3
+
+dn: cn=admin3,ou=People3,ou=People2,dc=intalio,dc=com
+objectClass: organizationalPerson
+objectClass: person
+objectClass: inetOrgPerson
+objectClass: top
+cn: admin3
+givenname: ADMIN
+mail: admin@intalio.org
+ou: People
+sn: Administrator
+userpassword:: Y2hhbmdlaXQ=
+

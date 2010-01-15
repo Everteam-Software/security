@@ -12,8 +12,11 @@ package org.intalio.tempo.security.ldap;
 
 import java.rmi.RemoteException;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.TreeMap;
 
 import javax.naming.Context;
@@ -158,14 +161,19 @@ implements AuthenticationProvider, LDAPProperties {
 
     class LDAPAuthentication implements AuthenticationQuery, AuthenticationRuntime {
 
-        private String _userBase;
-
         private String _userId;
 
         private Map<String,String> _userCredential;
 
+        private Set<String> _multipleOu;
+
         LDAPAuthentication( Map<String,String> config ) throws IllegalArgumentException {
-            _userBase = getNonNull(SECURITY_LDAP_USER_BASE, config);
+            try {
+                _multipleOu = readProperties(SECURITY_LDAP_USER_BASE, config).keySet();
+            } catch (Exception e) {
+                _multipleOu = new HashSet<String>(1);
+                _multipleOu.add(getNonNull(SECURITY_LDAP_USER_BASE, config));
+            }
             _userId   = getNonNull(SECURITY_LDAP_USER_ID, config);
             _userCredential = readProperties(SECURITY_LDAP_USER_CREDENTIAL, config);
             if (_userCredential==null)
@@ -187,10 +195,15 @@ implements AuthenticationProvider, LDAPProperties {
 
             user = IdentifierUtils.stripRealm(user);
             try {
-                short found;
+                short found = 0;
 
                 Map<String,Property> result = new HashMap<String,Property>();
-                found = _engine.queryProperties(user, _userBase, _userId, _userCredential, result);
+                Iterator<String> mmou = _multipleOu.iterator();
+                while(mmou.hasNext()) {
+                	found = _engine.queryProperties(user, mmou.next(), _userId, _userCredential, result);
+                	if (found==LDAPQueryEngine.SUBJECT_NOT_FOUND) continue; else break;
+                }
+                
                 if (LOG.isDebugEnabled())
                     LOG.debug("Result: "+found);
                 if (found==LDAPQueryEngine.SUBJECT_NOT_FOUND)
@@ -203,13 +216,9 @@ implements AuthenticationProvider, LDAPProperties {
                 throw new AuthenticationException(ne);
             }
         }
-
-        /**
-         * @see AuthenticationRuntime#authenticate(String, Property[])
-         */
-        public boolean authenticate(String user, Property[] credentials)
-        throws UserNotFoundException, AuthenticationException, RemoteException {
-            DirContext ctx;
+        
+        private boolean authenticate(String user, Property[] credentials, String userBase) throws UserNotFoundException, AuthenticationException, RemoteException {
+        	DirContext ctx;
 
             user = IdentifierUtils.stripRealm(user);
             try {
@@ -243,7 +252,7 @@ implements AuthenticationProvider, LDAPProperties {
                 if (_principleSyntax.equals("url")) {
                     env.put( Context.SECURITY_PRINCIPAL, user+"@"+toDot(_dn));
                 } else if (_principleSyntax.equals("dn")) {
-                    env.put( Context.SECURITY_PRINCIPAL, _userId+"="+user+","+_userBase+", "+_dn);
+                    env.put( Context.SECURITY_PRINCIPAL, _userId+"="+user+","+userBase+", "+_dn);
                 } else if (_principleSyntax.equals("user")) {
                     env.put( Context.SECURITY_PRINCIPAL, user);
                 } else {
@@ -270,7 +279,7 @@ implements AuthenticationProvider, LDAPProperties {
                 // use the same way as obtaining _context to authenticate
                 ctx = new InitialDirContext(env);
 
-                String lookup = _userBase+", "+_dn;
+                String lookup = userBase+", "+_dn;
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Authenticate lookup: "+lookup);
                 }
@@ -282,6 +291,18 @@ implements AuthenticationProvider, LDAPProperties {
                     LOG.debug("Authentication of user, "+user+" failed!", ne);
                 return false;
             }
+        }
+
+        /**
+         * @see AuthenticationRuntime#authenticate(String, Property[])
+         */
+        public boolean authenticate(String user, Property[] credentials) throws UserNotFoundException, AuthenticationException, RemoteException {
+            Iterator<String> iter = _multipleOu.iterator();
+            while (iter.hasNext()) {
+                if (authenticate(user, credentials, iter.next()))
+                    return true;
+            }
+            return false;
         }
 
 

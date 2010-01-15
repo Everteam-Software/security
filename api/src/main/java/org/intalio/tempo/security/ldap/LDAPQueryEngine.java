@@ -34,8 +34,7 @@ import org.slf4j.LoggerFactory;
 /**
  * LDAPQueryEngine
  *
- * @author <a href="mailto:yip@intalio.com>Thomas Yip</a>
- * @author <a href="http://www.intalio.com">&copy; Intalio Inc.</a>
+ * @author <a href="mailto:yip@intalio.com">Thomas Yip</a>
  */
 public class LDAPQueryEngine {
 

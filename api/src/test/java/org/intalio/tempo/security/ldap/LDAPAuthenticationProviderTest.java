@@ -70,7 +70,7 @@ public class LDAPAuthenticationProviderTest extends TestCase {
 			assertTrue(false);
 		}
 
-		assertEquals(authProvider.getName(), "LDAP Authetication Provider");
+		assertEquals(authProvider.getName(), "LDAP Authentication Provider");
 
 		try {
 			authProvider.getAdmin();
