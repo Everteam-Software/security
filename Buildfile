@@ -21,6 +21,7 @@ define "security" do
     test.exclude "*BaseSuite"
     test.exclude "*FuncTestSuite"
     test.exclude "*LDAPAuthenticationTest*"
+    test.exclude "*MultipleOuTest*"
     test.exclude "*LDAPRBACProviderTest*"
     test.with JAXEN, XMLUNIT, INSTINCT
     

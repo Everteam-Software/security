@@ -7,7 +7,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-
+/**
+ * This is a live test to test multiple OUs
+ *
+ */
 public class MultipleOuTest {
 	String pathToLdap = this.getClass().getResource("/ldap_test.properties").getFile();
 	private LDAPSecurityProvider ldap;
