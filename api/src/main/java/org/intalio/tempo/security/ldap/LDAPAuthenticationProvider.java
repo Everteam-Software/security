@@ -86,7 +86,7 @@ implements AuthenticationProvider, LDAPProperties {
     /**
      */
     public String getName() throws AuthenticationException {
-        return "LDAP Authetication Provider";
+        return "LDAP Authentication Provider";
     }
 
     /**

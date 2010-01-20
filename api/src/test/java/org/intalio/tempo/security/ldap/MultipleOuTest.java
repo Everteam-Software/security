@@ -8,7 +8,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * This is a live test to test multiple OUs
+ * This is a live test to test multiple OUs.
+ * Related test files are:
+ * - ldap_test.properties, for the LDAP mappings
+ * - test_multiple_ou.ldap, for an example of a LDAP file to import
  *
  */
 public class MultipleOuTest {
