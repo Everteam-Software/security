@@ -201,7 +201,14 @@ class LDAPRBACProvider implements RBACProvider, LDAPProperties {
         LDAPRBACQuery( Map map ) {
             _roleBase   = getNonNull(SECURITY_LDAP_ROLE_BASE, map);
             _roleId     = getNonNull(SECURITY_LDAP_ROLE_ID, map);
-            _userBase   = getNonNull(SECURITY_LDAP_USER_BASE, map);
+            try {
+                _userBase   = getNonNull(SECURITY_LDAP_USER_BASE, map);
+            } catch (Exception e) {
+                // more than one value, take the first one by default
+                // TODO: this is to fix. We should do a proper search, but first of all 
+                // we should find whether this code is used at all or not
+                _userBase   = readProperties(SECURITY_LDAP_USER_BASE, map).values().iterator().next();    
+            }
             _userId     = getNonNull(SECURITY_LDAP_USER_ID, map);
             
             _userRoles  = (String)map.get(SECURITY_LDAP_USER_ROLES);
