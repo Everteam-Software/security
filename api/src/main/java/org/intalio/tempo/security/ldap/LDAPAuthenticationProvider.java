@@ -223,12 +223,15 @@ implements AuthenticationProvider, LDAPProperties {
         private boolean authenticate(String user, Property[] credentials, String userBase) throws UserNotFoundException, AuthenticationException, RemoteException {
         	DirContext ctx;
             user = IdentifierUtils.stripRealm(user);
-            String fullPath = "";
-            
+            // OLD WAY OF HARDCODING THE USER PRINCIPAL
+            String userPrincipal = _userId+"="+user+","+userBase; 
             try {
-                fullPath = searchUser(user, userBase);   
+                // NOTE: new way,make a search on the user under the userbase
+                userPrincipal = searchUser(user, userBase);   
             } catch (NamingException e) {
-                throw new AuthenticationException(e);
+                // NOTE: do not throw an exception here, we can fail afterwards, and
+                // we also keep backward compatibility
+                //throw new AuthenticationException(e);
             }
                 
             
@@ -264,8 +267,7 @@ implements AuthenticationProvider, LDAPProperties {
                 if (_principleSyntax.equals("url")) {
                     env.put( Context.SECURITY_PRINCIPAL, user+"@"+toDot(_dn));
                 } else if (_principleSyntax.equals("dn")) {
-                    //env.put( Context.SECURITY_PRINCIPAL, _userId+"="+user+","+userBase+", "+_dn);
-                    env.put( Context.SECURITY_PRINCIPAL, fullPath);
+                    env.put( Context.SECURITY_PRINCIPAL, userPrincipal);
                 } else if (_principleSyntax.equals("user")) {
                     env.put( Context.SECURITY_PRINCIPAL, user);
                 } else {
