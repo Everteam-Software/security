@@ -19,7 +19,11 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.naming.NameNotFoundException;
+import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.SearchControls;
+import javax.naming.directory.SearchResult;
 
 import org.intalio.tempo.security.Property;
 import org.intalio.tempo.security.rbac.ObjectNotFoundException;
@@ -335,14 +339,24 @@ class LDAPRBACProvider implements RBACProvider, LDAPProperties {
         throws UserNotFoundException, RBACException, RemoteException {
 
             user = IdentifierUtils.stripRealm(user);
+            String fuser = "";
+            try {
+                fuser = _engine.searchUser(user, _userId, _userBase);
+            } catch (NamingException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            String cn = fuser.substring(3,fuser.indexOf(","));
+            String uid = fuser.substring(fuser.indexOf(",")+1);
             try {
                 ArrayList<String> list = new ArrayList<String>();
                 short result;
                 if (_userRoles!=null) {
-                    result = _engine.queryFields(user, _userBase, _userId, _userRoles, list);
+                    result = _engine.queryFields(cn, uid, _userId, _userRoles, list);
                 } else {
-                    boolean checkUser = true;
-                    result = _engine.queryRelations(user, _userBase, _userId, _roleBase, _roleUsers, checkUser, list);
+                    //boolean checkUser = true;
+                    //result = _engine.queryRelations(cn, _userBase, "cn", _roleBase, _roleUsers, checkUser, list);
+                    result = _engine.queryRelations(fuser , _roleBase, _roleUsers, list);
                 }
 
                 if (result==LDAPQueryEngine.SUBJECT_NOT_FOUND)
@@ -494,6 +508,25 @@ class LDAPRBACProvider implements RBACProvider, LDAPProperties {
                 throw new RBACException(ne);
             }
         }
+        
+//        public String searchUser(String user, String userBase) throws UserNotFoundException, NamingException {
+//
+//            DirContext rootCtx = _engine.getProvider().getRootContext();
+//            String lookup = (userBase.equals("")) ? _dn : userBase+", "+_dn;
+//            SearchControls ctls = new SearchControls();
+//            ctls.setSearchScope(ctls.SUBTREE_SCOPE);
+//            String filter = "(&(objectClass=person) (&("+_userId+"="+user+")))";
+//            
+//            NamingEnumeration<SearchResult> answer = rootCtx.search(lookup, filter, ctls);
+//            while (answer.hasMore()) {
+//                SearchResult sr = (SearchResult) answer.next();
+//                if(LOG.isDebugEnabled()) {
+//                    LOG.debug("User search on"+this._userBase+" returned:" + sr.getNameInNamespace());
+//                }
+//                return sr.getNameInNamespace();
+//            }
+//            throw new UserNotFoundException(user);
+//        }
 
         /**
          * @see org.intalio.tempo.security.rbac.RBACQuery#ascendantRoles(java.lang.String)

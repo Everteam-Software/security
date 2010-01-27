@@ -27,6 +27,7 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
 import org.intalio.tempo.security.Property;
+import org.intalio.tempo.security.rbac.UserNotFoundException;
 import org.intalio.tempo.security.util.StringArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,6 +71,24 @@ public class LDAPQueryEngine {
         return _provider;
     }
 
+    public String searchUser(String user, String userId, String userBase) throws UserNotFoundException, NamingException {
+        DirContext rootCtx = getProvider().getRootContext();
+        String lookup = (userBase.equals("")) ? _baseDN : userBase+", "+_baseDN;
+        SearchControls ctls = new SearchControls();
+        ctls.setSearchScope(ctls.SUBTREE_SCOPE);
+        String filter = "(&(objectClass=person) (&("+userId+"="+user+")))";
+        
+        NamingEnumeration<SearchResult> answer = rootCtx.search(lookup, filter, ctls);
+        while (answer.hasMore()) {
+            SearchResult sr = (SearchResult) answer.next();
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("User search on"+_baseDN+" returned:" + sr.getNameInNamespace());
+            }
+            return sr.getNameInNamespace();
+        }
+        throw new UserNotFoundException(user);
+    }
+
     public short queryRelations(String subject, String sbjBase, String id, String relBase, String rel,
     boolean checkSubject, Collection<String> result)
     throws NamingException {
@@ -77,13 +96,22 @@ public class LDAPQueryEngine {
         if (LOG.isDebugEnabled())
             LOG.debug("query name: "+subject);
         SearchControls sc = new SearchControls();
+        sc.setSearchScope(sc.SUBTREE_SCOPE);
         if (checkSubject){
             String search = id+"={0}";
             if (!isExist(sbjBase, search, new Object[] {subject}, sc))
                 return SUBJECT_NOT_FOUND;
         }
         String search = rel+"={0}";
-        Object[] args = new Object[] { (id+"="+subject+','+sbjBase+','+_baseDN) };
+        //String name = (id+"="+subject+','+sbjBase+','+_baseDN);
+        String name = (id+"="+subject+','+_baseDN);
+        try {
+            String fuser = this.searchUser(subject, id, _baseDN);
+        } catch (UserNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        Object[] args = new Object[] { name };
         return findNames(relBase, search, args, sc, result);
     }
 
@@ -128,6 +156,7 @@ public class LDAPQueryEngine {
         if (LOG.isDebugEnabled())
             LOG.debug("query field: "+subject);
         SearchControls sc = new SearchControls();
+        sc.setSearchScope(sc.SUBTREE_SCOPE);
         String search = id+"="+subject;
         String filter = fieldType;
         return findFilteredFields(base, search, field, filter, sc, result);
@@ -291,6 +320,8 @@ public class LDAPQueryEngine {
     throws NamingException {
 
         DirContext context = _provider.getContext(_baseDN);
+        sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
+//        String filter = "(&(objectClass=person) (&("+_userId+"="+user+")))";
         try {
             NamingEnumeration sbjResult = context.search(base(base), condition, args, sc);
             if (sbjResult.hasMore()) {
@@ -383,6 +414,7 @@ public class LDAPQueryEngine {
         try {
             String[] oldReturning = sc.getReturningAttributes();
             sc.setReturningAttributes( new String[] { field } );
+            
             NamingEnumeration subResult = context.search(base(base), condition, sc);
             if (!subResult.hasMore()) {
                 if (LOG.isDebugEnabled())
@@ -520,6 +552,18 @@ public class LDAPQueryEngine {
                 throw new IllegalArgumentException("Invalid format "+s);
             return s.substring(eq+1);
         }
+    }
+
+    public short queryRelations(String fuser, String relBase, String rel, ArrayList<String> result) throws NamingException {
+        if (LOG.isDebugEnabled())
+            LOG.debug("query name: "+fuser);
+        SearchControls sc = new SearchControls();
+        sc.setSearchScope(sc.SUBTREE_SCOPE);
+        String search = rel+"={0}";
+        //String name = (id+"="+subject+','+sbjBase+','+_baseDN);
+//        String name = (id+"="+subject+','+_baseDN);
+        Object[] args = new Object[] { fuser };
+        return findNames(relBase, search, args, sc, result);
     }
 }
 

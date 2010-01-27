@@ -228,10 +228,9 @@ implements AuthenticationProvider, LDAPProperties {
             try {
                 // NOTE: new way,make a search on the user under the userbase
                 userPrincipal = searchUser(user, userBase);   
-            } catch (NamingException e) {
-                // NOTE: do not throw an exception here, we can fail afterwards, and
-                // we also keep backward compatibility
-                //throw new AuthenticationException(e);
+            } catch (Exception e) {
+
+                throw new AuthenticationException(e);
             }
                 
             
@@ -308,8 +307,8 @@ implements AuthenticationProvider, LDAPProperties {
             }
         }
 
-        private String searchUser(String user, String userBase) throws UserNotFoundException, NamingException {
-
+        public String searchUser(String user, String userBase) throws UserNotFoundException, NamingException, org.intalio.tempo.security.rbac.UserNotFoundException {
+            //return _engine.searchUser(userBase, _userId, userBase);
             DirContext rootCtx = _engine.getProvider().getRootContext();
             String lookup = (userBase.equals("")) ? _dn : userBase+", "+_dn;
             SearchControls ctls = new SearchControls();
