@@ -8,43 +8,51 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * This is a live test to test multiple OUs.
- * Related test files are:
- * - ldap_test.properties, for the LDAP mappings
- * - test_multiple_ou.ldap, for an example of a LDAP file to import
- *
+ * This is a live test to test multiple OUs. Related test files are: -
+ * ldap_test.properties, for the LDAP mappings - test_multiple_ou.ldap, for an
+ * example of a LDAP file to import
+ * 
  */
 public class MultipleOuTest {
-	String pathToLdap = this.getClass().getResource("/ldap_test.properties").getFile();
-	private LDAPSecurityProvider ldap;
-	private AuthenticationRuntime provider;
-	private Property[] credentials;
+    String pathToLdap = this.getClass().getResource("/ldap_test.properties").getFile();
+    private LDAPSecurityProvider ldap;
+    private AuthenticationRuntime provider;
+    private Property[] credentials;
 
-	@Before
-	public void loginToLdap() throws Exception {
-		ldap = new LDAPSecurityProvider();
-		ldap.setPropertiesFile(pathToLdap);
-		provider = ldap.getAuthenticationProvider("intalio").getRuntime();
-		
-		String password = "changeit";
-		Property pwd = new Property( AuthenticationConstants.PROPERTY_PASSWORD, password );
-		credentials = new Property[] { pwd };
-	}
-	
-	@Test
-	public void testStandardOu() throws Exception {	
-		Assert.assertTrue(provider.authenticate("admin", credentials));
-	}
-	
-	@Test
-	public void testSecondOu() throws Exception {	
-		Assert.assertTrue(provider.authenticate("admin2", credentials));
-	}
-	
-	@Test
-	public void testInnerOu() throws Exception {	
-		Assert.assertTrue(provider.authenticate("admin3", credentials));
-	}
-	
-	
+    @Before
+    public void loginToLdap() throws Exception {
+        ldap = new LDAPSecurityProvider();
+        ldap.setPropertiesFile(pathToLdap);
+        provider = ldap.getAuthenticationProvider("intalio").getRuntime();
+
+        String password = "changeit";
+        Property pwd = new Property(AuthenticationConstants.PROPERTY_PASSWORD, password);
+        credentials = new Property[] { pwd };
+    }
+
+    @Test
+    public void testStandardOu() throws Exception {
+        Assert.assertTrue(provider.authenticate("admin@intalio.org", credentials));
+    }
+
+    @Test
+    public void testSecondOu() throws Exception {
+        Assert.assertTrue(provider.authenticate("admin2@intalio.org", credentials));
+    }
+
+    @Test
+    public void testInnerOu() throws Exception {
+        Assert.assertTrue(provider.authenticate("admin3@intalio.org", credentials));
+    }
+
+    @Test
+    public void testFailedOu() throws Exception {
+        try {
+            provider.authenticate("admin5", credentials);
+            Assert.fail("admin5 does not exist");
+        } catch (Exception e) {
+            // ok
+        }
+    }
+
 }

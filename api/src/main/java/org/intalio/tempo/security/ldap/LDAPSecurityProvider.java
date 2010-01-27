@@ -149,7 +149,7 @@ public class LDAPSecurityProvider implements SecurityProvider {
      * @param branch
      * @throws NamingException
      */
-    synchronized DirContext getContext(String branch) throws NamingException {
+    public synchronized DirContext getContext(String branch) throws NamingException {
         DirContext root = null;
         try {
             root = getRootContext();

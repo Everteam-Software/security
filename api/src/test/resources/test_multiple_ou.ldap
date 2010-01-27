@@ -55,7 +55,7 @@ objectClass: inetOrgPerson
 objectClass: top
 cn: admin2
 givenname: ADMIN
-mail: admin@intalio.org
+mail: admin2@intalio.org
 ou: People
 sn: Administrator
 userpassword:: Y2hhbmdlaXQ=
@@ -73,7 +73,7 @@ objectClass: inetOrgPerson
 objectClass: top
 cn: admin3
 givenname: ADMIN
-mail: admin@intalio.org
+mail: admin3@intalio.org
 ou: People
 sn: Administrator
 userpassword:: Y2hhbmdlaXQ=

@@ -376,7 +376,7 @@ public class LDAPSecurityProviderTest extends TestCase {
 		 * @param branch
 		 * @throws NamingException
 		 */
-		synchronized DirContext getContext(String branch)
+		public synchronized DirContext getContext(String branch)
 				throws NamingException {
 			return new MockDirContext();
 		}

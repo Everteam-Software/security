@@ -66,6 +66,10 @@ public class LDAPQueryEngine {
         _baseDN  = baseDN;
     }
 
+    public LDAPSecurityProvider getProvider() {
+        return _provider;
+    }
+
     public short queryRelations(String subject, String sbjBase, String id, String relBase, String rel,
     boolean checkSubject, Collection<String> result)
     throws NamingException {

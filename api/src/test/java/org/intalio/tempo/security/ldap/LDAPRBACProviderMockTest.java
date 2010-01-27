@@ -443,7 +443,7 @@ public class LDAPRBACProviderMockTest extends TestCase {
 	     * @param branch
 	     * @throws NamingException
 	     */
-	    synchronized DirContext getContext(String branch) throws NamingException {
+	    public synchronized DirContext getContext(String branch) throws NamingException {
 	    	return _context;
 	    }
 	}

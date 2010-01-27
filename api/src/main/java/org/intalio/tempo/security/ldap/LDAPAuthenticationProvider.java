@@ -20,9 +20,12 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import javax.naming.Context;
+import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
+import javax.naming.directory.SearchControls;
+import javax.naming.directory.SearchResult;
 
 import org.intalio.tempo.security.Property;
 import org.intalio.tempo.security.authentication.AuthenticationAdmin;
@@ -219,8 +222,17 @@ implements AuthenticationProvider, LDAPProperties {
         
         private boolean authenticate(String user, Property[] credentials, String userBase) throws UserNotFoundException, AuthenticationException, RemoteException {
         	DirContext ctx;
-
             user = IdentifierUtils.stripRealm(user);
+            String fullPath = "";
+            
+            try {
+                fullPath = searchUser(user, userBase);   
+            } catch (NamingException e) {
+                throw new AuthenticationException(e);
+            }
+                
+            
+            
             try {
                 if (LOG.isDebugEnabled())
                     LOG.debug("Authenticate("+user+") for realm, "+_realm);
@@ -252,7 +264,8 @@ implements AuthenticationProvider, LDAPProperties {
                 if (_principleSyntax.equals("url")) {
                     env.put( Context.SECURITY_PRINCIPAL, user+"@"+toDot(_dn));
                 } else if (_principleSyntax.equals("dn")) {
-                    env.put( Context.SECURITY_PRINCIPAL, _userId+"="+user+","+userBase+", "+_dn);
+                    //env.put( Context.SECURITY_PRINCIPAL, _userId+"="+user+","+userBase+", "+_dn);
+                    env.put( Context.SECURITY_PRINCIPAL, fullPath);
                 } else if (_principleSyntax.equals("user")) {
                     env.put( Context.SECURITY_PRINCIPAL, user);
                 } else {
@@ -279,7 +292,7 @@ implements AuthenticationProvider, LDAPProperties {
                 // use the same way as obtaining _context to authenticate
                 ctx = new InitialDirContext(env);
 
-                String lookup = userBase+", "+_dn;
+                String lookup = (userBase.equals("")) ? _dn : userBase+", "+_dn;
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Authenticate lookup: "+lookup);
                 }
@@ -291,6 +304,25 @@ implements AuthenticationProvider, LDAPProperties {
                     LOG.debug("Authentication of user, "+user+" failed!", ne);
                 return false;
             }
+        }
+
+        private String searchUser(String user, String userBase) throws UserNotFoundException, NamingException {
+
+            DirContext rootCtx = _engine.getProvider().getRootContext();
+            String lookup = (userBase.equals("")) ? _dn : userBase+", "+_dn;
+            SearchControls ctls = new SearchControls();
+            ctls.setSearchScope(ctls.SUBTREE_SCOPE);
+            String filter = "(&(objectClass=person) (&("+_userId+"="+user+")))";
+            
+            NamingEnumeration<SearchResult> answer = rootCtx.search(lookup, filter, ctls);
+            while (answer.hasMore()) {
+                SearchResult sr = (SearchResult) answer.next();
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("User search on"+_dn+" returned:" + sr.getNameInNamespace());
+                }
+                return sr.getNameInNamespace();
+            }
+            throw new UserNotFoundException(user);
         }
 
         /**
