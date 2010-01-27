@@ -103,14 +103,14 @@ public class LDAPQueryEngine {
                 return SUBJECT_NOT_FOUND;
         }
         String search = rel+"={0}";
-        //String name = (id+"="+subject+','+sbjBase+','+_baseDN);
+        // TODO: this is bad if we are in multipleOUs
         String name = (id+"="+subject+','+_baseDN);
-        try {
-            String fuser = this.searchUser(subject, id, _baseDN);
-        } catch (UserNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+//        try {
+//            String fuser = this.searchUser(subject, id, _baseDN);
+//        } catch (UserNotFoundException e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
         Object[] args = new Object[] { name };
         return findNames(relBase, search, args, sc, result);
     }

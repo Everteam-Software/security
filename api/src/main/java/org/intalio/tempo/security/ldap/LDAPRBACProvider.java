@@ -338,21 +338,24 @@ class LDAPRBACProvider implements RBACProvider, LDAPProperties {
             String fuser = "";
             try {
                 fuser = _engine.searchUser(user, _userId, _userBase);
-            } catch (NamingException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            } catch (Exception e) {
+                LOG.info(e.getMessage(),e);
             }
-            String cn = fuser.substring(3,fuser.indexOf(","));
-            String uid = fuser.substring(fuser.indexOf(",")+1);
+
             try {
                 ArrayList<String> list = new ArrayList<String>();
                 short result;
                 if (_userRoles!=null) {
-                    result = _engine.queryFields(cn, uid, _userId, _userRoles, list);
-                } else {
-                    //boolean checkUser = true;
-                    //result = _engine.queryRelations(cn, _userBase, "cn", _roleBase, _roleUsers, checkUser, list);
+                    // TODO: check this query
+                    result = _engine.queryFields(user, _userBase, _userId, _userRoles, list);
+                } else if (!"".equals(fuser)){
+                    String cn = fuser.substring(3,fuser.indexOf(","));
+                    String uid = fuser.substring(fuser.indexOf(",")+1);
                     result = _engine.queryRelations(fuser , _roleBase, _roleUsers, list);
+                } else {
+                    // TODO: check this query
+                    boolean checkUser = true;
+                    result = _engine.queryRelations(user, _userBase, _userId, _roleBase, _roleUsers, checkUser, list);
                 }
 
                 if (result==LDAPQueryEngine.SUBJECT_NOT_FOUND)
