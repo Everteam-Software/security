@@ -19,11 +19,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.naming.NameNotFoundException;
-import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.SearchControls;
-import javax.naming.directory.SearchResult;
 
 import org.intalio.tempo.security.Property;
 import org.intalio.tempo.security.rbac.ObjectNotFoundException;

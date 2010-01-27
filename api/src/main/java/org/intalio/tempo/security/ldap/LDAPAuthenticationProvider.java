@@ -229,8 +229,7 @@ implements AuthenticationProvider, LDAPProperties {
                 // NOTE: new way,make a search on the user under the userbase
                 userPrincipal = searchUser(user, userBase);   
             } catch (Exception e) {
-
-                throw new AuthenticationException(e);
+                //throw new AuthenticationException(e);
             }
                 
             
