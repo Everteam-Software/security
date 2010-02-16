@@ -204,10 +204,9 @@ class LDAPRBACProvider implements RBACProvider, LDAPProperties {
             try {
                 _userBase   = getNonNull(SECURITY_LDAP_USER_BASE, map);
             } catch (Exception e) {
-                // more than one value, take the first one by default
-                // TODO: this is to fix. We should do a proper search, but first of all 
-                // we should find whether this code is used at all or not
-                _userBase   = readProperties(SECURITY_LDAP_USER_BASE, map).values().iterator().next();    
+                // more than one value, take the root of the DC tree.
+                // TODO: this is to fix 
+                _userBase   = "";
             }
             _userId     = getNonNull(SECURITY_LDAP_USER_ID, map);
             
