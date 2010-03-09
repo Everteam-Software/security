@@ -39,7 +39,7 @@ public class LoginFilterTest {
     
     @Mock
     HttpSession session;
-    
+
     FakeHttpServletResponse response = new FakeHttpServletResponse();
     
     @BeforeSpecification
@@ -123,4 +123,32 @@ public class LoginFilterTest {
         });
         loginFilter.doFilter(request, response, filterChain);
     }
+
+    @Specification
+    void testDoFilterWithContextAlreadyLoggedIn() throws Exception {
+        final Cookie[] cookies = {new Cookie("singleLogin", "another_token")};
+        final FakeUIFWApplicationState state = new FakeUIFWApplicationState();
+        User currentUser = new User("test1", new String[] { "test/test1" }, "token1");
+        state.setCurrentUser(currentUser);
+
+        expect.that(new Expectations() {
+            {
+                atLeast(1).of(request).getRequestURI(); will(returnValue("http://localhost/tasks.htm"));
+                allowing(request).getSession(); will(returnValue(session));
+                one(session).getAttribute("SECURE_RANDOM"); will(returnValue("secure"));
+                allowing(request).getCookies(); will(returnValue(cookies));
+                one(session).getServletContext(); will(returnValue(msc));
+                one(session).getAttribute("APPLICATION_STATE"); will(returnValue(state));
+                allowing(session);
+                allowing(request);
+                allowing(filterChain);
+            }
+        });
+        loginFilter.doFilter(request, response, filterChain);
+
+        Assert.assertEquals("another_token", state.getCurrentUser().getToken());
+
+    }
+
+
 }

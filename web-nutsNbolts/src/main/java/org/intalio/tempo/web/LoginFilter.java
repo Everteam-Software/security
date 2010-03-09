@@ -71,7 +71,7 @@ public class LoginFilter implements javax.servlet.Filter {
                     LoginController.generateSecureRandom(req, resp);
                 }
                 ApplicationState state = login.getApplicationState(req);
-                if (state != null && state.getCurrentUser() == null) {
+                if (state != null) {
                     state.setCurrentUser(user);
                 }
                 chain.doFilter(request, response);
