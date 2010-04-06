@@ -1,127 +1,110 @@
-version: 1
-
+#!RESULT OK
+#!CONNECTION ldap://localhost:10389
+#!DATE 2010-04-06T21:21:29.828
 dn: dc=intalio,dc=com
 objectClass: extensibleObject
 objectClass: domain
 objectClass: top
 dc: intalio
 
+#!RESULT OK
+#!CONNECTION ldap://localhost:10389
+#!DATE 2010-04-06T21:21:29.851
 dn: ou=People,dc=intalio,dc=com
 objectClass: organizationalUnit
 objectClass: top
-ou: People
 description: People
+ou: People
 
+#!RESULT OK
+#!CONNECTION ldap://localhost:10389
+#!DATE 2010-04-06T21:21:29.864
 dn: cn=admin,ou=People,dc=intalio,dc=com
 objectClass: organizationalPerson
 objectClass: person
 objectClass: inetOrgPerson
 objectClass: top
 cn: admin
-sn: Administrator
-givenname: ADMIN
+givenName: ADMIN
 mail: admin@intalio.org
 ou: People
-userpassword:: Y2hhbmdlaXQ=
+sn: Administrator
+userPassword:: Y2hhbmdlaXQ=
 
+#!RESULT OK
+#!CONNECTION ldap://localhost:10389
+#!DATE 2010-04-06T21:21:29.882
 dn: ou=Roles,dc=intalio,dc=com
 objectClass: organizationalUnit
 objectClass: top
-ou: Roles
 description: Roles
+ou: Roles
 
+#!RESULT OK
+#!CONNECTION ldap://localhost:10389
+#!DATE 2010-04-06T21:21:29.893
 dn: cn=ProcessManager,ou=Roles,dc=intalio,dc=com
 objectClass: groupOfUniqueNames
 objectClass: top
 cn: ProcessManager
-uniquemember: cn=admin,ou=People,dc=intalio,dc=com
 ou: Roles
+uniqueMember: cn=admin,ou=People,dc=intalio,dc=com
 
+#!RESULT OK
+#!CONNECTION ldap://localhost:10389
+#!DATE 2010-04-06T21:21:29.905
 dn: cn=ProcessAdministrator,ou=Roles,dc=intalio,dc=com
 objectClass: groupOfUniqueNames
 objectClass: top
 cn: ProcessAdministrator
-uniquemember: cn=admin,ou=People,dc=intalio,dc=com
 ou: Roles
+uniqueMember: cn=admin,ou=People,dc=intalio,dc=com
 
+#!RESULT OK
+#!CONNECTION ldap://localhost:10389
+#!DATE 2010-04-06T21:21:29.918
 dn: ou=People2,dc=intalio,dc=com
 objectClass: organizationalUnit
 objectClass: top
-ou: People2
 description: People
+ou: People2
 
+#!RESULT OK
+#!CONNECTION ldap://localhost:10389
+#!DATE 2010-04-06T21:21:29.935
 dn: cn=admin2,ou=People2,dc=intalio,dc=com
 objectClass: organizationalPerson
 objectClass: person
 objectClass: inetOrgPerson
 objectClass: top
 cn: admin2
-sn: Administrator
 givenname: ADMIN
 mail: admin2@intalio.org
 ou: People
+sn: Administrator
 userpassword:: Y2hhbmdlaXQ=
 
+#!RESULT OK
+#!CONNECTION ldap://localhost:10389
+#!DATE 2010-04-06T21:21:29.949
 dn: ou=People3,ou=People2,dc=intalio,dc=com
 objectClass: organizationalUnit
 objectClass: top
-ou: People3
 description: People
+ou: People3
 
+#!RESULT OK
+#!CONNECTION ldap://localhost:10389
+#!DATE 2010-04-06T21:21:29.962
 dn: cn=admin3,ou=People3,ou=People2,dc=intalio,dc=com
 objectClass: organizationalPerson
 objectClass: person
 objectClass: inetOrgPerson
 objectClass: top
 cn: admin3
-sn: Administrator
 givenname: ADMIN
 mail: admin3@intalio.org
 ou: People
-userpassword:: Y2hhbmdlaXQ=
-
-dn: ou=Roles2,ou=Roles,dc=intalio,dc=com
-objectClass: organizationalUnit
-objectClass: top
-ou: Roles2
-description: Roles
-
-dn: cn=ProcessManager2,ou=Roles2,ou=Roles,dc=intalio,dc=com
-objectClass: groupOfUniqueNames
-objectClass: top
-cn: ProcessManager2
-uniquemember: cn=admin2,ou=People2,dc=intalio,dc=com
-ou: Roles
-
-dn: ou=Roles3,dc=intalio,dc=com
-objectClass: organizationalUnit
-objectClass: top
-ou: Roles3
-description: Roles
-
-dn: cn=ProcessAdministrator2,ou=Roles3,dc=intalio,dc=com
-objectClass: groupOfUniqueNames
-objectClass: top
-cn: ProcessAdministrator2
-uniquemember: cn=admin2,ou=People2,dc=intalio,dc=com
-ou: Roles
-
-dn: cn=ProcessManager3,ou=Roles2,ou=Roles,dc=intalio,dc=com
-objectClass: groupOfUniqueNames
-objectClass: top
-cn: ProcessManager3
-uniquemember: cn=admin3,ou=People3,ou=People2,dc=intalio,dc=com
-ou: Roles
-
-dn: cn=admin4,ou=People2,dc=intalio,dc=com
-objectClass: organizationalPerson
-objectClass: person
-objectClass: inetOrgPerson
-objectClass: top
-cn: admin4
 sn: Administrator
-givenname: ADMIN
-mail: admin4@intalio.org
-ou: People
 userpassword:: Y2hhbmdlaXQ=
 
