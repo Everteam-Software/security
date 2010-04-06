@@ -397,7 +397,7 @@ class LDAPRBACProvider implements RBACProvider, LDAPProperties {
 					while (mrou.hasNext()) {
 						result = _engine
 								.queryRelations(user, userBaseHit, _userId,
-										_roleBase, _roleUsers, checkUser, list);
+										mrou.next(), _roleUsers, checkUser, list);
 					}
 				}
 
