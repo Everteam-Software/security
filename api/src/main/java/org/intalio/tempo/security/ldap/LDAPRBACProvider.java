@@ -212,11 +212,17 @@ class LDAPRBACProvider implements RBACProvider, LDAPProperties {
 			try {
 				_multipleUserOU = readProperties(SECURITY_LDAP_USER_BASE, map)
 						.keySet();
-				_multipleRoleOU = readProperties(SECURITY_LDAP_ROLE_BASE, map)
-						.keySet();
+
 			} catch (Exception e) {
 				_multipleUserOU = new HashSet<String>(1);
 				_multipleUserOU.add(getNonNull(SECURITY_LDAP_USER_BASE, map));
+
+			}
+
+			try {
+				_multipleRoleOU = readProperties(SECURITY_LDAP_ROLE_BASE, map)
+						.keySet();
+			} catch (Exception e) {
 				_multipleRoleOU = new HashSet<String>(1);
 				_multipleRoleOU.add(getNonNull(SECURITY_LDAP_ROLE_BASE, map));
 			}
@@ -375,6 +381,9 @@ class LDAPRBACProvider implements RBACProvider, LDAPProperties {
 					LOG.info(e.getMessage(), e);
 				}
 			}
+			if (userBaseHit == null)
+				throw new UserNotFoundException("User, " + user
+						+ ", is not found!");
 			try {
 
 				short result;
@@ -395,9 +404,9 @@ class LDAPRBACProvider implements RBACProvider, LDAPProperties {
 					boolean checkUser = true;
 					Iterator<String> mrou = _multipleRoleOU.iterator();
 					while (mrou.hasNext()) {
-						result = _engine
-								.queryRelations(user, userBaseHit, _userId,
-										mrou.next(), _roleUsers, checkUser, list);
+						result = _engine.queryRelations(user, userBaseHit,
+								_userId, mrou.next(), _roleUsers, checkUser,
+								list);
 					}
 				}
 
