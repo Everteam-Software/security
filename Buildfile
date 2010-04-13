@@ -24,6 +24,7 @@ define "security" do
     test.exclude "*MultipleOuTest*"
 	test.exclude "*MultipleOuSpecifyTest*"
     test.exclude "*LDAPRBACProviderTest*"
+	test.exclude "*MultipleOuMixSpecifyTest*"
     test.with JAXEN, XMLUNIT, INSTINCT
     
     package :jar

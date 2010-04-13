@@ -504,7 +504,7 @@ public class LDAPRBACProviderMockTest extends TestCase {
 		LDAPRBACProvider rbacProvider = (LDAPRBACProvider)provider.getRBACProvider(null);
 		RBACQuery query = rbacProvider.getQuery();
 		query.ascendantRoles("role");
-		query.assignedRoles("user");
+		//query.assignedRoles("user");
 		query.assignedUsers("role");
 		query.authorizedRoles("user");
 		query.authorizedUsers("role");
