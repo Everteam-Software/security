@@ -378,14 +378,19 @@ public class LoginController extends UIController {
         LOG.debug("showForm() state=" + state);
 
         // Checking whether logged in
-        User user = null;
-        if (state.getCurrentUser() != null) {
-            user = state.getCurrentUser();
+        User user = state.getCurrentUser();
+
+        if (user == null) {
+            user = checkSingleLogin(request);
+            if (user != null)
+                user = authenticate(user.getToken(), convertRoles(_grantedRoles));
+        }
+        if (user == null) {
+            user = checkAutoLogin(request);
+            if (user != null)
+                user = authenticate(user.getToken(), convertRoles(_grantedRoles));
         }
 
-        if (user == null) user = checkSingleLogin(request);
-        if (user == null) user = checkAutoLogin(request);
-        
         if (user == null) {
             // do login
             // handle login from HTTP request
