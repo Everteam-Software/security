@@ -167,6 +167,7 @@ public class LDAPQueryEngine {
     throws NamingException {
 
         SearchControls sc = new SearchControls();
+        sc.setSearchScope(sc.SUBTREE_SCOPE);
         String search = id+"="+subject;
         return findProperties(base, search, map, sc, result);
     }

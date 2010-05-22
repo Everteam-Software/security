@@ -67,5 +67,38 @@ public class MultipleOuMixSpecifyTest {
     public void testFailedOu() throws Exception {
     	Assert.assertFalse(provider.authenticate("admin5", credentials));
     }
+    
+    @Test
+    public void testUserProperties() throws Exception {
+        Property[] p = rbac.getQuery().userProperties("admin3@intalio.org");
+        for(int i=0;i< p.length;i++){
+            System.out.print(p[i].getName() + ":");
+            System.out.println(p[i].getValue());
+        }
+        p = rbac.getQuery().userProperties("admin2@intalio.org");
+        for(int i=0;i< p.length;i++){
+            System.out.print(p[i].getName() + ":");
+            System.out.println(p[i].getValue());
+        }
+        p = rbac.getQuery().userProperties("admin5@intalio.org");
+        for(int i=0;i< p.length;i++){
+            System.out.print(p[i].getName() + ":");
+            System.out.println(p[i].getValue());
+        }
+    }
+    
+    @Test
+    public void testRoleProperties() throws Exception{
+        Property[] p = rbac.getQuery().roleProperties("ProcessManager");
+        for(int i=0;i< p.length;i++){
+            System.out.print(p[i].getName() + ":");
+            System.out.println(p[i].getValue());
+        }
+        p = rbac.getQuery().roleProperties("ProcessManager2");
+        for(int i=0;i< p.length;i++){
+            System.out.print(p[i].getName() + ":");
+            System.out.println(p[i].getValue());
+        }
+    }
 
 }
