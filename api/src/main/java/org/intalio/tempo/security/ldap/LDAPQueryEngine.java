@@ -459,7 +459,7 @@ public class LDAPQueryEngine {
     }
 
     private boolean isPass( String filter, String field ) {
-        boolean result = (field.indexOf(filter)!=-1);
+        boolean result = (field.toLowerCase().indexOf(filter.toLowerCase())!=-1);
         if (LOG.isDebugEnabled()) {
             LOG.debug("is pass? "+ result +" filter: "+filter+" field: "+field);
         }
