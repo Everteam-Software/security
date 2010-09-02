@@ -1,5 +1,6 @@
 require "buildr/xmlbeans"
 require "buildr/cobertura"
+require "buildr_bnd"
 
 # Keep this structure to allow the build system to update version numbers.
 VERSION_NUMBER = "1.0.18-SNAPSHOT"
@@ -64,6 +65,12 @@ define "security" do
   define "ws-service" do
     compile.with projects("api", "ws-common"), AXIOM, AXIS2, SLF4J, SPRING[:core], STAX_API  
     package(:aar).with :libs => [ projects("api", "ws-common"), CASTOR, SLF4J, SPRING[:core], CAS_CLIENT ]
+    package(:bundle).tap do |bnd|
+      bnd['Import-Package'] = "*"
+      bnd['Export-Package'] = "org.intalio.tempo.security*;version=#{version}"
+      bnd['Include-Resource'] = "../src/main/osgi"
+      bnd['DynamicImport-Package'] = "*"
+    end
   end
   
   desc "Common spring and web related classes"
