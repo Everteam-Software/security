@@ -252,7 +252,7 @@ public class SimpleDatabase
 
         synchronized ( SimpleDatabase.class ) {
             if ( MAPPING == null ) {
-                MAPPING = new Mapping();
+                MAPPING = new Mapping(SimpleDatabase.class.getClassLoader());
                 try {
                     MAPPING.loadMapping( SimpleDatabase.class.getResource( MAPPING_FILE ) );
                 } catch ( Exception except ) {
