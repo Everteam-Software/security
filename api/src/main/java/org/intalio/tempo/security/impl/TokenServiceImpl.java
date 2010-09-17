@@ -24,16 +24,14 @@ import org.intalio.tempo.security.util.MD5;
 import org.intalio.tempo.security.util.PropertyUtils;
 import org.intalio.tempo.security.util.StringArrayUtils;
 import org.intalio.tempo.security.util.TimeExpirationMap;
+import org.jasig.cas.client.authentication.AttributePrincipal;
+import org.jasig.cas.client.proxy.Cas20ProxyRetriever;
+import org.jasig.cas.client.validation.Assertion;
+import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
+import org.jasig.cas.client.validation.ProxyList;
+import org.jasig.cas.client.validation.TicketValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.iplanet.sso.SSOToken;
-import com.iplanet.sso.SSOTokenManager;
-import com.sun.identity.idm.AMIdentity;
-import com.sun.identity.idm.IdUtils;
-
-import edu.yale.its.tp.cas.client.ProxyTicketValidator;
-
 /**
  * Implementation of TokenIssuer that uses local authentication and RBAC
  * services.
@@ -41,7 +39,26 @@ import edu.yale.its.tp.cas.client.ProxyTicketValidator;
  * @author <a href="http://www.intalio.com">&copy; Intalio Inc.</a>
  */
 public class TokenServiceImpl implements TokenService {
+
     Logger _logger = LoggerFactory.getLogger(TokenServiceImpl.class);
+
+	public static final String SYS_PROP_DEFAULT_OPENSSO_TICKET_VALIDATOR =
+		"org.intalio.tempo.security.impl.defaultopenssoticketvalidator";
+	
+	static Class __default_open_sso_ticket_validator;
+	static {
+		String className = System.getProperty(SYS_PROP_DEFAULT_OPENSSO_TICKET_VALIDATOR,
+				"org.intalio.tempo.security.impl.openssoiplanet.DefaultIPlanetOpenSSOTicketValidator");
+		try {
+			__default_open_sso_ticket_validator =
+				TokenServiceImpl.class.getClass().getClassLoader()
+					.loadClass("org.intalio.tempo.security.impl.DefaultIPlanetOpenSSOTicketValidator");
+		} catch (Throwable t) {
+			LoggerFactory.getLogger(TokenServiceImpl.class)
+				.warn("No opensso default implemntation available here. Could not find the class " + className);
+		}
+	}
+	
 
     Realms _realms;
     TokenHandler _tokenHandler;
@@ -61,8 +78,26 @@ public class TokenServiceImpl implements TokenService {
     TimeExpirationMap _userAndRoles = new TimeExpirationMap(1000 * 60 * 30, 1000 * 60);
     TimeExpirationMap _tokenAndProperties = new TimeExpirationMap(1000 * 60 * 30, 1000 * 60);
 
+    IOpenSSOTicketValidator _openssoTicketValidator;
+    
     public TokenServiceImpl() {
         // nothing
+    	if (__default_open_sso_ticket_validator != null) {
+    		try {
+				setIOpenSSOTicketValidator((IOpenSSOTicketValidator)__default_open_sso_ticket_validator.newInstance());
+			} catch (Exception e) {
+				_logger.warn("Unable to set the __default_open_sso_ticket_validator", e);
+			}
+    	}
+    }
+    
+    public void setIOpenSSOTicketValidator(IOpenSSOTicketValidator openSSOTicketValidator) {
+    	_openssoTicketValidator = openSSOTicketValidator;
+    	_openssoTicketValidator.setTokenServiceImpl(this);
+    }
+    
+    public IOpenSSOTicketValidator getIOpenSSOTicketValidator() {
+    	return _openssoTicketValidator;
     }
 
     /**
@@ -233,25 +268,52 @@ public class TokenServiceImpl implements TokenService {
         return propsArray;
     }
 
-    public ProxyTicketValidator getProxyTicketValidator() {
-        return new ProxyTicketValidator();
+//    public ProxyTicketValidator getProxyTicketValidator() {
+//        return new ProxyTicketValidator();
+//    }
+
+    public Cas20ProxyTicketValidator getProxyTicketValidator() {
+        return new Cas20ProxyTicketValidator(_validateURL);
     }
-
+    
     public String getTokenFromTicket(String proxyTicket, String serviceURL) throws AuthenticationException, RBACException, RemoteException {
-        ProxyTicketValidator pv = getProxyTicketValidator();
-        pv.setCasValidateUrl(_validateURL);
-        pv.setService(serviceURL);
-        pv.setServiceTicket(proxyTicket);
+//    	ProxyTicketValidator pv = getProxyTicketValidator();
+//        pv.setCasValidateUrl(_validateURL);
+//        pv.setService(serviceURL);
+//        pv.setServiceTicket(proxyTicket);
+//        try {
+//            pv.validate();
+//        } catch (Exception e) {
+//            throw new AuthenticationException("Authentication failed! Proxy ticket invalid!");
+//        }
+//        if (pv.isAuthenticationSuccesful()) {
+//            String user = pv.getUser();
+//
+//            if (user == null) {
+//                throw new AuthenticationException("Authentication failed: Null User");
+//            }
+//            return createToken(user);
+//        } else {
+//            throw new AuthenticationException("Authentication failed! Proxy ticket authentication failed!");
+//        }
+    	Cas20ProxyTicketValidator pv = getProxyTicketValidator();
+    	pv.setAcceptAnyProxy(true);
+    	pv.setProxyRetriever(new Cas20ProxyRetriever(_validateURL));
+    	pv.setAllowedProxyChains(new ProxyList());
+    	pv.setRenew(false);// by default as shown in the CAS default implementations.
+//        pv.setProxyCallbackUrl(_validateURL);
+        Assertion asser;
+		try {
+			asser = pv.validate(proxyTicket, serviceURL);
+		} catch (TicketValidationException e) {
+			throw new AuthenticationException("Authentication failed! Proxy ticket invalid!", e);
+		}
+        
+        AttributePrincipal princip = asser.getPrincipal();
 
-        try {
-            pv.validate();
-        } catch (Exception e) {
-            throw new AuthenticationException("Authentication failed! Proxy ticket invalid!");
-        }
 
-        if (pv.isAuthenticationSuccesful()) {
-            String user = pv.getUser();
-
+        if (princip != null) {
+            String user = princip.getName();
             if (user == null) {
                 throw new AuthenticationException("Authentication failed: Null User");
             }
@@ -263,31 +325,12 @@ public class TokenServiceImpl implements TokenService {
     }
 
     public String getTokenFromOpenSSOToken(String tokenId)
-        throws AuthenticationException, RBACException, RemoteException {
-        try {
-            SSOTokenManager tokenManager = SSOTokenManager.getInstance();
-            SSOToken token = tokenManager.createSSOToken(
-                            tokenId);
-            if (token == null) {
-                    throw new AuthenticationException(
-                                    "Failed to get the sso token with token ID: " + tokenId);
-            }
-
-            // check the token validity
-            SSOTokenManager manager = tokenManager;
-            if (!manager.isValidToken(token)) {
-                    throw new AuthenticationException("Token with ID: " + tokenId
-                                    + " is invalid.");
-            }
-
-            // get the user with sso token
-            AMIdentity userIdentity = IdUtils.getIdentity(token);
-            String user = userIdentity.getName();
-
-            return createToken(user);
-        } catch (Exception e) {
-            _logger.error("OpenSSO Token Error",e);
-            throw new AuthenticationException("Authentication failed! OpenSSO ticket authentication failed!");
-        }
-    }
+    throws AuthenticationException, RBACException, RemoteException {
+	    if (_openssoTicketValidator != null) {
+	    	return _openssoTicketValidator.getTokenFromOpenSSOToken(tokenId);
+	    } else {
+	    	_logger.error("OpenSSO Token Error: no opensso integration available here");
+            throw new AuthenticationException("Authentication failed! No OpenSSO available in this runtime!");
+	    }
+     }
 }

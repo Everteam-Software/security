@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.intalio.tempo.security.ws-common common
+Bundle-SymbolicName: org.intalio.tempo.security.ws-common
+Bundle-Version: 1.0.18.qualifier
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: org.apache.axiom.om,
+ org.apache.axis2,
+ org.intalio.tempo.security,
+ org.intalio.tempo.security.authentication,
+ org.intalio.tempo.security.provider,
+ org.intalio.tempo.security.rbac,
+ org.intalio.tempo.security.rbac.provider,
+ org.intalio.tempo.security.token,
+ org.intalio.tempo.security.util,
+ org.slf4j,
+ org.springframework.beans.factory.config,
+ org.springframework.beans.factory.support,
+ org.springframework.beans.factory.xml,
+ org.springframework.core.io
+Export-Package: org.intalio.tempo.security.ws;version="1.0.18"

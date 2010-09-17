@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: tempo security ws-client
+Fragment-Host: org.intalio.tempo.security.ws-service
+Bundle-SymbolicName: org.intalio.tempo.security.ws-service
+Bundle-Version: 1.0.18.qualifier
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Require-Bundle: org.intalio.tempo.security.api,
+ org.intalio.tempo.security.ws-common

@@ -22,7 +22,8 @@ AXIOM = group("axiom-api", "axiom-dom", "axiom-impl", :under=>"org.apache.ws.com
 BACKPORT = "backport-util-concurrent:backport-util-concurrent:jar:3.1"
 
 CASTOR = "castor:castor:jar:1.0"
-CAS_CLIENT = "cas:casclient:jar:2.1.1"
+#CAS_CLIENT = "cas:casclient:jar:2.1.1"
+CAS_CLIENT = "cas:casclient:jar:3.1.6"
 CSV = "org.ostermiller:utils:jar:1.07.00"
 
 DB_CONNECTOR = {
@@ -49,7 +50,7 @@ JDOM = "jdom:jdom:jar:1.0"
 JETTY = [group("jetty", "jetty-util", :under=>"org.mortbay.jetty", :version=>"6.1.10")]
 JPA = "javax.persistence:persistence-api:jar:1.0"
 JSON = "json:json-taglib:jar:0.4.1"
-JSON_NAGGIT = "org.apache:naggit:jar:1.0.20080807"
+JSON_NAGGIT = "org.apache:org.apache.noggit:jar:1.0.0.201009171450"#"org.apache:naggit:jar:1.0.20080807"
 JSP_API = "javax.servlet:jsp-api:jar:2.0"
 JSTL = "javax.servlet:jstl:jar:1.1.2"
 JUNIT = "junit:junit:jar:4.4"
