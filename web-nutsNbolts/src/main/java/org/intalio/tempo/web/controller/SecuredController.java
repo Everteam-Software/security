@@ -50,7 +50,7 @@ public class SecuredController extends UIController {
             
         }
         fillAuthorization(request, mav);
-        state.setPreviousAction(request.getRequestURL().toString());
+        state.setPreviousAction(request.getRequestURL().append("?").append(request.getQueryString()).toString());
         return mav;
     }
 
