@@ -22,7 +22,7 @@
 	
 	${scripts}
 	<script src="script/folding.js" language="javascript" type="text/javascript"></script> 
-<body>
+<body onLoad="document.getElementById('form').username.focus();">
 <form id="form" name="form" method="POST" style="display:inline;" onSubmit="document.getElementById('actionName').value = 'logIn';">
 	<input type="hidden" id="actionName" name="actionName" value="logIn"/>
 
