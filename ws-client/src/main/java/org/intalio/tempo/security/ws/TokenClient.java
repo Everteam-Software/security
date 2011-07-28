@@ -85,8 +85,14 @@ public class TokenClient implements TokenService {
         EndpointReference targetEPR = new EndpointReference(_endpoint);
         options.setTo(targetEPR);
         options.setAction(action);
-        OMElement response = serviceClient.sendReceive(request);
-        return new OMParser(response);
+        try{
+            OMElement response = serviceClient.sendReceive(request);
+            response.build();
+            return new OMParser(response);
+        }
+        finally{
+            serviceClient.cleanupTransport();
+        }
     }
 
     private static OMElement element(QName name) {
