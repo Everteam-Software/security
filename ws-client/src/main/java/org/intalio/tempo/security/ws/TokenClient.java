@@ -23,6 +23,8 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
+import org.apache.axis2.transport.http.HTTPConstants;
+import org.apache.commons.httpclient.HttpClient;
 import org.intalio.tempo.security.Property;
 import org.intalio.tempo.security.authentication.AuthenticationException;
 import org.intalio.tempo.security.rbac.RBACException;
@@ -62,7 +64,7 @@ public class TokenClient implements TokenService {
         request.addChild(elementText(TokenConstants.USER, user));
         OMElement requestCred = element(TokenConstants.CREDENTIALS);
         for (int i = 0; i < credentials.length; i++) {
-            OMElement prop = element(Constants.PROPERTY);
+            OMElement prop = element(Constants.PROPERTY); 
             prop.addChild(elementText(Constants.NAME, credentials[i].getName()));
             prop.addChild(elementText(Constants.VALUE, credentials[i].getValue().toString()));
             requestCred.addChild(prop);
@@ -80,6 +82,7 @@ public class TokenClient implements TokenService {
     }
 
     protected OMParser invoke(String action, OMElement request) throws AxisFault {
+    	
         ServiceClient serviceClient = getServiceClient();
         Options options = serviceClient.getOptions();
         EndpointReference targetEPR = new EndpointReference(_endpoint);
@@ -121,7 +124,17 @@ public class TokenClient implements TokenService {
         return response.getRequiredString(TokenConstants.TOKEN);
     }
 
-    protected ServiceClient getServiceClient() throws AxisFault {
-        return new ServiceClient();
-    }
+	protected ServiceClient getServiceClient() throws AxisFault {
+		HttpClient httpClient = new HttpClient(
+				MultiThreadedHttpConnectionManagerFactory.getInstance());
+		Options options = new Options();
+		options.setTimeOutInMilliSeconds(120 * 1000);
+		ServiceClient serviceClient = new ServiceClient();
+		serviceClient.setOptions(options);
+		serviceClient.getOptions().setProperty(HTTPConstants.REUSE_HTTP_CLIENT,
+				 org.apache.axis2.Constants.VALUE_TRUE);
+		serviceClient.getOptions().setProperty(
+				HTTPConstants.CACHED_HTTP_CLIENT, httpClient);
+		return serviceClient;
+	}
 }

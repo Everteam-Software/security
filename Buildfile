@@ -32,13 +32,13 @@ define "security" do
   
   desc "Security Web-Service Common Library"
   define "ws-common" do
-    compile.with project("api"), AXIOM, AXIS2, SLF4J, SPRING[:core], STAX_API 
+    compile.with project("api"),APACHE_COMMONS[:httpclient], AXIOM, AXIS2, SLF4J, SPRING[:core], STAX_API 
     package :jar
   end
   
   desc "Security Web-Service Client"
   define "ws-client" do
-    compile.with projects("api", "ws-common"),AXIOM, AXIS2, SLF4J, STAX_API, SPRING[:core]
+    compile.with projects("api", "ws-common"),AXIOM, AXIS2, SLF4J, STAX_API,APACHE_COMMONS[:httpclient], SPRING[:core]
     test.with APACHE_COMMONS[:httpclient], APACHE_COMMONS[:codec], CASTOR, LOG4J, SUNMAIL, XERCES, WS_COMMONS_SCHEMA, WSDL4J, WOODSTOX, CAS_CLIENT, INSTINCT
 
     # Remember to set JAVA_OPTIONS before starting Jetty
