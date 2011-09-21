@@ -272,12 +272,14 @@ implements AuthenticationProvider, LDAPProperties {
                     throw new IllegalArgumentException("Property, "+SECURITY_LDAP_USER_CREDENTIAL+" does not allow value of '"+_principleSyntax+"'");
                 }
 
-                env.put( Context.SECURITY_CREDENTIALS, cred.getValue() );
+                
 
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Authenticate env: "+env);
                 }
-
+                // Password should be put after doing debugging
+                env.put( Context.SECURITY_CREDENTIALS, cred.getValue() );
+                
                 // workaround for the fact that Sun's JNDI provider does an
                 // anonymous bind if no password is supplied for simple authentication
                 // see http://java.sun.com/products/jndi/tutorial/ldap/faq/_context.html

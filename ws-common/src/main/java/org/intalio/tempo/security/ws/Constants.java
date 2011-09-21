@@ -34,6 +34,8 @@ public class Constants {
     public static final QName NAME = new QName(TOKEN_NS.getNamespaceURI(), "name");
 
     public static final QName VALUE = new QName(TOKEN_NS.getNamespaceURI(), "value");
+    
+    public static final String PASSWORD_MASK = "IntalioEncryptedpassword#123";
 
 
 }
