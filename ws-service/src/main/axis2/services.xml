@@ -49,7 +49,10 @@
     <operation name="getTokenProperties">
         <messageReceiver class="org.apache.axis2.receivers.RawXMLINOutMessageReceiver"/>
     </operation>
-    <operation name="getTokenFromTicket">
+     <operation name="getTokenFromTicket">
+        <messageReceiver class="org.apache.axis2.receivers.RawXMLINOutMessageReceiver"/>
+    </operation>
+    <operation name="isWorkflowAdmin">
         <messageReceiver class="org.apache.axis2.receivers.RawXMLINOutMessageReceiver"/>
     </operation>
 	<operation name="getTokenFromOpenSSOToken">

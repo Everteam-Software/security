@@ -81,6 +81,14 @@ public class TokenClient implements TokenService {
         return response.getProperties(Constants.PROPERTIES);
     }
 
+    public boolean isWorkflowAdmin(String token) throws AuthenticationException, RemoteException {
+        OMElement request = element(TokenConstants.IS_WORKFLOW_ADMIN);
+        request.addChild(elementText(TokenConstants.TOKEN, token));
+        OMParser response = invoke(TokenConstants.IS_WORKFLOW_ADMIN.getLocalPart(), request);
+        
+        return Boolean.valueOf(response.getRequiredString(TokenConstants.IS_WORKFLOW_ADMIN));
+    }
+    
     protected OMParser invoke(String action, OMElement request) throws AxisFault {
     	
         ServiceClient serviceClient = getServiceClient();

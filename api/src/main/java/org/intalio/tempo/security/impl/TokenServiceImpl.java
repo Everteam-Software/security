@@ -17,6 +17,8 @@ import java.util.Map;
 import org.intalio.tempo.security.Property;
 import org.intalio.tempo.security.authentication.AuthenticationConstants;
 import org.intalio.tempo.security.authentication.AuthenticationException;
+import org.intalio.tempo.security.authentication.provider.AuthenticationProvider;
+import org.intalio.tempo.security.provider.SecurityProvider;
 import org.intalio.tempo.security.rbac.RBACException;
 import org.intalio.tempo.security.token.TokenService;
 import org.intalio.tempo.security.util.IdentifierUtils;
@@ -289,5 +291,11 @@ public class TokenServiceImpl implements TokenService {
             _logger.error("OpenSSO Token Error",e);
             throw new AuthenticationException("Authentication failed! OpenSSO ticket authentication failed!");
         }
+    }
+    public boolean isWorkflowAdmin(String user) throws AuthenticationException, RemoteException, RBACException{
+    	
+    	return _realms.isWorkflowAdmin(user);
+    	
+    	
     }
 }

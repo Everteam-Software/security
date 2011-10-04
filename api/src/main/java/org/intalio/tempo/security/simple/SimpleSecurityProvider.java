@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.intalio.tempo.security.authentication.AuthenticationAdmin;
 import org.intalio.tempo.security.authentication.AuthenticationException;
@@ -101,8 +102,33 @@ public final class SimpleSecurityProvider
      */
 	static final Logger LOG = LoggerFactory.getLogger( "tempo.security.simple" );
 
+    private  Set<String> _workflowAdminUsers;
 
-    /**
+    private  Set<String> _workflowAdminRoles;
+
+	
+
+    public Set<String> getWorkflowAdminUsers() {
+		return _workflowAdminUsers;
+	}
+
+
+	public void setWorkflowAdminUsers(Set<String> workflowAdminUsers) {
+		_workflowAdminUsers = workflowAdminUsers;
+	}
+
+
+	public Set<String> getWorkflowAdminRoles() {
+		return _workflowAdminRoles;
+	}
+
+
+	public void setWorkflowAdminRoles(Set<String> workflowAdminRoles) {
+		_workflowAdminRoles = workflowAdminRoles;
+	}
+
+
+	/**
      * Public no-arg constructor.
      */
     public SimpleSecurityProvider()
@@ -278,6 +304,7 @@ public final class SimpleSecurityProvider
 			
 			auth = new SimpleAuthenticationProvider( realms[i] );
 			_authMap.put( realms[i].toLowerCase(), auth );
+			
 		}
 
 		// bind default realm		        
@@ -374,9 +401,8 @@ public final class SimpleSecurityProvider
         {
             return _runtime;
         }
-        
+
         
     } // class SimpleAuthorizationProvider
     
 }
-

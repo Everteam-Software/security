@@ -12,6 +12,7 @@ package org.intalio.tempo.security.authentication;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import org.intalio.tempo.security.Property;
+import org.intalio.tempo.security.rbac.RBACException;
 
 /**
  * Administrative review services for performing queries on users of the
@@ -35,5 +36,16 @@ public interface AuthenticationQuery
      */
     public Property[] getUserCredentials( String user )
         throws AuthenticationException, RemoteException;
+
+    /**
+     * Get a user's credentials.
+     * <p>
+     * Returns true if user is a Workflow Admin user or a member of Worflow Admin Roles, false otherwise.
+     * <p>
+	 *
+     * @param user identifier of the user
+     * @return true if user is a Workflow Admin user , otherwise false.
+     */
+	public boolean isWorkflowAdmin(String user)throws AuthenticationException, RemoteException, RBACException;
     
 }

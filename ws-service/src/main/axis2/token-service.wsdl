@@ -79,6 +79,22 @@
 					</xsd:sequence>
 				</xsd:complexType>
 			</xsd:element>
+			<xsd:element name="isWorkflowAdmin">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="user" type="xsd:string" />
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<xsd:element name="isWorkflowAdminResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="isWorkflowAdmin"
+							type="xsd:boolean" />
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
 			<xsd:element name="getTokenResponse">
 				<xsd:complexType>
 					<xsd:sequence>
