@@ -16,6 +16,7 @@ APACHE_COMMONS = {
   :validator => "commons-validator:commons-validator:jar:1.2.0"
 }
 APACHE_DERBY = "org.apache.derby:derby:jar:10.2.2.0"
+JASYPT = "org.jasypt:jasypt:jar:1.8"
 
 AXIOM = group("axiom-api", "axiom-dom", "axiom-impl", :under=>"org.apache.ws.commons.axiom", :version=>"1.2.7")
 

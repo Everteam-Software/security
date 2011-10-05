@@ -29,12 +29,16 @@ import org.intalio.tempo.security.Property;
 import org.intalio.tempo.security.authentication.AuthenticationException;
 import org.intalio.tempo.security.rbac.RBACException;
 import org.intalio.tempo.security.token.TokenService;
+import org.jasypt.util.text.BasicTextEncryptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Client web services API for the Token Service.
  */
 public class TokenClient implements TokenService {
 
+	Logger _logger = LoggerFactory.getLogger(TokenClient.class);
     String _endpoint;
 
     /**
@@ -54,7 +58,11 @@ public class TokenClient implements TokenService {
     public String authenticateUser(String user, String password) throws AuthenticationException, RBACException, RemoteException {
         OMElement request = element(TokenConstants.AUTHENTICATE_USER);
         request.addChild(elementText(TokenConstants.USER, user));
-        request.addChild(elementText(TokenConstants.PASSWORD, password));
+        BasicTextEncryptor encryptor = new BasicTextEncryptor();
+        // time to encrypt before sending
+		encryptor.setPassword(org.intalio.tempo.security.ws.Constants.PASSWORD_MASK);
+        request.addChild(elementText(TokenConstants.PASSWORD,encryptor.encrypt(password)));
+        
         OMParser response = invoke(TokenConstants.AUTHENTICATE_USER.getLocalPart(), request);
         return response.getRequiredString(TokenConstants.TOKEN);
     }
@@ -81,6 +89,7 @@ public class TokenClient implements TokenService {
         return response.getProperties(Constants.PROPERTIES);
     }
 
+
     public boolean isWorkflowAdmin(String token) throws AuthenticationException, RemoteException {
         OMElement request = element(TokenConstants.IS_WORKFLOW_ADMIN);
         request.addChild(elementText(TokenConstants.TOKEN, token));
@@ -89,22 +98,29 @@ public class TokenClient implements TokenService {
         return Boolean.valueOf(response.getRequiredString(TokenConstants.IS_WORKFLOW_ADMIN));
     }
     
-    protected OMParser invoke(String action, OMElement request) throws AxisFault {
-    	
-        ServiceClient serviceClient = getServiceClient();
-        Options options = serviceClient.getOptions();
-        EndpointReference targetEPR = new EndpointReference(_endpoint);
-        options.setTo(targetEPR);
-        options.setAction(action);
-        try{
-            OMElement response = serviceClient.sendReceive(request);
-            response.build();
-            return new OMParser(response);
-        }
-        finally{
-            serviceClient.cleanupTransport();
-        }
-    }
+	protected OMParser invoke(String action, OMElement request)
+			throws AxisFault {
+		ServiceClient serviceClient = getServiceClient();
+		Options options = serviceClient.getOptions();
+		EndpointReference targetEPR = new EndpointReference(_endpoint);
+		options.setTo(targetEPR);
+		options.setAction(action);
+
+		// Disabling chunking as lighthttpd doesnt support it
+	options.setProperty(
+				org.apache.axis2.transport.http.HTTPConstants.CHUNKED,
+				Boolean.FALSE);
+		OMElement response = null;
+		try {
+			response = serviceClient.sendReceive(request);
+			response.build();
+		} finally {
+			serviceClient.cleanupTransport();
+		}
+		_logger.debug("Invoked service for authentication");
+		return new OMParser(response);
+	}
+
 
     private static OMElement element(QName name) {
         return OM_FACTORY.createOMElement(name);
@@ -143,6 +159,10 @@ public class TokenClient implements TokenService {
 				 org.apache.axis2.Constants.VALUE_TRUE);
 		serviceClient.getOptions().setProperty(
 				HTTPConstants.CACHED_HTTP_CLIENT, httpClient);
+		// Disabling chunking as lighthttpd doesnt support it
+		serviceClient.getOptions().setProperty(
+				org.apache.axis2.transport.http.HTTPConstants.CHUNKED,
+				Boolean.FALSE);
 		return serviceClient;
 	}
 }

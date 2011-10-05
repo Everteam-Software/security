@@ -26,6 +26,7 @@ import org.intalio.tempo.security.util.MD5;
 import org.intalio.tempo.security.util.PropertyUtils;
 import org.intalio.tempo.security.util.StringArrayUtils;
 import org.intalio.tempo.security.util.TimeExpirationMap;
+import org.jasypt.util.text.BasicTextEncryptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -158,8 +159,11 @@ public class TokenServiceImpl implements TokenService {
     public String authenticateUser(String user, String password) throws AuthenticationException, RBACException, RemoteException {
         Property[] props;
         Property passwordProp;
-
-        passwordProp = new Property(AuthenticationConstants.PROPERTY_PASSWORD, password);
+        BasicTextEncryptor encryptor = new BasicTextEncryptor();
+        // setPassword uses hash to decrypt password which should be same as hash of encryptor
+		encryptor.setPassword("IntalioEncryptedpassword#123");
+        // This is where we need to send the password in decrypted form
+		passwordProp = new Property(AuthenticationConstants.PROPERTY_PASSWORD, encryptor.decrypt(password));
         props = new Property[] { passwordProp };
 
         if (!_realms.authenticate(user, props)) {
