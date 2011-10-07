@@ -270,6 +270,7 @@ public class LoginController extends UIController {
 
     protected User authenticate(String username, String password, String[] grantedRoles) throws SecurityException {
         try {
+        	
             String token = _tokenService.authenticateUser(username, password);
             if (token == null) {
                 throw new IllegalStateException("Empty token returned from token service");

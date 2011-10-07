@@ -39,55 +39,67 @@ import org.slf4j.LoggerFactory;
 public class TokenClient implements TokenService {
 
 	Logger _logger = LoggerFactory.getLogger(TokenClient.class);
-    String _endpoint;
+	String _endpoint;
+	private String httpChunking = "false";
 
-    /**
-     * Create a token service client
-     * 
-     * @param endpointUrl
-     *            endpoint of the token service
-     */
-    public TokenClient(String endpointUrl) {
-        _endpoint = endpointUrl;
-    }
+ 	/**
+	 * Create a token service client
+	 * 
+	 * @param endpointUrl
+	 *            endpoint of the token service
+	 */
+	public TokenClient(String endpointUrl) {
+		_endpoint = endpointUrl;
+	}
 
-    public String getEndpoint() {
-    	return _endpoint;
-    }
+	public String getEndpoint() {
+		return _endpoint;
+	}
 
-    public String authenticateUser(String user, String password) throws AuthenticationException, RBACException, RemoteException {
-        OMElement request = element(TokenConstants.AUTHENTICATE_USER);
-        request.addChild(elementText(TokenConstants.USER, user));
-        BasicTextEncryptor encryptor = new BasicTextEncryptor();
-        // time to encrypt before sending
-		encryptor.setPassword(org.intalio.tempo.security.ws.Constants.PASSWORD_MASK);
-        request.addChild(elementText(TokenConstants.PASSWORD,encryptor.encrypt(password)));
-        
-        OMParser response = invoke(TokenConstants.AUTHENTICATE_USER.getLocalPart(), request);
-        return response.getRequiredString(TokenConstants.TOKEN);
-    }
+	public String authenticateUser(String user, String password)
+			throws AuthenticationException, RBACException, RemoteException {
+		OMElement request = element(TokenConstants.AUTHENTICATE_USER);
+		request.addChild(elementText(TokenConstants.USER, user));
+		BasicTextEncryptor encryptor = new BasicTextEncryptor();
+		// time to encrypt before sending
+		encryptor
+				.setPassword(org.intalio.tempo.security.ws.Constants.PASSWORD_MASK);
+		request.addChild(elementText(TokenConstants.PASSWORD,
+				encryptor.encrypt(password)));
 
-    public String authenticateUser(String user, Property[] credentials) throws AuthenticationException, RBACException, RemoteException {
-        OMElement request = element(TokenConstants.AUTHENTICATE_USER_WITH_CREDENTIALS);
-        request.addChild(elementText(TokenConstants.USER, user));
-        OMElement requestCred = element(TokenConstants.CREDENTIALS);
-        for (int i = 0; i < credentials.length; i++) {
-            OMElement prop = element(Constants.PROPERTY); 
-            prop.addChild(elementText(Constants.NAME, credentials[i].getName()));
-            prop.addChild(elementText(Constants.VALUE, credentials[i].getValue().toString()));
-            requestCred.addChild(prop);
-        }
-        request.addChild(requestCred);
-        OMParser response = invoke(TokenConstants.AUTHENTICATE_USER_WITH_CREDENTIALS.getLocalPart(), request);
-        return response.getRequiredString(TokenConstants.TOKEN);
-    }
+		OMParser response = invoke(
+				TokenConstants.AUTHENTICATE_USER.getLocalPart(), request);
+		return response.getRequiredString(TokenConstants.TOKEN);
+	}
 
-    public Property[] getTokenProperties(String token) throws AuthenticationException, RemoteException {
-        OMElement request = element(TokenConstants.GET_TOKEN_PROPERTIES);
-        request.addChild(elementText(TokenConstants.TOKEN, token));
-        OMParser response = invoke(TokenConstants.GET_TOKEN_PROPERTIES.getLocalPart(), request);
-        return response.getProperties(Constants.PROPERTIES);
-    }
+	public String authenticateUser(String user, Property[] credentials)
+			throws AuthenticationException, RBACException, RemoteException {
+		OMElement request = element(TokenConstants.AUTHENTICATE_USER_WITH_CREDENTIALS);
+		request.addChild(elementText(TokenConstants.USER, user));
+		OMElement requestCred = element(TokenConstants.CREDENTIALS);
+		for (int i = 0; i < credentials.length; i++) {
+			OMElement prop = element(Constants.PROPERTY);
+			prop.addChild(elementText(Constants.NAME, credentials[i].getName()));
+			prop.addChild(elementText(Constants.VALUE, credentials[i]
+					.getValue().toString()));
+			requestCred.addChild(prop);
+		}
+		request.addChild(requestCred);
+		OMParser response = invoke(
+				TokenConstants.AUTHENTICATE_USER_WITH_CREDENTIALS
+						.getLocalPart(),
+				request);
+		return response.getRequiredString(TokenConstants.TOKEN);
+	}
+
+	public Property[] getTokenProperties(String token)
+			throws AuthenticationException, RemoteException {
+		OMElement request = element(TokenConstants.GET_TOKEN_PROPERTIES);
+		request.addChild(elementText(TokenConstants.TOKEN, token));
+		OMParser response = invoke(
+				TokenConstants.GET_TOKEN_PROPERTIES.getLocalPart(), request);
+		return response.getProperties(Constants.PROPERTIES);
+	}
 
 	protected OMParser invoke(String action, OMElement request)
 			throws AxisFault {
@@ -98,45 +110,63 @@ public class TokenClient implements TokenService {
 		options.setAction(action);
 
 		// Disabling chunking as lighthttpd doesnt support it
-        options.setProperty(
-				org.apache.axis2.transport.http.HTTPConstants.CHUNKED,
-				Boolean.FALSE);
+		if (isChunking())
+			options.setProperty(
+					org.apache.axis2.transport.http.HTTPConstants.CHUNKED,
+					Boolean.FALSE);
+		else
+			options.setProperty(
+					org.apache.axis2.transport.http.HTTPConstants.CHUNKED,
+					Boolean.FALSE);
+
 		OMElement response = null;
 		try {
 			response = serviceClient.sendReceive(request);
 			response.build();
+		} catch (AxisFault e) {
+			// Sometimes we get nasty errors and we need to understand what
+			// caused these errors, having service client options
+			// being printed will help
+			_logger.error("Service was called with this option "
+					+ serviceClient.getServiceContext());
+			throw e;
 		} finally {
+
 			serviceClient.cleanupTransport();
 		}
 		_logger.debug("Invoked service for authentication");
 		return new OMParser(response);
 	}
 
-    private static OMElement element(QName name) {
-        return OM_FACTORY.createOMElement(name);
-    }
+	private static OMElement element(QName name) {
+		return OM_FACTORY.createOMElement(name);
+	}
 
-    private static OMElement elementText(QName name, String text) {
-        OMElement element = OM_FACTORY.createOMElement(name);
-        element.setText(text);
-        return element;
-    }
+	private static OMElement elementText(QName name, String text) {
+		OMElement element = OM_FACTORY.createOMElement(name);
+		element.setText(text);
+		return element;
+	}
 
-    public String getTokenFromTicket(String ticket, String serviceURL) throws AuthenticationException, RBACException, RemoteException {
-        OMElement request = element(TokenConstants.PROXY_TICKET);
-        request.addChild(elementText(TokenConstants.TICKET, ticket));
-        request.addChild(elementText(TokenConstants.SERVICE_URL, serviceURL));
-        OMParser response = invoke(TokenConstants.GETTOKEN_FROMTICKET.getLocalPart(), request);
-        return response.getRequiredString(TokenConstants.TOKEN);
-    }
+	public String getTokenFromTicket(String ticket, String serviceURL)
+			throws AuthenticationException, RBACException, RemoteException {
+		OMElement request = element(TokenConstants.PROXY_TICKET);
+		request.addChild(elementText(TokenConstants.TICKET, ticket));
+		request.addChild(elementText(TokenConstants.SERVICE_URL, serviceURL));
+		OMParser response = invoke(
+				TokenConstants.GETTOKEN_FROMTICKET.getLocalPart(), request);
+		return response.getRequiredString(TokenConstants.TOKEN);
+	}
 
-    public String getTokenFromOpenSSOToken(String tokenId)
-    		throws AuthenticationException, RBACException, RemoteException {
-        OMElement request = element(TokenConstants.OPENSSO_TICKET);
-        request.addChild(elementText(TokenConstants.OPENSSO_TOKEN, tokenId));
-        OMParser response = invoke(TokenConstants.GETTOKEN_FROM_OPSSSOTOKEN.getLocalPart(), request);
-        return response.getRequiredString(TokenConstants.TOKEN);
-    }
+	public String getTokenFromOpenSSOToken(String tokenId)
+			throws AuthenticationException, RBACException, RemoteException {
+		OMElement request = element(TokenConstants.OPENSSO_TICKET);
+		request.addChild(elementText(TokenConstants.OPENSSO_TOKEN, tokenId));
+		OMParser response = invoke(
+				TokenConstants.GETTOKEN_FROM_OPSSSOTOKEN.getLocalPart(),
+				request);
+		return response.getRequiredString(TokenConstants.TOKEN);
+	}
 
 	protected ServiceClient getServiceClient() throws AxisFault {
 		HttpClient httpClient = new HttpClient(
@@ -146,7 +176,7 @@ public class TokenClient implements TokenService {
 		ServiceClient serviceClient = new ServiceClient();
 		serviceClient.setOptions(options);
 		serviceClient.getOptions().setProperty(HTTPConstants.REUSE_HTTP_CLIENT,
-				 org.apache.axis2.Constants.VALUE_TRUE);
+				org.apache.axis2.Constants.VALUE_TRUE);
 		serviceClient.getOptions().setProperty(
 				HTTPConstants.CACHED_HTTP_CLIENT, httpClient);
 		// Disabling chunking as lighthttpd doesnt support it
@@ -154,5 +184,17 @@ public class TokenClient implements TokenService {
 				org.apache.axis2.transport.http.HTTPConstants.CHUNKED,
 				Boolean.FALSE);
 		return serviceClient;
+	}
+
+	public String getHttpChunking() {
+		return httpChunking;
+	}
+
+	public void setHttpChunking(String httpChunking) {
+		this.httpChunking = httpChunking;
+	}
+	
+	public boolean isChunking() {
+		return Boolean.parseBoolean(this.httpChunking);
 	}
 }
