@@ -21,6 +21,8 @@ import static org.intalio.tempo.security.ws.TokenConstants.SERVICE_URL;
 import static org.intalio.tempo.security.ws.TokenConstants.TICKET;
 import static org.intalio.tempo.security.ws.TokenConstants.TOKEN;
 import static org.intalio.tempo.security.ws.TokenConstants.USER;
+import static org.intalio.tempo.security.ws.TokenConstants.IS_WORKFLOW_ADMIN;
+import static org.intalio.tempo.security.ws.TokenConstants.IS_WORKFLOW_ADMIN_RESPONSE;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
@@ -92,6 +94,25 @@ public class TokenWS extends BaseWS {
         }
         return tokenPropertiesResponse(props);
     }
+    
+    public OMElement isWorkflowAdmin(OMElement requestEl) throws AxisFault {
+        OMParser request = new OMParser(requestEl);
+        String user = request.getRequiredString(TOKEN);
+
+        boolean isWorkflowAdmin;
+        try {
+            isWorkflowAdmin = _tokenService.isWorkflowAdmin(user);
+        } catch (AuthenticationException except) {
+            if (LOG.isDebugEnabled())
+                LOG.debug("isWorkflowAdmin:\n" + requestEl, except);
+            throw AxisFault.makeFault(except);
+        } catch (Exception except) {
+            if (LOG.isDebugEnabled())
+                LOG.debug("isWorkflowAdmin:\n" + requestEl, except);
+            throw new RuntimeException(except);
+        }
+        return isWorkflowAdminResponse(isWorkflowAdmin);
+    }
 
     private OMElement authenticateUserResponse(String token) {
         OMElement response = OM_FACTORY.createOMElement(AUTHENTICATE_USER_RESPONSE);
@@ -115,6 +136,15 @@ public class TokenWS extends BaseWS {
         }
         return response;
     }
+
+    private OMElement isWorkflowAdminResponse(boolean isWorkflowAdmin) {
+        OMElement response = OM_FACTORY.createOMElement(IS_WORKFLOW_ADMIN_RESPONSE);
+        OMElement responseToken = OM_FACTORY.createOMElement(IS_WORKFLOW_ADMIN, response);
+        responseToken.setText(String.valueOf(isWorkflowAdmin));
+        return response;    
+    
+    }
+
     
     public OMElement getTokenFromTicket(OMElement requestEl) throws AxisFault {
         OMParser request = new OMParser(requestEl);

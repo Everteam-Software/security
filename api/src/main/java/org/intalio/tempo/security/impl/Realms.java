@@ -508,4 +508,11 @@ public class Realms
         return getRBACRuntime( user ).checkAccess( user, roles, operation, object );
     }
     
+    // implement AuthenticationQuery interface
+    public boolean isWorkflowAdmin( String user )
+        throws AuthenticationException, RemoteException, RBACException
+    {
+        return getAuthenticationQuery( user ).isWorkflowAdmin( user );
+    }
+    
 }

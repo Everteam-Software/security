@@ -49,6 +49,9 @@ public class LDAPSecurityProvider implements SecurityProvider {
     protected static final String DEFAULT_SECURITY_CREDENTIALS = "password";
     
     protected static final Logger LOG = LoggerFactory.getLogger("tempo.security");
+    
+    private  Set<String> _workflowAdminUsers;
+    private  Set<String> _workflowAdminRoles;
 
 	private String                      _name = "LDAP";
 
@@ -79,6 +82,16 @@ public class LDAPSecurityProvider implements SecurityProvider {
         initialize( props );
     }
     
+
+    public void setWorkflowAdminUsers(Set<String> _workflowAdminUsers) {
+        this._workflowAdminUsers = _workflowAdminUsers;
+    }
+    
+    public void setWorkflowAdminRoles(Set<String> _workflowAdminRoles) {
+        this._workflowAdminRoles = _workflowAdminRoles;
+    }
+
+    
     // Spring init method
     @SuppressWarnings("unchecked")
     public void initialize(Object config)
@@ -107,7 +120,7 @@ public class LDAPSecurityProvider implements SecurityProvider {
         if (!_env.containsKey(Context.SECURITY_CREDENTIALS)) {
             _env.put(Context.SECURITY_CREDENTIALS, DEFAULT_SECURITY_CREDENTIALS);
             LOG.info("\""+Context.SECURITY_CREDENTIALS+"\" is not configured, default \""+DEFAULT_SECURITY_CREDENTIALS+"\" is used!");
-        }
+        }              
         
         DirContext root = null;
         try {
@@ -262,6 +275,8 @@ public class LDAPSecurityProvider implements SecurityProvider {
             
             LDAPQueryEngine engine  = new LDAPQueryEngine(this, dn);
             LDAPAuthenticationProvider auth = new LDAPAuthenticationProvider(realm, engine, dn, _env);
+            auth.setWorkflowAdminRoles(_workflowAdminRoles);
+            auth.setWorkflowAdminUsers(_workflowAdminUsers);
             auth.initialize(_env);
             _auths.put(realm, auth);
     

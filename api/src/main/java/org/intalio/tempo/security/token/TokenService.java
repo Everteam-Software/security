@@ -63,6 +63,20 @@ public interface TokenService
 	public Property[] getTokenProperties( String token )
 	    throws AuthenticationException, RemoteException;
 	
+
+    /**
+     * Get a user's credentials.
+     * <p>
+     * Returns true if user is a Workflow Admin user or a member of Workflow Admin Roles, false otherwise.
+     * <p>
+	 *
+     * @param user identifier of the user
+     * @return true if user is a Workflow Admin user , otherwise false.
+ 	 * @throws RBACException
+     */
+	public boolean isWorkflowAdmin( String user )
+	    throws AuthenticationException, RemoteException, RBACException;
+	
 	/**
 	 * Get the security token of an authenticated user
 	 * 

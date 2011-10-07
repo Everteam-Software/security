@@ -35,7 +35,11 @@ import org.intalio.tempo.security.authentication.AuthenticationQuery;
 import org.intalio.tempo.security.authentication.AuthenticationRuntime;
 import org.intalio.tempo.security.authentication.UserNotFoundException;
 import org.intalio.tempo.security.authentication.provider.AuthenticationProvider;
+import org.intalio.tempo.security.rbac.RBACException;
+import org.intalio.tempo.security.rbac.RBACQuery;
+import org.intalio.tempo.security.rbac.provider.RBACProvider;
 import org.intalio.tempo.security.util.IdentifierUtils;
+import org.intalio.tempo.security.util.StringArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +66,23 @@ implements AuthenticationProvider, LDAPProperties {
     private String                  _principleSyntax;
 
     private LDAPAuthentication      _queryRuntime;
+    
+    private Set<String> _workflowAdminUsers;
+    
+    private Set<String> _workflowAdminRoles;
+    
+  
+
+	public void setWorkflowAdminUsers(Set<String> workflowAdminUsers) {
+		_workflowAdminUsers = workflowAdminUsers;
+	}
+
+
+	public void setWorkflowAdminRoles(Set<String> workflowAdminRoles) {
+		_workflowAdminRoles = workflowAdminRoles;
+	}
+
+	
 
 
     /**
@@ -219,6 +240,36 @@ implements AuthenticationProvider, LDAPProperties {
                 throw new AuthenticationException(ne);
             }
         }
+        
+        @Override
+		public boolean isWorkflowAdmin(String identifier)
+				throws AuthenticationException, RemoteException, RBACException {
+
+        	String realm = IdentifierUtils.getRealm(identifier);
+			LDAPSecurityProvider provider = _engine.getProvider();
+			RBACProvider rbac = provider.getRBACProvider(realm);
+			if (rbac == null) {
+				throw new RBACException("SecurityProvider '"
+						+ provider.getName()
+						+ "' doesn't provide RBACProvider " + "for realm '"
+						+ realm + "'");
+			}
+			
+			RBACQuery query = rbac.getQuery();
+			if (query == null) {
+				throw new RBACException(
+						"RBACProvider doesn't provide RBACQuery");
+			}
+			
+			String[] roles = query.authorizedRoles(identifier);
+			boolean isAdmin=false;
+			for(int i=0; i<roles.length;i++){
+				isAdmin=_workflowAdminRoles.contains(roles[i]);
+				if(isAdmin) break;
+				
+			}
+			return (isAdmin || _workflowAdminUsers.contains(identifier));
+		}
         
         private boolean authenticate(String user, Property[] credentials, String userBase) throws UserNotFoundException, AuthenticationException, RemoteException {
         	DirContext ctx;
@@ -388,5 +439,9 @@ implements AuthenticationProvider, LDAPProperties {
             }
         }
 
+		
+
     }
+
+	
 }

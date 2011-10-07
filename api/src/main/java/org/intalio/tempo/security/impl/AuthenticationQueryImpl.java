@@ -13,6 +13,7 @@ import java.rmi.RemoteException;
 import org.intalio.tempo.security.Property;
 import org.intalio.tempo.security.authentication.AuthenticationException;
 import org.intalio.tempo.security.authentication.AuthenticationQuery;
+import org.intalio.tempo.security.rbac.RBACException;
 
 /**
  * Authentication Query Service.  This is a thin wrapper around a
@@ -41,6 +42,14 @@ public class AuthenticationQueryImpl
 		throws AuthenticationException, RemoteException
 	{
 		return _providers.getAuthenticationQuery( user ).getUserCredentials( user );
+	}
+
+
+	@Override
+	public boolean isWorkflowAdmin(String user) throws AuthenticationException,
+			RemoteException, RBACException {
+		
+		return _providers.getAuthenticationQuery( user ).isWorkflowAdmin(user);
 	}
 
 }

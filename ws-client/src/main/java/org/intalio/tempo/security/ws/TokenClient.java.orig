@@ -119,7 +119,7 @@ public class TokenClient implements TokenService {
 		options.setAction(action);
 
 		// Disabling chunking as lighthttpd doesnt support it
-
+<<<<<<< HEAD
 		if (isChunking())
 			options.setProperty(
 					org.apache.axis2.transport.http.HTTPConstants.CHUNKED,
@@ -129,7 +129,11 @@ public class TokenClient implements TokenService {
 					org.apache.axis2.transport.http.HTTPConstants.CHUNKED,
 					Boolean.FALSE);
 
-
+=======
+	options.setProperty(
+				org.apache.axis2.transport.http.HTTPConstants.CHUNKED,
+				Boolean.FALSE);
+>>>>>>> c1cc618e3d414ffbbe98eb6475d84ed207a660a2
 		OMElement response = null;
 		try {
 			response = serviceClient.sendReceive(request);
@@ -149,7 +153,7 @@ public class TokenClient implements TokenService {
 		return new OMParser(response);
 	}
 
-
+<<<<<<< HEAD
 	private static OMElement element(QName name) {
 		return OM_FACTORY.createOMElement(name);
 	}
@@ -179,7 +183,34 @@ public class TokenClient implements TokenService {
 				request);
 		return response.getRequiredString(TokenConstants.TOKEN);
 	}
+=======
 
+    private static OMElement element(QName name) {
+        return OM_FACTORY.createOMElement(name);
+    }
+
+    private static OMElement elementText(QName name, String text) {
+        OMElement element = OM_FACTORY.createOMElement(name);
+        element.setText(text);
+        return element;
+    }
+
+    public String getTokenFromTicket(String ticket, String serviceURL) throws AuthenticationException, RBACException, RemoteException {
+        OMElement request = element(TokenConstants.PROXY_TICKET);
+        request.addChild(elementText(TokenConstants.TICKET, ticket));
+        request.addChild(elementText(TokenConstants.SERVICE_URL, serviceURL));
+        OMParser response = invoke(TokenConstants.GETTOKEN_FROMTICKET.getLocalPart(), request);
+        return response.getRequiredString(TokenConstants.TOKEN);
+    }
+
+    public String getTokenFromOpenSSOToken(String tokenId)
+    		throws AuthenticationException, RBACException, RemoteException {
+        OMElement request = element(TokenConstants.OPENSSO_TICKET);
+        request.addChild(elementText(TokenConstants.OPENSSO_TOKEN, tokenId));
+        OMParser response = invoke(TokenConstants.GETTOKEN_FROM_OPSSSOTOKEN.getLocalPart(), request);
+        return response.getRequiredString(TokenConstants.TOKEN);
+    }
+>>>>>>> c1cc618e3d414ffbbe98eb6475d84ed207a660a2
 
 	protected ServiceClient getServiceClient() throws AxisFault {
 		HttpClient httpClient = new HttpClient(

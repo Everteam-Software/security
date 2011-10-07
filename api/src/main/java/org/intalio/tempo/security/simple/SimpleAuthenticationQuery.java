@@ -9,11 +9,18 @@
 
 package org.intalio.tempo.security.simple;
 
+import java.rmi.RemoteException;
+import java.util.Set;
+
 import org.intalio.tempo.security.Property;
 import org.intalio.tempo.security.authentication.AuthenticationConstants;
 import org.intalio.tempo.security.authentication.AuthenticationException;
 import org.intalio.tempo.security.authentication.AuthenticationQuery;
 import org.intalio.tempo.security.authentication.UserNotFoundException;
+import org.intalio.tempo.security.rbac.RBACException;
+import org.intalio.tempo.security.rbac.RBACQuery;
+import org.intalio.tempo.security.rbac.provider.RBACProvider;
+import org.intalio.tempo.security.util.IdentifierUtils;
 
 /**
  * Simple implementation of the authentication query functions.
@@ -55,5 +62,35 @@ class SimpleAuthenticationQuery
         
         return new Property[] { password };
     }
+
+
+	@Override
+	public boolean isWorkflowAdmin(String identifier) throws AuthenticationException,
+			RemoteException, RBACException {
+		
+		String realm = IdentifierUtils.getRealm( identifier );					
+		RBACProvider rbac = _provider.getRBACProvider( realm );
+		if ( rbac == null ) {
+			throw new RBACException( 
+				"SecurityProvider '" + _provider.getName()
+				+ "' doesn't provide RBACProvider "
+				+ "for realm '" + realm + "'" );
+		}
+		RBACQuery query = rbac.getQuery();
+		if ( query == null ) {
+			throw new RBACException( "RBACProvider doesn't provide RBACQuery" );
+		}
+		String[] roles=query.authorizedRoles(identifier);
+		Set<String> workflowAdminRoles=_provider.getWorkflowAdminRoles();
+		Set<String> workflowAdminUsers=_provider.getWorkflowAdminUsers();		
+		boolean isAdmin=false;
+		for(int i=0; i<roles.length;i++){
+			isAdmin=workflowAdminRoles.contains(roles[i]);
+			if(isAdmin) break;
+			
+		}		
+
+		return (isAdmin || workflowAdminUsers.contains(identifier));
+	}
     
 }
