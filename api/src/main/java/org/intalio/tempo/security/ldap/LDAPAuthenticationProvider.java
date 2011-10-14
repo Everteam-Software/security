@@ -262,13 +262,16 @@ implements AuthenticationProvider, LDAPProperties {
 			}
 			
 			String[] roles = query.authorizedRoles(identifier);
-			boolean isAdmin=false;
-			for(int i=0; i<roles.length;i++){
+			boolean isAdmin = false;
+			for (int i = 0; i < roles.length && _workflowAdminRoles != null; i++) {
 				isAdmin=_workflowAdminRoles.contains(roles[i]);
 				if(isAdmin) break;
 				
 			}
-			return (isAdmin || _workflowAdminUsers.contains(identifier));
+			if (_workflowAdminUsers != null)
+				return (isAdmin || _workflowAdminUsers.contains(identifier));
+			else
+				return isAdmin;
 		}
         
         private boolean authenticate(String user, Property[] credentials, String userBase) throws UserNotFoundException, AuthenticationException, RemoteException {
