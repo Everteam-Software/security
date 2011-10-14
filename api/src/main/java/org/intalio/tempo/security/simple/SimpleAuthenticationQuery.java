@@ -84,13 +84,15 @@ class SimpleAuthenticationQuery
 		Set<String> workflowAdminRoles=_provider.getWorkflowAdminRoles();
 		Set<String> workflowAdminUsers=_provider.getWorkflowAdminUsers();		
 		boolean isAdmin=false;
-		for(int i=0; i<roles.length;i++){
+		for(int i=0; i<roles.length && workflowAdminRoles != null ;i++){
 			isAdmin=workflowAdminRoles.contains(roles[i]);
 			if(isAdmin) break;
 			
 		}		
-
-		return (isAdmin || workflowAdminUsers.contains(identifier));
+		if (workflowAdminUsers != null)
+			return (isAdmin || workflowAdminUsers.contains(identifier));
+		else
+			return isAdmin;
 	}
     
 }
