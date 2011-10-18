@@ -41,6 +41,7 @@ public class TokenWS extends BaseWS {
 
         String token;
         try {
+        	initStatics();
             token = _tokenService.authenticateUser(user, password);
         } catch (AuthenticationException except) {
             if (LOG.isDebugEnabled())
@@ -62,6 +63,7 @@ public class TokenWS extends BaseWS {
 
         String token;
         try {
+        	initStatics();
             token = _tokenService.authenticateUser(user, credentials);
         } catch (AuthenticationException except) {
             if (LOG.isDebugEnabled())
@@ -82,6 +84,7 @@ public class TokenWS extends BaseWS {
 
         Property[] props;
         try {
+        	initStatics();
             props = _tokenService.getTokenProperties(token);
         } catch (AuthenticationException except) {
             if (LOG.isDebugEnabled())
@@ -101,6 +104,7 @@ public class TokenWS extends BaseWS {
 
         boolean isWorkflowAdmin;
         try {
+        	initStatics();
             isWorkflowAdmin = _tokenService.isWorkflowAdmin(user);
         } catch (AuthenticationException except) {
             if (LOG.isDebugEnabled())
@@ -153,6 +157,7 @@ public class TokenWS extends BaseWS {
 
         String token;
         try {
+        	initStatics();
             token = _tokenService.getTokenFromTicket(ticket, serviceURL);
         } catch (AuthenticationException except) {
             if (LOG.isDebugEnabled())

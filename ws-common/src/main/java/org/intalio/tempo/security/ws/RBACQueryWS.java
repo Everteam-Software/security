@@ -47,6 +47,7 @@ public class RBACQueryWS extends BaseWS {
         String[] users= null;
         	try {
         		String role = request.getRequiredString(RBACQueryConstants.ROLE);
+        		initStatics();
 				RBACProvider usersRBACProvider = _securityProvider.getRBACProvider(IdentifierUtils.getRealm(role));
 				
 				RBACQuery usersRBACquery=usersRBACProvider.getQuery();
@@ -86,6 +87,7 @@ public class RBACQueryWS extends BaseWS {
         String[] users= null;
         	try {
         		String user = request.getRequiredString(RBACQueryConstants.USER);
+        		initStatics();
 				RBACProvider usersRBACProvider = _securityProvider.getRBACProvider(IdentifierUtils.getRealm(user));
 				
 				RBACQuery usersRBACquery=usersRBACProvider.getQuery();
@@ -128,6 +130,7 @@ public class RBACQueryWS extends BaseWS {
         	try {
         		String role = request.getRequiredString(RBACQueryConstants.ROLE);
         		String object = request.getRequiredString(RBACQueryConstants.OBJECT);
+        		initStatics();
 				RBACProvider usersRBACProvider = _securityProvider.getRBACProvider(IdentifierUtils.getRealm(role));
 				RBACQuery usersRBACquery=usersRBACProvider.getQuery();
 				operations=usersRBACquery.roleOperationsOnObject(role, object);
@@ -167,6 +170,7 @@ public class RBACQueryWS extends BaseWS {
         	try {
 				String user = request.getRequiredString(RBACQueryConstants.USER);
 				String object = request.getRequiredString(RBACQueryConstants.OBJECT);
+				initStatics();
 				RBACProvider usersRBACProvider = _securityProvider.getRBACProvider(IdentifierUtils.getRealm(user));
 				
 				RBACQuery usersRBACquery=usersRBACProvider.getQuery();
@@ -215,6 +219,7 @@ public class RBACQueryWS extends BaseWS {
         String[] users= null;
         	try {
         		String role = request.getRequiredString(RBACQueryConstants.ROLE);
+        		initStatics();
 				RBACProvider usersRBACProvider = _securityProvider.getRBACProvider(IdentifierUtils.getRealm(role));
 				
 				RBACQuery usersRBACquery=usersRBACProvider.getQuery();
@@ -255,6 +260,7 @@ public class RBACQueryWS extends BaseWS {
         String[] roles= null;
         	try {
         		String user = request.getRequiredString(RBACQueryConstants.USER);
+        		initStatics();
 				RBACProvider usersRBACProvider = _securityProvider.getRBACProvider(IdentifierUtils.getRealm(user));
 				
 				RBACQuery usersRBACquery=usersRBACProvider.getQuery();
@@ -298,6 +304,7 @@ public class RBACQueryWS extends BaseWS {
         String[] roles= null;
         	try {
         		String realm = request.getRequiredString(RBACQueryConstants.REALM);
+        		initStatics();
 				RBACProvider usersRBACProvider = _securityProvider.getRBACProvider(realm);
 				
 				RBACQuery usersRBACquery=usersRBACProvider.getQuery();
@@ -333,7 +340,7 @@ public class RBACQueryWS extends BaseWS {
         String[] roles= null;
         	try {
         		String role = request.getRequiredString(RBACQueryConstants.ROLE);
-        	        
+        		initStatics();
 				RBACProvider usersRBACProvider = _securityProvider.getRBACProvider(IdentifierUtils.getRealm(role));
 				
 				RBACQuery usersRBACquery=usersRBACProvider.getQuery();
@@ -371,7 +378,7 @@ public class RBACQueryWS extends BaseWS {
         String[] roles= null;
         	try { 
         		String role = request.getRequiredString(RBACQueryConstants.ROLE);
-        	
+        		initStatics();
 				RBACProvider usersRBACProvider = _securityProvider.getRBACProvider(IdentifierUtils.getRealm(role));
 				
 				RBACQuery usersRBACquery=usersRBACProvider.getQuery();
@@ -407,6 +414,7 @@ public class RBACQueryWS extends BaseWS {
         Property[] properties= null;
         	try {
         		String user = request.getRequiredString(RBACQueryConstants.USER);
+        		initStatics();
 				RBACProvider usersRBACProvider = _securityProvider.getRBACProvider(IdentifierUtils.getRealm(user));
 				
 				RBACQuery usersRBACquery=usersRBACProvider.getQuery();
@@ -444,6 +452,7 @@ public class RBACQueryWS extends BaseWS {
         Property[] properties= null;
         	try {
         		String role = request.getRequiredString(RBACQueryConstants.ROLE);
+        		initStatics();
 				RBACProvider usersRBACProvider = _securityProvider.getRBACProvider(IdentifierUtils.getRealm(role));
 				RBACQuery usersRBACquery=usersRBACProvider.getQuery();
 				properties=usersRBACquery.roleProperties(role);

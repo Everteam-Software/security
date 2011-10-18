@@ -36,10 +36,12 @@ public class BaseWS {
     protected static File _configDir;
 
     protected BaseWS() {
-        initStatics();
+//        initStatics();
     }
-
+    
     protected void initStatics() {
+        if (_initialized)
+            return;
         try {
             synchronized (BaseWS.class) {
                 if (_initialized)
