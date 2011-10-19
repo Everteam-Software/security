@@ -22,6 +22,7 @@
 			<name>Admininistrator</name>
 			<email>admin@example.com</email>
 			<password>changeit</password>
+			<assignRole>WorkflowAdministrator</assignRole>
 		</user>        
 		
         <user identifier="prod-manager1">
@@ -104,6 +105,15 @@
 
         <role identifier="eng">
             <description>Software Engineer</description>
+            
+            <permission operation="read"   object="specification"/>
+            <permission operation="read"   object="MRD"/>
+            <permission operation="read"   object="code"/>
+            <permission operation="write"  object="code"/>
+            <permission operation="commit" object="cvs"/>
+        </role>
+         <role identifier="WorkflowAdministrator">
+            <description>Tempo Workflow Admin</description>
             
             <permission operation="read"   object="specification"/>
             <permission operation="read"   object="MRD"/>

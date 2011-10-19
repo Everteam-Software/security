@@ -11,6 +11,20 @@
 
     <bean id="securityProvider" class="org.intalio.tempo.security.simple.SimpleSecurityProvider" init-method="init">
         <property name="configFile"><value>${org.intalio.tempo.configDirectory}/testSimpleSecurity.xml</value></property>
+        
+        <property name="workflowAdminRoles">
+			<set>
+				
+				<value>intalio\WorkflowAdministrator</value>
+			</set>
+		</property>
+		<property name="workflowAdminUsers">
+			<set>
+				<value>intalio\admin</value>
+			</set>
+		</property>
+        
+        
     </bean>
 
     <bean id="tokenHandler" class="org.intalio.tempo.security.impl.TokenHandler">

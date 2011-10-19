@@ -19,6 +19,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
 
+import junit.framework.Assert;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.intalio.tempo.security.Property;
@@ -100,6 +102,15 @@ public class TokenWSTest {
         Property[] props = _client.getTokenProperties(token);
         if (props == null || props.length < 1)
             fail("invalid properties returned: " + PropertyUtils.toMap(props));
+    }
+    
+    @Test
+    public void testIsWorkflowAdmin() throws AuthenticationException, RBACException, RemoteException {
+        boolean isWorkflowAdmin = _client.isWorkflowAdmin("intalio\\admin");
+        Assert.assertTrue(isWorkflowAdmin);
+       
+        isWorkflowAdmin = _client.isWorkflowAdmin("intalio\\prod-manager1");
+        Assert.assertFalse(isWorkflowAdmin);
     }
 
     static class TokenClientMock extends TokenClient {
