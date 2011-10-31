@@ -28,6 +28,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.intalio.tempo.security.Property;
 import org.intalio.tempo.security.authentication.AuthenticationException;
+import org.jasypt.util.text.BasicTextEncryptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +43,11 @@ public class TokenWS extends BaseWS {
         String token;
         try {
         	initStatics();
-            token = _tokenService.authenticateUser(user, password);
+        	 BasicTextEncryptor encryptor = new BasicTextEncryptor();
+             // setPassword uses hash to decrypt password which should be same as hash of encryptor
+     		encryptor.setPassword("IntalioEncryptedpassword#123");
+     		
+            token = _tokenService.authenticateUser(user,encryptor.encrypt(password));
         } catch (AuthenticationException except) {
             if (LOG.isDebugEnabled())
                 LOG.debug("authenticateUser:\n" + requestEl, except);
@@ -50,6 +55,7 @@ public class TokenWS extends BaseWS {
         } catch (Exception except) {
             if (LOG.isDebugEnabled())
                 LOG.debug("authenticateUser:\n" + requestEl, except);
+            LOG.error("User : " + user + " , Password : " + password);
             throw new RuntimeException(except);
         }
 

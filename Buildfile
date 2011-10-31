@@ -32,7 +32,7 @@ define "security" do
   
   desc "Security Web-Service Common Library"
   define "ws-common" do
-    compile.with project("api"),APACHE_COMMONS[:httpclient], AXIOM, AXIS2, SLF4J, SPRING[:core], STAX_API 
+    compile.with project("api"),APACHE_COMMONS[:httpclient], AXIOM, AXIS2, SLF4J, SPRING[:core], STAX_API ,JASYPT
     package :jar
   end
   
