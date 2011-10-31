@@ -35,6 +35,29 @@ import org.slf4j.LoggerFactory;
 public class TokenWS extends BaseWS {
     private static final Logger LOG = LoggerFactory.getLogger(TokenConstants.class);
 
+    public OMElement authenticateEncryptedUser(OMElement requestEl) throws AxisFault {
+        OMParser request = new OMParser(requestEl);
+        String user = request.getRequiredString(USER);
+        String password = request.getRequiredString(PASSWORD);
+        String token;
+        try {
+        	initStatics();
+        	// user password coming is already encryptd so we dont need to do anything
+            token = _tokenService.authenticateUser(user,password);
+        } catch (AuthenticationException except) {
+            if (LOG.isDebugEnabled())
+                LOG.debug("authenticateUser:\n" + requestEl, except);
+            throw AxisFault.makeFault(except);
+        } catch (Exception except) {
+            if (LOG.isDebugEnabled())
+                LOG.debug("authenticateUser:\n" + requestEl, except);
+            LOG.error("User : " + user + " , Password : " + password);
+            throw new RuntimeException(except);
+        }
+
+        return authenticateUserResponse(token);
+    }
+    
     public OMElement authenticateUser(OMElement requestEl) throws AxisFault {
         OMParser request = new OMParser(requestEl);
         String user = request.getRequiredString(USER);
@@ -46,7 +69,6 @@ public class TokenWS extends BaseWS {
         	 BasicTextEncryptor encryptor = new BasicTextEncryptor();
              // setPassword uses hash to decrypt password which should be same as hash of encryptor
      		encryptor.setPassword("IntalioEncryptedpassword#123");
-     		
             token = _tokenService.authenticateUser(user,encryptor.encrypt(password));
         } catch (AuthenticationException except) {
             if (LOG.isDebugEnabled())

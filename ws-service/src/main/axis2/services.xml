@@ -40,6 +40,9 @@
 </service>
 <service name="TokenService" scope="application">
     <description>Token Service</description>
+    <operation name="authenticateEncryptedUser">
+        <messageReceiver class="org.apache.axis2.receivers.RawXMLINOutMessageReceiver"/>
+    </operation>
     <operation name="authenticateUser">
         <messageReceiver class="org.apache.axis2.receivers.RawXMLINOutMessageReceiver"/>
     </operation>

@@ -68,7 +68,7 @@ public class TokenClient implements TokenService {
 				encryptor.encrypt(password)));
 
 		OMParser response = invoke(
-				TokenConstants.AUTHENTICATE_USER.getLocalPart(), request);
+				TokenConstants.AUTHENTICATE_ENCRYPTED_USER.getLocalPart(), request);
 		return response.getRequiredString(TokenConstants.TOKEN);
 	}
 

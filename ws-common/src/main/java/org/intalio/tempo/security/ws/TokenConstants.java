@@ -19,6 +19,8 @@ import javax.xml.namespace.QName;
 public class TokenConstants {
     public static final String TOKEN_PREFIX = "tokenws";
 
+    public static final QName AUTHENTICATE_ENCRYPTED_USER = new QName(TOKEN_NS.getNamespaceURI(), "authenticateEncryptedUser", TOKEN_PREFIX);
+    
     public static final QName AUTHENTICATE_USER = new QName(TOKEN_NS.getNamespaceURI(), "authenticateUser", TOKEN_PREFIX);
 
     public static final QName AUTHENTICATE_USER_WITH_CREDENTIALS = new QName(TOKEN_NS.getNamespaceURI(), "authenticateUserWithCredentials", TOKEN_PREFIX);
