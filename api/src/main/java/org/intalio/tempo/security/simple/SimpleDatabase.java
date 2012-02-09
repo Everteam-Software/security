@@ -76,6 +76,15 @@ public class SimpleDatabase
     {
         _realms = new HashMap<String,SimpleRealm>();
     }
+    
+    
+    /**
+     * Checks if simple security is caseSensitive
+     * @return
+     */
+	public boolean isCaseSensitive(){
+		    return this._caseSensitive;
+	}
 
 	/**
 	 * Get the default realm.

@@ -26,6 +26,7 @@ import org.intalio.tempo.security.rbac.RBACQuery;
 import org.intalio.tempo.security.rbac.RBACRuntime;
 import org.intalio.tempo.security.rbac.provider.RBACProvider;
 import org.intalio.tempo.security.util.IdentifierUtils;
+import org.intalio.tempo.security.simple.SimpleSecurityProvider;
 
 /**
  * Realms - registry for security providers
@@ -64,7 +65,11 @@ public class Realms
         for ( SecurityProvider provider : providers ) {
             String[] realms = provider.getRealms();
             for ( int i=0; i<realms.length; i++ ) {
-                _realms.put( realms[i].toLowerCase(), provider );
+//                _realms.put( realms[i].toLowerCase(), provider );
+                if(provider instanceof SimpleSecurityProvider && !((SimpleSecurityProvider) provider).getDatabase().isCaseSensitive())
+                    _realms.put(realms[i].toLowerCase(), provider );
+                else
+                    _realms.put( realms[i], provider );
             }
         }
     }
@@ -105,9 +110,9 @@ public class Realms
     {
 		if ( realm == null || realm.length() == 0 ) {
 			realm = _defaultRealm;
-		} else {
-			realm = realm.toLowerCase();
-		}
+		}			
+		if (_realms.get("") instanceof SimpleSecurityProvider && !((SimpleSecurityProvider)_realms.get("")).getDatabase().isCaseSensitive())
+		    realm = realm.toLowerCase();
 
 		return _realms.get( realm );
 	}

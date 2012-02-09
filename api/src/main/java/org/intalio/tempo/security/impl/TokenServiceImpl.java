@@ -17,8 +17,6 @@ import java.util.Map;
 import org.intalio.tempo.security.Property;
 import org.intalio.tempo.security.authentication.AuthenticationConstants;
 import org.intalio.tempo.security.authentication.AuthenticationException;
-import org.intalio.tempo.security.authentication.provider.AuthenticationProvider;
-import org.intalio.tempo.security.provider.SecurityProvider;
 import org.intalio.tempo.security.rbac.RBACException;
 import org.intalio.tempo.security.token.TokenService;
 import org.intalio.tempo.security.util.IdentifierUtils;
@@ -26,6 +24,8 @@ import org.intalio.tempo.security.util.MD5;
 import org.intalio.tempo.security.util.PropertyUtils;
 import org.intalio.tempo.security.util.StringArrayUtils;
 import org.intalio.tempo.security.util.TimeExpirationMap;
+import org.intalio.tempo.security.simple.SimpleSecurityProvider;
+
 import org.jasypt.util.text.BasicTextEncryptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,7 +124,11 @@ public class TokenServiceImpl implements TokenService {
 
     public String createToken(String user, String password) throws RBACException, RemoteException {
         // TODO we should use _realms to normalize
-        user = IdentifierUtils.normalize(user, _realms.getDefaultRealm(), false, '\\');
+//        user = IdentifierUtils.normalize(user, _realms.getDefaultRealm(), false, '\\');
+	    boolean caseSensitive = true;
+	    if(_realms.getSecurityProviders().get(0) instanceof SimpleSecurityProvider && !((SimpleSecurityProvider)_realms.getSecurityProviders().get(0)).getDatabase().isCaseSensitive())
+        caseSensitive = false;
+	    user = IdentifierUtils.normalize(user, _realms.getDefaultRealm(), caseSensitive, '\\');
 
         // place session information in token
         Property userProp = new Property(AuthenticationConstants.PROPERTY_USER, user);
