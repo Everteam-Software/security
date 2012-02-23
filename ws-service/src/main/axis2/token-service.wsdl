@@ -82,7 +82,7 @@
 			<xsd:element name="isWorkflowAdmin">
 				<xsd:complexType>
 					<xsd:sequence>
-						<xsd:element name="user" type="xsd:string" />
+						<xsd:element name="token" type="xsd:string" />
 					</xsd:sequence>
 				</xsd:complexType>
 			</xsd:element>
@@ -124,6 +124,14 @@
 		</xsd:schema>
 	</wsdl:types>
 
+	
+	 <wsdl:message name="isWorkflowAdminRequest">
+		<wsdl:part name="payload" element="tns:isWorkflowAdmin"/>
+	</wsdl:message>
+	
+    <wsdl:message name="isWorkflowAdminResponse">
+		<wsdl:part name="payload" element="tns:isWorkflowAdminResponse"/>
+	</wsdl:message>
 
 	<wsdl:message name="authenticateUser">
 		<wsdl:part name="payload" element="tns:authenticateUser" />
@@ -188,6 +196,11 @@
 		<wsdl:operation name="getTokenFromOpenSSOToken">
 			<wsdl:input message="tns:getTokenFromOpenSSOTokenRequest"></wsdl:input>
 			<wsdl:output message="tns:getTokenFromOpenSSOTokenResponse"></wsdl:output>
+		</wsdl:operation>
+
+		<wsdl:operation name="isWorkflowAdmin">
+			<wsdl:input message="tns:isWorkflowAdminRequest"></wsdl:input>
+			<wsdl:output message="tns:isWorkflowAdminResponse"></wsdl:output>
 		</wsdl:operation>		
 	</wsdl:portType>
 
@@ -244,7 +257,17 @@
 			<wsdl:output>
 				<soap:body parts="payload" use="literal" />
 			</wsdl:output>
-		</wsdl:operation>		
+		</wsdl:operation>	
+
+		<wsdl:operation name="isWorkflowAdmin">
+			<soap:operation soapAction="isWorkflowAdmin" />
+			<wsdl:input>
+				<soap:body parts="payload" use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body parts="payload" use="literal" />
+			</wsdl:output>
+		</wsdl:operation>			
 	</wsdl:binding>
 
 	<wsdl:service name="TokenService">
