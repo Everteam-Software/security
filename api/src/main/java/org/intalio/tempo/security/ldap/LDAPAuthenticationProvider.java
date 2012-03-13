@@ -374,7 +374,7 @@ implements AuthenticationProvider, LDAPProperties {
             while (answer.hasMore()) {
                 SearchResult sr = (SearchResult) answer.next();
                 if(LOG.isDebugEnabled()) {
-                    LOG.debug("User search on"+_dn+" returned:" + sr.getNameInNamespace());
+                    LOG.debug("User search on "+_dn+" returned:" + sr.getNameInNamespace());
                 }
                 return sr.getNameInNamespace();
             }
