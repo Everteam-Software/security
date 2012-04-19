@@ -322,9 +322,9 @@ class LDAPRBACProvider implements RBACProvider, LDAPProperties {
                 list.add(role);
                 short found;
                 if (_roleAscen != null)
-                    found = _engine.queryInheritRelation(_roleBase, _roleId, _roleAscen, list);
+                    found = _engine.queryInheritReference(_roleBase, _roleId, _roleAscen, list);
                 else
-                    found = _engine.queryInheritReference(_roleBase, _roleId, _roleDescen, list);
+                    found = _engine.queryInheritRelation(_roleBase, _roleId, _roleDescen, list);
                 if (found == LDAPQueryEngine.SUBJECT_NOT_FOUND)
                     throw new RoleNotFoundException("Role, " + role + ", is not found!");
                 if (LOG.isDebugEnabled())
@@ -456,9 +456,9 @@ class LDAPRBACProvider implements RBACProvider, LDAPProperties {
 
                 // include all super roles
                 if (_roleAscen != null)
-                    _engine.queryInheritReference(_roleBase, _roleId, _roleAscen, list);
+                    _engine.queryInheritRelation(_roleBase, _roleId, _roleAscen, list);
                 else
-                    _engine.queryInheritRelation(_roleBase, _roleId, _roleDescen, list);
+                    _engine.queryInheritReference(_roleBase, _roleId, _roleDescen, list);
 
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("user '" + user + "' authorizedRoles: " + list);
