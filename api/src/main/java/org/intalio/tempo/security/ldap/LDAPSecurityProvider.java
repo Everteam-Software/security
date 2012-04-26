@@ -77,6 +77,11 @@ public class LDAPSecurityProvider implements SecurityProvider {
     }
 
     public void setPropertiesFile( String filename ) throws Exception {
+    	if(filename.startsWith("$")){
+    		String[] fileStrings = filename.split("/");
+    		String configDir = System.getProperty("org.intalio.tempo.configDirectory");
+    		filename = configDir + "/" + fileStrings[fileStrings.length-1];
+    	}
         Properties props = new Properties();
         props.load( new FileInputStream( filename ) );
         initialize( props );
