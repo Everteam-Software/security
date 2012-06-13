@@ -104,7 +104,7 @@ public class LDAPQueryEngine {
         }
         String search = rel+"={0}";
         // TODO: this is bad if we are in multipleOUs
-        String name = (id+"="+subject+','+_baseDN);
+        String name = (id+"="+subject+','+sbjBase+','+_baseDN);
 //        try {
 //            String fuser = this.searchUser(subject, id, _baseDN);
 //        } catch (UserNotFoundException e) {
