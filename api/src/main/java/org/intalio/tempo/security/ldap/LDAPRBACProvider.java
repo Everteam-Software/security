@@ -270,25 +270,32 @@ class LDAPRBACProvider implements RBACProvider, LDAPProperties {
         /**
          * @see org.intalio.tempo.security.rbac.RBACQuery#assignedUsers(java.lang.String)
          */
+        
         public String[] assignedUsers(String role) throws RoleNotFoundException, RBACException,
                 RemoteException {
 
             try {
                 role = IdentifierUtils.stripRealm(role);
                 ArrayList<String> list = new ArrayList<String>();
-                short found;
-                if (_userRoles != null) {
-                    // foreign key on the user
-                    boolean checkRole = true;
-                    found = _engine.queryRelations(role, _roleBase, _roleId, _userBase, _userRoles,
-                            checkRole, list);
+                Iterator<String> mrou = _multipleRoleOU.iterator();
+                short found=0;
+                while(mrou.hasNext()) {
+                	String roleBase = mrou.next();
+                	if (_userRoles != null) {
+                    	// foreign key on the user
+                    	boolean checkRole = true;
+                    	found = _engine.queryRelations(role, roleBase, _roleId, _userBase, _userRoles,checkRole, list);
 
-                } else {
-                    // _roleUsers!=null, foreign key on the role
-                    found = _engine.queryFilteredFields(role, _roleBase, _roleId, _roleUsers,
-                            _userBase, list);
+                	} else {
+                    	// _roleUsers!=null, foreign key on the role
+                    	found = _engine.queryFilteredFields(role, roleBase, _roleId, _roleUsers, _userBase, list);
+                	}
+                	
+                	if (found == LDAPQueryEngine.RESULT_FOUND) {
+                		break;
+                	}                		
                 }
-                if (found == LDAPQueryEngine.SUBJECT_NOT_FOUND)
+                	if (found == LDAPQueryEngine.SUBJECT_NOT_FOUND)
                     throw new RoleNotFoundException("Role, " + role + ", is not found!");
                 if (found == LDAPQueryEngine.RELATION_NOT_FOUND)
                     return EMPTY_STRINGS;
@@ -304,7 +311,7 @@ class LDAPRBACProvider implements RBACProvider, LDAPProperties {
                 throw new RBACException(ne);
             }
         }
-
+     
         /**
          * @see org.intalio.tempo.security.rbac.RBACQuery#authorizedUsers(java.lang.String)
          */
