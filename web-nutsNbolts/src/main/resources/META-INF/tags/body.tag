@@ -24,6 +24,9 @@
 
 <%@ attribute name="footer" required="false"%>
 
+<%@ attribute name="hideFooter" required="false" type="java.lang.Boolean"%>
+<%@ attribute name="hideHeaderCell" required="false" type="java.lang.Boolean"%>
+<%@ attribute name="hideSubMenuHeader" required="false" type="java.lang.Boolean"%>
 
 ${toolbar}
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
@@ -45,11 +48,13 @@ ${toolbar}
 <form id="form" name="form" method="POST" style="display:inline;">
 	<input type="hidden" id="actionName" name="actionName" value=""/>
 <table width="100%"  border="0" cellspacing="0" cellpadding="0" style="height: 100%; ">
+	<c:if test="${! hideHeaderCell}">	
 	<tr>
 		<td>
 			${headerCell}
 		</td>
 	</tr>
+	</c:if>
 	<tr>
 		<td class="centerField" ><!-- Center b -->
 			<table width="100%"  border="0" style="height:100%" cellpadding="0" cellspacing="0">
@@ -60,6 +65,7 @@ ${toolbar}
 						<!-- Error Messages list e-->
 					</td>
 				</tr>
+				<c:if test="${! hideSubMenuHeader}">	
 				<tr>
 					<td valign="top">
 						<!-- Sub Header b -->
@@ -73,6 +79,7 @@ ${toolbar}
 						<!-- Sub Header e -->
 					</td>
 				</tr>
+				</c:if>
 				<tr>
 					<td valign="top" style="height: 100%;"><!-- DATA b-->
 						<table class="contentBox" cellpadding="0" cellspacing="0" style="height: 100%;">
@@ -89,6 +96,8 @@ ${toolbar}
 			<!-- Center e -->
 		</td>
 	</tr>
+
+    <c:if test="${! hideFooter}">	
 	  <tr>
 	    <td style="height:36px; "><!-- Bottom b -->
 	      <table width="100%"  border="0" cellpadding="0" cellspacing="0">
@@ -104,6 +113,7 @@ ${toolbar}
 	      <!-- Bottom e -->
 	    </td>
 	  </tr>
+	  </c:if>
 </table>
 </form>
 <!--hint b-->
