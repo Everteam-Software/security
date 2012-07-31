@@ -23,8 +23,6 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
-import org.apache.axis2.transport.http.HTTPConstants;
-import org.apache.commons.httpclient.HttpClient;
 import org.intalio.tempo.security.Property;
 import org.intalio.tempo.security.authentication.AuthenticationException;
 import org.intalio.tempo.security.rbac.RBACException;
@@ -32,6 +30,8 @@ import org.intalio.tempo.security.token.TokenService;
 import org.jasypt.util.text.BasicTextEncryptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.intalio.bpms.common.AxisUtil;
 
 /**
  * Client web services API for the Token Service.
@@ -112,20 +112,20 @@ public class TokenClient implements TokenService {
     
 	protected OMParser invoke(String action, OMElement request)
 			throws AxisFault {
-		ServiceClient serviceClient = getServiceClient();
-		Options options = serviceClient.getOptions();
+		AxisUtil util = new AxisUtil();
+		ServiceClient serviceClient = util.getServiceClient();
 		EndpointReference targetEPR = new EndpointReference(_endpoint);
-		options.setTo(targetEPR);
-		options.setAction(action);
+		serviceClient.getOptions().setTo(targetEPR);
+		serviceClient.getOptions().setAction(action);
 
 		// Disabling chunking as lighthttpd doesnt support it
 
 		if (isChunking())
-			options.setProperty(
+			serviceClient.getOptions().setProperty(
 					org.apache.axis2.transport.http.HTTPConstants.CHUNKED,
 					Boolean.FALSE);
 		else
-			options.setProperty(
+			serviceClient.getOptions().setProperty(
 					org.apache.axis2.transport.http.HTTPConstants.CHUNKED,
 					Boolean.FALSE);
 
@@ -142,8 +142,7 @@ public class TokenClient implements TokenService {
 					+ serviceClient.getServiceContext());
 			throw e;
 		} finally {
-
-			serviceClient.cleanupTransport();
+			util.closeClient(serviceClient);
 		}
 		_logger.debug("Invoked service for authentication");
 		return new OMParser(response);
@@ -178,25 +177,6 @@ public class TokenClient implements TokenService {
 				TokenConstants.GETTOKEN_FROM_OPSSSOTOKEN.getLocalPart(),
 				request);
 		return response.getRequiredString(TokenConstants.TOKEN);
-	}
-
-
-	protected ServiceClient getServiceClient() throws AxisFault {
-		HttpClient httpClient = new HttpClient(
-				MultiThreadedHttpConnectionManagerFactory.getInstance());
-		Options options = new Options();
-		options.setTimeOutInMilliSeconds(120 * 1000);
-		ServiceClient serviceClient = new ServiceClient();
-		serviceClient.setOptions(options);
-		serviceClient.getOptions().setProperty(HTTPConstants.REUSE_HTTP_CLIENT,
-				org.apache.axis2.Constants.VALUE_TRUE);
-		serviceClient.getOptions().setProperty(
-				HTTPConstants.CACHED_HTTP_CLIENT, httpClient);
-		// Disabling chunking as lighthttpd doesnt support it
-		serviceClient.getOptions().setProperty(
-				org.apache.axis2.transport.http.HTTPConstants.CHUNKED,
-				Boolean.FALSE);
-		return serviceClient;
 	}
 
 	public String getHttpChunking() {

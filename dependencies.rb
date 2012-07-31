@@ -18,7 +18,7 @@ APACHE_COMMONS = {
 APACHE_DERBY = "org.apache.derby:derby:jar:10.2.2.0"
 JASYPT = "org.jasypt:jasypt:jar:1.8"
 
-AXIOM = group("axiom-api", "axiom-dom", "axiom-impl", :under=>"org.apache.ws.commons.axiom", :version=>"1.2.7")
+AXIOM = group("axiom-api", "axiom-dom", "axiom-impl", :under=>"org.apache.ws.commons.axiom", :version=>"1.2.11")
 
 BACKPORT = "backport-util-concurrent:backport-util-concurrent:jar:3.1"
 
@@ -100,7 +100,7 @@ INSTINCT = [
 ]
 
 AXIS2 = [
-  group("axis2-kernel", "axis2-adb", "axis2-xmlbeans", "axis2-json", :under=>"org.apache.axis2", :version=>"1.5.1"),
+  group("axis2-kernel", "axis2-adb", "axis2-xmlbeans", "axis2-json", :under=>"org.apache.axis2", :version=>"1.5.5"),
   BACKPORT,
   NEETHI,
   SUNMAIL
@@ -121,3 +121,5 @@ APACHE_JPA = [
 ]
 
 OPENSSO_CLIENT_SDK = "com.sun:openssoclientsdk:jar:3.0"
+
+BPMS_COMMON="com.intalio.bpms.common:bpms-common:jar:1.0.0.0";

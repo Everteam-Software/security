@@ -2,7 +2,7 @@ require "buildr/xmlbeans"
 require "buildr/cobertura"
 
 # Keep this structure to allow the build system to update version numbers.
-VERSION_NUMBER = "1.0.24"
+VERSION_NUMBER = "1.0.25"
 
 require "dependencies.rb"
 require "repositories.rb"
@@ -38,7 +38,7 @@ define "security" do
   
   desc "Security Web-Service Client"
   define "ws-client" do
-    compile.with projects("api", "ws-common"),JASYPT,AXIOM, AXIS2, SLF4J, STAX_API,APACHE_COMMONS[:httpclient], SPRING[:core]
+    compile.with projects("api", "ws-common"),BPMS_COMMON,JASYPT,AXIOM, AXIS2, SLF4J, STAX_API,APACHE_COMMONS[:httpclient], SPRING[:core]
     test.with APACHE_COMMONS[:httpclient], APACHE_COMMONS[:codec], CASTOR, LOG4J, SUNMAIL, XERCES, WS_COMMONS_SCHEMA, WSDL4J, WOODSTOX, CAS_CLIENT, INSTINCT
 
     # Remember to set JAVA_OPTIONS before starting Jetty
@@ -63,7 +63,7 @@ define "security" do
   desc "Security Web-Service"
   define "ws-service" do
     compile.with projects("api", "ws-common"), AXIOM, AXIS2, SLF4J, SPRING[:core], STAX_API  
-    package(:aar).with :libs => [ projects("api", "ws-common"), CASTOR, SLF4J, SPRING[:core], CAS_CLIENT ]
+    package(:aar).with :libs => [ projects("api", "ws-common"), CASTOR, SLF4J, SPRING[:core], CAS_CLIENT,BPMS_COMMON ]
   end
   
   desc "Common spring and web related classes"
