@@ -317,6 +317,60 @@ public class LoginController extends UIController {
         return null;
     }
 
+ 
+    public String arrayToString(String[] stringArray, String delimiter) {
+        StringBuilder builder = new StringBuilder();
+        int arrayLength = stringArray.length;
+        for (int index = 0; index < arrayLength; index++) {
+            builder.append(stringArray[index]);
+            if (index != (arrayLength - 1)) {
+                builder.append(delimiter);
+            }
+        }
+        return builder.toString();
+    }
+
+    public void executePost(PostMethod post) {
+        HttpClient httpclient = new HttpClient();
+        try {
+            httpclient.executeMethod(post);
+            String responseAsString = post.getResponseBodyAsString();
+            LOG.debug("Response is: " + responseAsString);
+        } catch (Exception e) {
+            LOG.warn("Got exception " + e.getMessage() + "while posting request "
+                    + post.getPath());
+        } finally {
+            LOG.debug("Releasing Connection");
+            post.releaseConnection();
+        }
+    }
+
+    public void sendUserAndRolesToPopulateCache(User user, String serverUrl) {
+        String url = serverUrl + "/gi/populaterolescache";
+        String userName = user.getName();
+        String[] userRoles = user.getRoles();
+        String userRolesAsString = arrayToString(userRoles, ",");
+        PostMethod post = new PostMethod(url);
+        post.addParameter("username", userName);
+        post.addParameter("roles", userRolesAsString);
+        LOG.debug("Sending post request to: " + url);
+        executePost(post);
+    }
+
+    public void sendUserToInvalidateCache(String userName, String serverUrl) {
+        String url = serverUrl + "/gi/invalidaterolescache";
+        PostMethod post = new PostMethod(url);
+        post.addParameter("username", userName);
+        LOG.debug("Sending post request to: " + url);
+        executePost(post);
+    }
+
+    public String getServerUrl(HttpServletRequest request) {
+        String serverUrl = "http://" + request.getServerName() + ":" + request.getServerPort();
+        LOG.debug("Server url is: " + serverUrl);
+        return serverUrl;
+    }
+ 
     // @note(alex) Called by reflection - see UIController
     @SuppressWarnings("unchecked")
     public ModelAndView logIn(HttpServletRequest request, HttpServletResponse response, LoginCommand login,
