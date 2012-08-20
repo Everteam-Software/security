@@ -13,7 +13,8 @@ APACHE_COMMONS = {
   :lang => "commons-lang:commons-lang:jar:2.3",
   :logging => "commons-logging:commons-logging:jar:1.0.4",
   :pool => "commons-pool:commons-pool:jar:1.4",
-  :validator => "commons-validator:commons-validator:jar:1.2.0"
+  :validator => "commons-validator:commons-validator:jar:1.2.0",
+  :httpclient => "commons-httpclient:commons-httpclient:jar:3.1"
 }
 APACHE_DERBY = "org.apache.derby:derby:jar:10.2.2.0"
 JASYPT = "org.jasypt:jasypt:jar:1.8"

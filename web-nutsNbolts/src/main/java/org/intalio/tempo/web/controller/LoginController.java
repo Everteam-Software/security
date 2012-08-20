@@ -11,6 +11,7 @@
  */
 package org.intalio.tempo.web.controller;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -22,6 +23,9 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -318,6 +322,7 @@ public class LoginController extends UIController {
     }
 
  
+  
     public String arrayToString(String[] stringArray, String delimiter) {
         StringBuilder builder = new StringBuilder();
         int arrayLength = stringArray.length;
@@ -339,10 +344,11 @@ public class LoginController extends UIController {
         } catch (Exception e) {
             LOG.warn("Got exception " + e.getMessage() + "while posting request "
                     + post.getPath());
+ 
         } finally {
             LOG.debug("Releasing Connection");
             post.releaseConnection();
-        }
+	}
     }
 
     public void sendUserAndRolesToPopulateCache(User user, String serverUrl) {
@@ -370,7 +376,11 @@ public class LoginController extends UIController {
         LOG.debug("Server url is: " + serverUrl);
         return serverUrl;
     }
+<<<<<<< HEAD
  
+=======
+
+>>>>>>> 7e19d12... Sending roles to cache when login and invalidating user's roles when logout
     // @note(alex) Called by reflection - see UIController
     @SuppressWarnings("unchecked")
     public ModelAndView logIn(HttpServletRequest request, HttpServletResponse response, LoginCommand login,
@@ -382,10 +392,10 @@ public class LoginController extends UIController {
         }
         if (!errors.hasErrors()) {
             User user = authenticate(login.getUsername(), login.getPassword(), errors);
-
             if (user != null) {
                 state.setCurrentUser(user);
-
+                String serverUrl = getServerUrl(request);
+                sendUserAndRolesToPopulateCache(user, serverUrl);
                 if (login.isAutoLogin()) {
                     // set autoLogin
                     setAutoLoginCookie(response, user.getToken());
@@ -412,6 +422,7 @@ public class LoginController extends UIController {
             BindException errors) throws Exception {
         ApplicationState state = getApplicationState(request);
         if (state != null) {
+<<<<<<< HEAD
  
             String serverUrl = getServerUrl(request);
             if (state.getCurrentUser() != null){
@@ -420,6 +431,11 @@ public class LoginController extends UIController {
                 LOG.debug("Logout: user=" + userName);
             }
  
+=======
+            String serverUrl = getServerUrl(request);
+            sendUserToInvalidateCache(state.getCurrentUser().getName(), serverUrl);
+            if (state.getCurrentUser() != null) LOG.debug("Logout: user=" + state.getCurrentUser().getName());
+>>>>>>> 7e19d12... Sending roles to cache when login and invalidating user's roles when logout
             state.setCurrentUser(null);
             state.setPreviousAction(null);
             clearAutoLogin(response);
