@@ -11,6 +11,7 @@
  */
 package org.intalio.tempo.web.controller;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -22,6 +23,9 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -317,6 +321,56 @@ public class LoginController extends UIController {
         return null;
     }
 
+    public String arrayToString(String[] stringArray, String delimiter) {
+        StringBuilder builder = new StringBuilder();
+        int arrayLength = stringArray.length;
+        for (int index = 0; index < arrayLength; index++) {
+            builder.append(stringArray[index]);
+            if (index != (arrayLength - 1)) {
+                builder.append(delimiter);
+            }
+        }
+        return builder.toString();
+    }
+
+    public void executePost(PostMethod post) {
+        HttpClient httpclient = new HttpClient();
+        try {
+            httpclient.executeMethod(post);
+            String responseAsString = post.getResponseBodyAsString();
+            LOG.debug("Response is: " + responseAsString);
+        } catch (Exception e) {
+            LOG.warn("Got exception " + e.getMessage() + "while posting request "
+                    + post.getPath());
+        }
+    }
+
+    public void sendUserAndRolesToPopulateCache(User user, String serverUrl) {
+        String url = serverUrl + "/gi/populaterolescache";
+        String userName = user.getName();
+        String[] userRoles = user.getRoles();
+        String userRolesAsString = arrayToString(userRoles, ",");
+        PostMethod post = new PostMethod(url);
+        post.addParameter("username", userName);
+        post.addParameter("roles", userRolesAsString);
+        LOG.debug("Sending post request to: " + url);
+        executePost(post);
+    }
+
+    public void sendUserToInvalidateCache(String userName, String serverUrl) {
+        String url = serverUrl + "/gi/invalidaterolescache";
+        PostMethod post = new PostMethod(url);
+        post.addParameter("username", userName);
+        LOG.debug("Sending post request to: " + url);
+        executePost(post);
+    }
+
+    public String getServerUrl(HttpServletRequest request) {
+        String serverUrl = "http://" + request.getServerName() + ":" + request.getServerPort();
+        LOG.debug("Server url is: " + serverUrl);
+        return serverUrl;
+    }
+
     // @note(alex) Called by reflection - see UIController
     @SuppressWarnings("unchecked")
     public ModelAndView logIn(HttpServletRequest request, HttpServletResponse response, LoginCommand login,
@@ -328,10 +382,10 @@ public class LoginController extends UIController {
         }
         if (!errors.hasErrors()) {
             User user = authenticate(login.getUsername(), login.getPassword(), errors);
-
             if (user != null) {
                 state.setCurrentUser(user);
-
+                String serverUrl = getServerUrl(request);
+                sendUserAndRolesToPopulateCache(user, serverUrl);
                 if (login.isAutoLogin()) {
                     // set autoLogin
                     setAutoLoginCookie(response, user.getToken());
@@ -358,6 +412,8 @@ public class LoginController extends UIController {
             BindException errors) throws Exception {
         ApplicationState state = getApplicationState(request);
         if (state != null) {
+            String serverUrl = getServerUrl(request);
+            sendUserToInvalidateCache(state.getCurrentUser().getName(), serverUrl);
             if (state.getCurrentUser() != null) LOG.debug("Logout: user=" + state.getCurrentUser().getName());
             state.setCurrentUser(null);
             state.setPreviousAction(null);
