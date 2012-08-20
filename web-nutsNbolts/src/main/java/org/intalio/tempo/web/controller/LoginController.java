@@ -342,6 +342,9 @@ public class LoginController extends UIController {
         } catch (Exception e) {
             LOG.warn("Got exception " + e.getMessage() + "while posting request "
                     + post.getPath());
+        } finally {
+            LOG.debug("Releasing Connection");
+            post.releaseConnection();
         }
     }
 
