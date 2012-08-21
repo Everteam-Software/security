@@ -358,7 +358,14 @@ public class LoginController extends UIController {
             BindException errors) throws Exception {
         ApplicationState state = getApplicationState(request);
         if (state != null) {
-            if (state.getCurrentUser() != null) LOG.debug("Logout: user=" + state.getCurrentUser().getName());
+ 
+            String serverUrl = getServerUrl(request);
+            if (state.getCurrentUser() != null){
+                String userName = state.getCurrentUser().getName();
+                sendUserToInvalidateCache(userName, serverUrl);
+                LOG.debug("Logout: user=" + userName);
+            }
+ 
             state.setCurrentUser(null);
             state.setPreviousAction(null);
             clearAutoLogin(response);
