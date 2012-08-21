@@ -416,8 +416,11 @@ public class LoginController extends UIController {
         ApplicationState state = getApplicationState(request);
         if (state != null) {
             String serverUrl = getServerUrl(request);
-            sendUserToInvalidateCache(state.getCurrentUser().getName(), serverUrl);
-            if (state.getCurrentUser() != null) LOG.debug("Logout: user=" + state.getCurrentUser().getName());
+            if (state.getCurrentUser() != null){
+                String userName = state.getCurrentUser().getName();
+                sendUserToInvalidateCache(userName, serverUrl);
+                LOG.debug("Logout: user=" + userName);
+            }
             state.setCurrentUser(null);
             state.setPreviousAction(null);
             clearAutoLogin(response);
