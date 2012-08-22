@@ -376,11 +376,7 @@ public class LoginController extends UIController {
         LOG.debug("Server url is: " + serverUrl);
         return serverUrl;
     }
-<<<<<<< HEAD
- 
-=======
 
->>>>>>> 7e19d12... Sending roles to cache when login and invalidating user's roles when logout
     // @note(alex) Called by reflection - see UIController
     @SuppressWarnings("unchecked")
     public ModelAndView logIn(HttpServletRequest request, HttpServletResponse response, LoginCommand login,
@@ -422,7 +418,7 @@ public class LoginController extends UIController {
             BindException errors) throws Exception {
         ApplicationState state = getApplicationState(request);
         if (state != null) {
-<<<<<<< HEAD
+ 
  
             String serverUrl = getServerUrl(request);
             if (state.getCurrentUser() != null){
@@ -431,11 +427,7 @@ public class LoginController extends UIController {
                 LOG.debug("Logout: user=" + userName);
             }
  
-=======
-            String serverUrl = getServerUrl(request);
-            sendUserToInvalidateCache(state.getCurrentUser().getName(), serverUrl);
-            if (state.getCurrentUser() != null) LOG.debug("Logout: user=" + state.getCurrentUser().getName());
->>>>>>> 7e19d12... Sending roles to cache when login and invalidating user's roles when logout
+ 
             state.setCurrentUser(null);
             state.setPreviousAction(null);
             clearAutoLogin(response);
