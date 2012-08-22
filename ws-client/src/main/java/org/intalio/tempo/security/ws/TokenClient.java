@@ -110,44 +110,39 @@ public class TokenClient implements TokenService {
         return Boolean.valueOf(response.getRequiredString(TokenConstants.IS_WORKFLOW_ADMIN));
     }
     
-	protected OMParser invoke(String action, OMElement request)
-			throws AxisFault {
-		AxisUtil util = new AxisUtil();
-		ServiceClient serviceClient = util.getServiceClient();
-		EndpointReference targetEPR = new EndpointReference(_endpoint);
-		serviceClient.getOptions().setTo(targetEPR);
-		serviceClient.getOptions().setAction(action);
-
-		// Disabling chunking as lighthttpd doesnt support it
-
-		if (isChunking())
-			serviceClient.getOptions().setProperty(
-					org.apache.axis2.transport.http.HTTPConstants.CHUNKED,
-					Boolean.FALSE);
-		else
-			serviceClient.getOptions().setProperty(
-					org.apache.axis2.transport.http.HTTPConstants.CHUNKED,
-					Boolean.FALSE);
-
-
-		OMElement response = null;
-		try {
-			response = serviceClient.sendReceive(request);
-			response.build();
-		} catch (AxisFault e) {
-			// Sometimes we get nasty errors and we need to understand what
-			// caused these errors, having service client options
-			// being printed will help
-			_logger.error("Service was called with this option "
-					+ serviceClient.getServiceContext());
-			throw e;
-		} finally {
-			util.closeClient(serviceClient);
-		}
-		_logger.debug("Invoked service for authentication");
-		return new OMParser(response);
-	}
-
+ 
+    protected OMParser invoke(String action, OMElement request) throws AxisFault {
+        ServiceClient serviceClient = null;
+        OMElement response = null;
+        AxisUtil util = new AxisUtil();
+        try {
+            serviceClient = util.getServiceClient();
+            serviceClient.getOptions().setTo(new EndpointReference(_endpoint));
+            serviceClient.getOptions().setAction(action);
+            // Disabling chunking as lighthttpd doesnt support it
+            if (isChunking())
+                serviceClient.getOptions()
+                        .setProperty(org.apache.axis2.transport.http.HTTPConstants.CHUNKED, Boolean.FALSE);
+            else
+                serviceClient.getOptions()
+                        .setProperty(org.apache.axis2.transport.http.HTTPConstants.CHUNKED, Boolean.FALSE);
+            response = serviceClient.sendReceive(request);
+            response.build();
+        } catch (AxisFault e) {
+            _logger.error("Service was called with this option " + serviceClient.getServiceContext());
+            throw e;
+        } finally {
+            if (serviceClient != null)
+                try {
+                    util.closeClient(serviceClient);
+                } catch (Exception e) {
+                    _logger.error("Error while cleanup");
+                }
+        }
+        _logger.debug("Invoked service for authentication");
+        return new OMParser(response);
+    }
+ 
 
 	private static OMElement element(QName name) {
 		return OM_FACTORY.createOMElement(name);
