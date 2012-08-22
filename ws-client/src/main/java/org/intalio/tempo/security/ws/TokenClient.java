@@ -33,6 +33,8 @@ import org.jasypt.util.text.BasicTextEncryptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.intalio.bpms.common.AxisUtil;
+
 /**
  * Client web services API for the Token Service.
  */
@@ -110,44 +112,37 @@ public class TokenClient implements TokenService {
         return Boolean.valueOf(response.getRequiredString(TokenConstants.IS_WORKFLOW_ADMIN));
     }
     
-	protected OMParser invoke(String action, OMElement request)
-			throws AxisFault {
-		ServiceClient serviceClient = getServiceClient();
-		Options options = serviceClient.getOptions();
-		EndpointReference targetEPR = new EndpointReference(_endpoint);
-		options.setTo(targetEPR);
-		options.setAction(action);
-
-		// Disabling chunking as lighthttpd doesnt support it
-
-		if (isChunking())
-			options.setProperty(
-					org.apache.axis2.transport.http.HTTPConstants.CHUNKED,
-					Boolean.FALSE);
-		else
-			options.setProperty(
-					org.apache.axis2.transport.http.HTTPConstants.CHUNKED,
-					Boolean.FALSE);
-
-
-		OMElement response = null;
-		try {
-			response = serviceClient.sendReceive(request);
-			response.build();
-		} catch (AxisFault e) {
-			// Sometimes we get nasty errors and we need to understand what
-			// caused these errors, having service client options
-			// being printed will help
-			_logger.error("Service was called with this option "
-					+ serviceClient.getServiceContext());
-			throw e;
-		} finally {
-
-			serviceClient.cleanupTransport();
-		}
-		_logger.debug("Invoked service for authentication");
-		return new OMParser(response);
-	}
+    protected OMParser invoke(String action, OMElement request) throws AxisFault {
+        ServiceClient serviceClient = null;
+        OMElement response = null;
+        AxisUtil util = new AxisUtil();
+        try {
+            serviceClient = util.getServiceClient();
+            serviceClient.getOptions().setTo(new EndpointReference(_endpoint));
+            serviceClient.getOptions().setAction(action);
+            // Disabling chunking as lighthttpd doesnt support it
+            if (isChunking())
+                serviceClient.getOptions()
+                        .setProperty(org.apache.axis2.transport.http.HTTPConstants.CHUNKED, Boolean.FALSE);
+            else
+                serviceClient.getOptions()
+                        .setProperty(org.apache.axis2.transport.http.HTTPConstants.CHUNKED, Boolean.FALSE);
+            response = serviceClient.sendReceive(request);
+            response.build();
+        } catch (AxisFault e) {
+            _logger.error("Service was called with this option " + serviceClient.getServiceContext());
+            throw e;
+        } finally {
+            if (serviceClient != null)
+                try {
+                    util.closeClient(serviceClient);
+                } catch (Exception e) {
+                    _logger.error("Error while cleanup");
+                }
+        }
+        _logger.debug("Invoked service for authentication");
+        return new OMParser(response);
+    }
 
 
 	private static OMElement element(QName name) {
@@ -178,25 +173,6 @@ public class TokenClient implements TokenService {
 				TokenConstants.GETTOKEN_FROM_OPSSSOTOKEN.getLocalPart(),
 				request);
 		return response.getRequiredString(TokenConstants.TOKEN);
-	}
-
-
-	protected ServiceClient getServiceClient() throws AxisFault {
-		HttpClient httpClient = new HttpClient(
-				MultiThreadedHttpConnectionManagerFactory.getInstance());
-		Options options = new Options();
-		options.setTimeOutInMilliSeconds(120 * 1000);
-		ServiceClient serviceClient = new ServiceClient();
-		serviceClient.setOptions(options);
-		serviceClient.getOptions().setProperty(HTTPConstants.REUSE_HTTP_CLIENT,
-				org.apache.axis2.Constants.VALUE_TRUE);
-		serviceClient.getOptions().setProperty(
-				HTTPConstants.CACHED_HTTP_CLIENT, httpClient);
-		// Disabling chunking as lighthttpd doesnt support it
-		serviceClient.getOptions().setProperty(
-				org.apache.axis2.transport.http.HTTPConstants.CHUNKED,
-				Boolean.FALSE);
-		return serviceClient;
 	}
 
 	public String getHttpChunking() {
