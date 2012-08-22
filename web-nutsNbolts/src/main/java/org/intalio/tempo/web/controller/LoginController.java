@@ -342,7 +342,7 @@ public class LoginController extends UIController {
             String responseAsString = post.getResponseBodyAsString();
             LOG.debug("Response is: " + responseAsString);
         } catch (Exception e) {
-            LOG.warn("Got exception " + e.getMessage() + "while posting request "
+            LOG.error("Got exception " + e.getMessage() + "while posting request "
                     + post.getPath());
  
         } finally {
