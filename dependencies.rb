@@ -123,5 +123,5 @@ APACHE_JPA = [
 
 OPENSSO_CLIENT_SDK = "com.sun:openssoclientsdk:jar:3.0"
  
-BPMS_COMMON="com.intalio.bpms.common:bpms-common:jar:1.0.0.002";
+BPMS_COMMON="com.intalio.bpms.common:bpms-common:jar:1.1.0.002";
  
