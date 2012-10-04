@@ -54,6 +54,14 @@ public class LoginController extends UIController {
     public static final String REDIRECT_AFTER_LOGIN = "redirectAfterLogin";
 
     public static final String SECURE_RANDOM = "SECURE_RANDOM";
+    
+    public static final String JSESSION = "JSESSIONID";
+    
+    public static final String UI_FW = "/ui-fw/";
+    
+    public static final String MONITORING = "/monitoring/";
+    
+    public static final String BPMS_CONSOLE = "/bpms-console/";
 
     private static final Logger LOG = LogManager.getLogger(LoginController.class);
 
@@ -115,7 +123,11 @@ public class LoginController extends UIController {
     public static void clearSecureRandom(HttpServletResponse response) {
         clearCookie(SECURE_RANDOM, response);
     }
-
+    
+    public static void clearRootCookie(HttpServletResponse response) {
+        clearCookie(JSESSION, response);
+    }
+    
     public static String getSecureRandomCookie(HttpServletRequest request) {
         Cookie cookie = getCookie(request, SECURE_RANDOM);
         if (cookie == null) return null;
@@ -163,7 +175,14 @@ public class LoginController extends UIController {
         newCookie.setPath("/");
         response.addCookie(newCookie);
     }
-
+    
+    public static void clearOtherCookie(HttpServletResponse response,String cookieName,String path) {
+        Cookie newCookie = new Cookie(cookieName, null);
+        newCookie.setMaxAge(0);
+        newCookie.setPath(path);
+        response.addCookie(newCookie);
+    }
+    
     private static String extractProperty(String propName, Property[] props) {
         for (Property prop : props) {
             if (propName.equals(prop.getName())) {
@@ -426,6 +445,10 @@ public class LoginController extends UIController {
             clearAutoLogin(response);
             clearSingleLogin(response);
             clearSecureRandom(response);
+            clearRootCookie(response);
+            clearOtherCookie(response,JSESSION,UI_FW);
+            clearOtherCookie(response,JSESSION,MONITORING);
+            clearOtherCookie(response,JSESSION,BPMS_CONSOLE);
         }
         Map model = new HashMap();
         model.put("login", new LoginCommand());
