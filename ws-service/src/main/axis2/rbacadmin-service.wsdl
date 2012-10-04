@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~ Copyright (c) 2005-2007 Intalio inc. ~ ~ All rights reserved. This
+	program and the accompanying materials ~ are made available under the terms
+	of the Eclipse Public License v1.0 ~ which accompanies this distribution,
+	and is available at ~ http://www.eclipse.org/legal/epl-v10.html ~ ~ Contributors:
+	~ Intalio inc. - initial API and implementation -->
+<wsdl:definitions targetNamespace="http://tempo.intalio.org/security/RBACAdminService/"
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://tempo.intalio.org/security/RBACAdminService/"
+	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:ns="http://tempo.intalio.org/security/">
+
+	<wsdl:types>
+
+		<xsd:schema targetNamespace="http://tempo.intalio.org/security/RBACAdminService/"
+			elementFormDefault="qualified" attributeFormDefault="unqualified">
+			<xsd:complexType name="property">
+				<xsd:sequence>
+					<xsd:element name="name" type="xsd:string" />
+					<xsd:element name="value" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="properties">
+				<xsd:sequence>
+					<xsd:element name="property" type="tns:property"
+						maxOccurs="unbounded" minOccurs="0" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="abstractType">
+				<xsd:sequence>
+					<xsd:element name="id" type="xsd:string" />
+					<xsd:element name="realms" type="xsd:string" />
+					<xsd:element name="details" type="tns:properties"
+							maxOccurs="1" minOccurs="1" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="modifyUser">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="action" type="xsd:string" />
+						<xsd:element name="user" type="xsd:string" />
+						<xsd:element name="realm" type="xsd:string" />
+						<xsd:element name="details" type="tns:properties"
+							maxOccurs="1" minOccurs="0" />
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="modifyRole">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="action" type="xsd:string" />
+						<xsd:element name="role" type="xsd:string" />
+						<xsd:element name="realm" type="xsd:string" />
+						<xsd:element name="details" type="tns:properties"
+							maxOccurs="1" minOccurs="0" />
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="response">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="token" type="xsd:string" />
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="getAttributes">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="token" type="xsd:string" />
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="getProperties">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="user" type="xsd:string" />
+						<xsd:element name="role" type="xsd:string" />
+						<xsd:element name="realm" type="xsd:string" />
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="realms">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="realm" type="xsd:string" maxOccurs="unbounded" minOccurs="1"/>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="roles">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="roleType" type="tns:abstractType"
+						maxOccurs="unbounded" minOccurs="0" />
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="users">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="userType" type="tns:abstractType"
+						maxOccurs="unbounded" minOccurs="0" />
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="attributes">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="attribute" type="xsd:string" maxOccurs="unbounded" minOccurs="1" />
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="AuthenticationFault" type="xsd:string" />
+			<xsd:element name="RemoteFault" type="xsd:string" />
+			<xsd:element name="RBACFault" type="xsd:string" />
+			<xsd:element name="UserExistsFault" type="xsd:string" />
+			<xsd:element name="UserNotFoundFault" type="xsd:string" />
+			<xsd:element name="RoleExistsFault" type="xsd:string" />
+			<xsd:element name="RoleNotFoundFault" type="xsd:string" />
+			<xsd:element name="getRealms" type="xsd:string" maxOccurs="1" minOccurs="0"/>
+			<xsd:element name="getRoles" type="xsd:string" maxOccurs="1" minOccurs="0"/>
+			<xsd:element name="getUsers" type="xsd:string" maxOccurs="1" minOccurs="0"/>
+			<xsd:element name="details" type="tns:properties" />
+		</xsd:schema>
+	</wsdl:types>
+
+
+	<wsdl:message name="details">
+		<wsdl:part name="payload" element="tns:details" />
+	</wsdl:message>
+	<wsdl:message name="modifyUser">
+		<wsdl:part name="payload" element="tns:modifyUser" />
+	</wsdl:message>
+	<wsdl:message name="modifyRole">
+		<wsdl:part name="payload" element="tns:modifyRole" />
+	</wsdl:message>
+	<wsdl:message name="getRealms">
+		<wsdl:part name="payload" element="tns:getRealms" />
+	</wsdl:message>
+	<wsdl:message name="getRoles">
+		<wsdl:part name="payload" element="tns:getRoles" />
+	</wsdl:message>
+	<wsdl:message name="getUsers">
+		<wsdl:part name="payload" element="tns:getUsers" />
+	</wsdl:message>
+	<wsdl:message name="attributes">
+		<wsdl:part name="payload" element="tns:attributes" />
+	</wsdl:message>
+	<wsdl:message name="response">
+		<wsdl:part name="payload" element="tns:response" />
+	</wsdl:message>
+	<wsdl:message name="getAttributes">
+		<wsdl:part name="payload" element="tns:getAttributes" />
+	</wsdl:message>
+	<wsdl:message name="getProperties">
+		<wsdl:part name="payload" element="tns:getProperties" />
+	</wsdl:message>
+	<wsdl:message name="realms">
+		<wsdl:part name="payload" element="tns:realms" />
+	</wsdl:message>
+	<wsdl:message name="roles">
+		<wsdl:part name="payload" element="tns:roles" />
+	</wsdl:message>
+	<wsdl:message name="users">
+		<wsdl:part name="payload" element="tns:users" />
+	</wsdl:message>
+	<wsdl:message name="AuthenticationFault">
+		<wsdl:part name="payload" element="tns:AuthenticationFault" />
+	</wsdl:message>
+	<wsdl:message name="RemoteFault">
+		<wsdl:part name="payload" element="tns:RemoteFault" />
+	</wsdl:message>
+	<wsdl:message name="RBACFault">
+		<wsdl:part name="payload" element="tns:RBACFault" />
+	</wsdl:message>
+	<wsdl:message name="UserExistsFault">
+		<wsdl:part name="payload" element="tns:UserExistsFault" />
+	</wsdl:message>
+	<wsdl:message name="UserNotFoundFault">
+		<wsdl:part name="payload" element="tns:UserNotFoundFault" />
+	</wsdl:message>
+	<wsdl:message name="RoleExistsFault">
+		<wsdl:part name="payload" element="tns:RoleExistsFault" />
+	</wsdl:message>
+	<wsdl:message name="RoleNotFoundFault">
+		<wsdl:part name="payload" element="tns:RoleNotFoundFault" />
+	</wsdl:message>
+
+	<wsdl:portType name="RBACAdminPortType">
+		<wsdl:operation name="modifyUser">
+			<wsdl:input message="tns:modifyUser" />
+			<wsdl:output message="tns:response" />
+			<wsdl:fault message="tns:RemoteFault" name="RemoteFault" />
+			<wsdl:fault message="tns:RBACFault" name="RBACFault" />
+			<wsdl:fault message="tns:UserExistsFault" name="UserExistsFault" />
+			<wsdl:fault message="tns:UserNotFoundFault" name="UserNotFoundFault" />
+		</wsdl:operation>
+		<wsdl:operation name="modifyRole">
+			<wsdl:input message="tns:modifyRole" />
+			<wsdl:output message="tns:response" />
+			<wsdl:fault message="tns:RemoteFault" name="RemoteFault" />
+			<wsdl:fault message="tns:RBACFault" name="RBACFault" />
+			<wsdl:fault message="tns:RoleExistsFault" name="RoleExistsFault" />
+			<wsdl:fault message="tns:RoleNotFoundFault" name="RoleNotFoundFault" />
+		</wsdl:operation>
+		<wsdl:operation name="getRealms">
+			<wsdl:input message="tns:getRealms" />
+			<wsdl:output message="tns:realms" />
+			<wsdl:fault message="tns:RemoteFault" name="RemoteFault" />
+			<wsdl:fault message="tns:RBACFault" name="RBACFault" />
+			<wsdl:fault message="tns:AuthenticationFault" name="AuthenticationFault" />
+		</wsdl:operation>
+		<wsdl:operation name="getRoles">
+			<wsdl:input message="tns:getRoles" />
+			<wsdl:output message="tns:roles" />
+			<wsdl:fault message="tns:RemoteFault" name="RemoteFault" />
+			<wsdl:fault message="tns:RBACFault" name="RBACFault" />
+			<wsdl:fault message="tns:AuthenticationFault" name="AuthenticationFault" />
+		</wsdl:operation>
+		<wsdl:operation name="getAttributes">
+			<wsdl:input message="tns:getAttributes" />
+			<wsdl:output message="tns:attributes" />
+			<wsdl:fault message="tns:RBACFault" name="RBACFault" />
+		</wsdl:operation>
+		<wsdl:operation name="getProperties">
+			<wsdl:input message="tns:getProperties" />
+			<wsdl:output message="tns:details" />
+			<wsdl:fault message="tns:RemoteFault" name="RemoteFault" />
+			<wsdl:fault message="tns:RBACFault" name="RBACFault" />
+		</wsdl:operation>
+		<wsdl:operation name="getUsers">
+			<wsdl:input message="tns:getUsers" />
+			<wsdl:output message="tns:users" />
+			<wsdl:fault message="tns:RemoteFault" name="RemoteFault" />
+			<wsdl:fault message="tns:RBACFault" name="RBACFault" />
+			<wsdl:fault message="tns:AuthenticationFault" name="AuthenticationFault" />
+		</wsdl:operation>
+	</wsdl:portType>
+
+
+	<wsdl:binding name="RBACAdminSOAP" type="tns:RBACAdminPortType">
+		<soap:binding style="document"
+			transport="http://schemas.xmlsoap.org/soap/http" />
+		<wsdl:operation name="modifyUser">
+			<soap:operation soapAction="modifyUser" />
+			<wsdl:input>
+				<soap:body parts="payload" use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body parts="payload" use="literal" />
+			</wsdl:output>
+			<wsdl:fault name="RemoteFault">
+				<soap:fault use="literal" name="RemoteFault" />
+			</wsdl:fault>
+			<wsdl:fault name="RBACFault">
+				<soap:fault use="literal" name="RBACFault" />
+			</wsdl:fault>
+			<wsdl:fault name="UserExistsFault">
+				<soap:fault use="literal" name="UserExistsFault" />
+			</wsdl:fault>
+			<wsdl:fault name="UserNotFoundFault">
+				<soap:fault use="literal" name="UserNotFoundFault" />
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="modifyRole">
+			<soap:operation soapAction="modifyRole" />
+			<wsdl:input>
+				<soap:body parts="payload" use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body parts="payload" use="literal" />
+			</wsdl:output>
+			<wsdl:fault name="RemoteFault">
+				<soap:fault use="literal" name="RemoteFault" />
+			</wsdl:fault>
+			<wsdl:fault name="RBACFault">
+				<soap:fault use="literal" name="RBACFault" />
+			</wsdl:fault>
+			<wsdl:fault name="RoleExistsFault">
+				<soap:fault use="literal" name="RoleExistsFault" />
+			</wsdl:fault>
+			<wsdl:fault name="RoleNotFoundFault">
+				<soap:fault use="literal" name="RoleNotFoundFault" />
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="getRealms">
+			<soap:operation soapAction="getRealms" />
+			<wsdl:input>
+				<soap:body parts="payload" use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body parts="payload" use="literal" />
+			</wsdl:output>
+			<wsdl:fault name="RemoteFault">
+				<soap:fault use="literal" name="RemoteFault" />
+			</wsdl:fault>
+			<wsdl:fault name="RBACFault">
+				<soap:fault use="literal" name="RBACFault" />
+			</wsdl:fault>
+			<wsdl:fault name="AuthenticationFault">
+				<soap:fault use="literal" name="AuthenticationFault" />
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="getRoles">
+			<soap:operation soapAction="getRoles" />
+			<wsdl:input>
+				<soap:body parts="payload" use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body parts="payload" use="literal" />
+			</wsdl:output>
+			<wsdl:fault name="RemoteFault">
+				<soap:fault use="literal" name="RemoteFault" />
+			</wsdl:fault>
+			<wsdl:fault name="RBACFault">
+				<soap:fault use="literal" name="RBACFault" />
+			</wsdl:fault>
+			<wsdl:fault name="AuthenticationFault">
+				<soap:fault use="literal" name="AuthenticationFault" />
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="getAttributes">
+			<soap:operation soapAction="getAttributes" />
+			<wsdl:input>
+				<soap:body parts="payload" use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body parts="payload" use="literal" />
+			</wsdl:output>
+			<wsdl:fault name="RBACFault">
+				<soap:fault use="literal" name="RBACFault" />
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="getProperties">
+			<soap:operation soapAction="getProperties" />
+			<wsdl:input>
+				<soap:body parts="payload" use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body parts="payload" use="literal" />
+			</wsdl:output>
+			<wsdl:fault name="RemoteFault">
+				<soap:fault use="literal" name="RemoteFault" />
+			</wsdl:fault>
+			<wsdl:fault name="RBACFault">
+				<soap:fault use="literal" name="RBACFault" />
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="getUsers">
+			<soap:operation soapAction="getUsers" />
+			<wsdl:input>
+				<soap:body parts="payload" use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body parts="payload" use="literal" />
+			</wsdl:output>
+			<wsdl:fault name="RemoteFault">
+				<soap:fault use="literal" name="RemoteFault" />
+			</wsdl:fault>
+			<wsdl:fault name="RBACFault">
+				<soap:fault use="literal" name="RBACFault" />
+			</wsdl:fault>
+			<wsdl:fault name="AuthenticationFault">
+				<soap:fault use="literal" name="AuthenticationFault" />
+			</wsdl:fault>
+		</wsdl:operation>
+	</wsdl:binding>
+
+	<wsdl:service name="RBACAdminService">
+		<wsdl:port name="RBACAdminService" binding="tns:RBACAdminSOAP">
+			<soap:address location="http://localhost:8080/axis2/services/RBACAdminService" />
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

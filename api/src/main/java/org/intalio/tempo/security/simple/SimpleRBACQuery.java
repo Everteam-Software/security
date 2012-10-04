@@ -9,6 +9,7 @@
 
 package org.intalio.tempo.security.simple;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,6 +20,7 @@ import org.intalio.tempo.security.rbac.RBACQuery;
 import org.intalio.tempo.security.rbac.RoleNotFoundException;
 import org.intalio.tempo.security.rbac.UserNotFoundException;
 import org.intalio.tempo.security.util.IdentifierUtils;
+import org.intalio.tempo.security.util.StringArrayUtils;
 
 /**
  * Simple implementation of the RBAC query functions.
@@ -310,20 +312,25 @@ class SimpleRBACQuery
         
 		database = _provider.getDatabase();
         
-        user = database.normalize( user );
+        user = database.normalize( user , _realm);
 
         simpleUser = database.getUser( user );
         if ( simpleUser == null ) {
             throw new UserNotFoundException( "User not found: " + user );
         }
-        
-        Property name = new Property( RBACConstants.PROPERTY_FULL_NAME,
-                                      simpleUser.getName() );
-        
-        Property email = new Property( RBACConstants.PROPERTY_EMAIL,
-                                       simpleUser.getEmail() );
 
-        return new Property[] { name, email };
+        ArrayList<Property> properties = new ArrayList<Property>();
+        if (simpleUser.getName() != null) {
+            properties.add(new Property(RBACConstants.PROPERTY_NAME, simpleUser.getName()));
+        }
+        if (simpleUser.getEmail() != null) {
+            properties.add(new Property(RBACConstants.PROPERTY_EMAIL, simpleUser.getEmail()));
+        }
+        String[] roleArray = simpleUser.getAssignedRoles();
+        if(roleArray != null && roleArray.length > 0) {
+            properties.add(new Property(RBACConstants.PROPERTY_ASSIGN_ROLES, StringArrayUtils.toCommaDelimited(roleArray)));
+        }
+        return properties.toArray(new Property[properties.size()]);
     }
     
     
@@ -336,17 +343,44 @@ class SimpleRBACQuery
         
 		database = _provider.getDatabase();
         
-        role = database.normalize( role );
+        role = database.normalize( role , _realm);
 
         simpleRole = database.getRole( role );
         if ( simpleRole == null ) {
             throw new RoleNotFoundException( "Role not found: " + role );
         }
         
-        Property description = new Property( RBACConstants.PROPERTY_DESCRIPTION, 
-                                             simpleRole.getDescription() );
-        
-        return new Property[] { description };
+        ArrayList<Property> properties = new ArrayList<Property>();
+        if (simpleRole.getDescription() != null) {
+            properties.add(new Property(RBACConstants.PROPERTY_DESCRIPTION, simpleRole.getDescription()));
+        }
+        String[] roleArray = simpleRole.getDescendants();
+        if(roleArray != null && roleArray.length > 0) {
+            properties.add(new Property(RBACConstants.PROPERTY_DESCENDANT_ROLE, StringArrayUtils.toCommaDelimited(roleArray)));
+        }
+        return properties.toArray(new Property[properties.size()]);
     }
-    
+
+
+    @Override
+    public String[] getRoles(String realm) throws RBACException, RemoteException {
+        SimpleDatabase database;
+
+        database = _provider.getDatabase();
+        SimpleRealm simpleRealm = database.getRealm(realm);
+        if (simpleRealm == null) {
+            throw new RBACException("Unknown realm '" + realm + "'");
+        }
+
+        ArrayList<String> result = new ArrayList<String>();
+        Iterator iter = database.getRoles();
+        while (iter.hasNext()) {
+            SimpleRole simpleRole = (SimpleRole) iter.next();
+            if (realm.equals(IdentifierUtils.getRealm(simpleRole.getIdentifier()))) {
+                result.add(simpleRole.getIdentifier());
+            }
+        }
+
+        return (String[]) result.toArray(new String[result.size()]);
+    }
 }

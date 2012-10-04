@@ -16,7 +16,7 @@ define "security" do
 
   desc "Security Framework"
   define "api" do
-    compile.with CAS_CLIENT, DOM4J, CASTOR, LOG4J, SLF4J, SPRING[:core], XERCES, OPENSSO_CLIENT_SDK, SERVLET_API,JASYPT
+    compile.with AXIOM, CAS_CLIENT, DOM4J, CASTOR, LOG4J, SLF4J, SPRING[:core], XERCES, OPENSSO_CLIENT_SDK, SERVLET_API,JASYPT
 
     test.exclude "*BaseSuite"
     test.exclude "*FuncTestSuite"

@@ -28,11 +28,24 @@ public class RBACConstants
      * Email address property
      */
     public static final String PROPERTY_EMAIL = "email";
-    
 
     /**
      * User's full name property
      */
-    public static final String PROPERTY_FULL_NAME = "fullName";
+    public static final String PROPERTY_NAME = "name";
 
+    /**
+     * Assigned roles property
+     */
+    public static final String PROPERTY_ASSIGN_ROLES = "assignRole";
+
+    /**
+     * Descendant roles property
+     */
+    public static final String PROPERTY_DESCENDANT_ROLE = "descendantRole";
+
+    /**
+    * Password property
+    */
+   public static final String PROPERTY_PASSWORD = "password";
 }
