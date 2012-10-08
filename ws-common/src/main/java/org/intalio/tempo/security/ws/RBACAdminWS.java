@@ -192,22 +192,18 @@ public class RBACAdminWS extends BaseWS {
      * @throws AxisFault
      */
     public OMElement getUsers(OMElement requestEl) throws AxisFault {
-        String[] roles = null;
         RBACQuery query;
         OMElement response = OM_FACTORY.createOMElement(RBACAdminConstants.USERS);
         try {
             for (String realm : _securityProvider.getRealms()) {
                 query = _securityProvider.getRBACProvider(realm).getQuery();
                 if (realm != null && !realm.equals("")) {
-                    roles = query.getRoles(realm);
                     Set<String> userSet = new HashSet<String>();
-                    for (String role : roles) {
-                        String[] users = query.assignedUsers(role);
-                        for (String user : users) {
-                            userSet.add(user);
-                        }
+                    String[] users = query.getUsers(realm);
+                    for (String user : users) {
+                        userSet.add(user);
                     }
-                    if (roles != null) {
+                    if (users != null) {
                         for (String user : userSet) {
                             OMElement responseToken = OM_FACTORY
                                     .createOMElement(RBACAdminConstants.USER_TYPE, response);

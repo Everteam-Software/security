@@ -776,5 +776,20 @@ class LDAPRBACProvider implements RBACProvider, LDAPProperties {
             return prefix (list);
         }
 
+        @Override
+        public String[] getUsers(String realm) throws RBACException, RemoteException {
+            if (!_realm.equals(realm))
+                throw new RBACException("Unsupported realm, " + realm);
+
+            ArrayList<String> list = new ArrayList<String>();
+            try {
+                _engine.queryExtent(_userBase, _userId, list);
+            } catch (NamingException e) {
+                LOG.error("Error occured while getting user",e);
+                throw new RBACException(e);
+            }
+            return prefix (list);
+        }
+
     }
 }

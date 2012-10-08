@@ -127,5 +127,10 @@ public class RBACQueryImpl
     {
         return _providers.getRBACQuery( realm ).getRoles(realm);
     }
+
+    @Override
+    public String[] getUsers(String realm) throws RBACException, RemoteException {
+        return _providers.getRBACQuery( realm ).getUsers(realm);
+    }
     
 }

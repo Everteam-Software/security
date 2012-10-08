@@ -383,4 +383,26 @@ class SimpleRBACQuery
 
         return (String[]) result.toArray(new String[result.size()]);
     }
+
+    @Override
+    public String[] getUsers(String realm) throws RBACException, RemoteException {
+        SimpleDatabase database;
+
+        database = _provider.getDatabase();
+        SimpleRealm simpleRealm = database.getRealm(realm);
+        if (simpleRealm == null) {
+            throw new RBACException("Unknown realm '" + realm + "'");
+        }
+
+        ArrayList<String> result = new ArrayList<String>();
+        Iterator iter = database.getUsers();
+        while (iter.hasNext()) {
+            SimpleUser simpleUser = (SimpleUser) iter.next();
+            if (realm.equals(IdentifierUtils.getRealm(simpleUser.getIdentifier()))) {
+                result.add(simpleUser.getIdentifier());
+            }
+        }
+
+        return (String[]) result.toArray(new String[result.size()]);
+    }
 }
