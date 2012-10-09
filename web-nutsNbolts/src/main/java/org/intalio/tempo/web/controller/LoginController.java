@@ -28,6 +28,7 @@ import org.apache.log4j.Logger;
 import org.intalio.tempo.security.Property;
 import org.intalio.tempo.security.authentication.AuthenticationConstants;
 import org.intalio.tempo.security.authentication.AuthenticationException;
+import org.intalio.tempo.security.rbac.RBACException;
 import org.intalio.tempo.security.token.TokenService;
 import org.intalio.tempo.security.util.PropertyUtils;
 import org.intalio.tempo.security.util.StringArrayUtils;
@@ -224,7 +225,8 @@ public class LoginController extends UIController {
                     Property[] props = _tokenService.getTokenProperties(token);
                     String name = extractUser(props);
                     String[] roles = extractRoles(props);
-                    user = new User(name, roles, token);
+                    Property isWorkFlowAdmin = PropertyUtils.getProperty(props, "isWorkflowAdmin");
+                    user = new User(name, roles, token, Boolean.parseBoolean(isWorkFlowAdmin.getValue().toString()));
                 } catch (Exception ex) {
                     LOG.error("Exception while verifying security token: "+ex);
                 }
@@ -290,7 +292,8 @@ public class LoginController extends UIController {
 
             String name = extractUser(props);
             String[] roles = extractRoles(props);
-            User user = new User(name, roles, token);
+            Property isWorkFlowAdmin = PropertyUtils.getProperty(props, "isWorkflowAdmin");
+            User user = new User(name, roles, token, Boolean.parseBoolean(isWorkFlowAdmin.getValue().toString()));
             if (grantedRoles.length > 0 && !user.hasOneRoleOf(grantedRoles)) {
                 throw new SecurityException("User does not have one of the following role: "
                         + StringArrayUtils.toCommaDelimited(grantedRoles));

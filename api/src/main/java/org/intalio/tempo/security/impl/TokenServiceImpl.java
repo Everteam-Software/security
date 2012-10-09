@@ -117,12 +117,13 @@ public class TokenServiceImpl implements TokenService {
      * @param user
      *            user identifier
      * @return cryptographic token
+     * @throws AuthenticationException 
      */
-    public String createToken(String user) throws RBACException, RemoteException {
+    public String createToken(String user) throws RBACException, RemoteException, AuthenticationException {
         return createToken(user, null);
     }
 
-    public String createToken(String user, String password) throws RBACException, RemoteException {
+    public String createToken(String user, String password) throws RBACException, RemoteException, AuthenticationException {
         // TODO we should use _realms to normalize
         user = IdentifierUtils.normalize(user, _realms.getDefaultRealm(), false, '\\');
 
@@ -136,6 +137,7 @@ public class TokenServiceImpl implements TokenService {
 
         props.add(userProp);
         props.add(issueProp);
+        props.add(new Property(AuthenticationConstants.PROPERTY_IS_WORKFLOW_ADMIN, Boolean.toString(isWorkflowAdmin(user))));
         if (!_cacheRoles) {
             String[] roles = _realms.authorizedRoles(user);
             props.add(new Property(AuthenticationConstants.PROPERTY_ROLES, StringArrayUtils.toCommaDelimited(roles)));
