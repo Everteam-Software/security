@@ -13,6 +13,7 @@ package org.intalio.tempo.security.ldap;
 
 import java.io.FileInputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
@@ -331,6 +332,39 @@ public class LDAPSecurityProvider implements SecurityProvider {
                 // ignore
             }
         }
+    }
+
+    @Override
+    public Set<String> getAttributes(String forObject) throws RBACException {
+        Set<String> properties = new HashSet<String>();
+        String propertyName = "";
+        String id = "";
+        if (forObject.equals("user")) {
+            propertyName = LDAPProperties.SECURITY_LDAP_USER_PROP;
+            id = LDAPProperties.SECURITY_LDAP_USER_ID;
+            properties.add( _env.get(LDAPProperties.SECURITY_LDAP_USER_CREDENTIAL+".0").split(":")[0]);
+        } else if (forObject.equals("role")) {
+            propertyName = LDAPProperties.SECURITY_LDAP_ROLE_PROP;
+            id = LDAPProperties.SECURITY_LDAP_ROLE_ID;
+        }
+        for (int i = 0; true; i++) {
+            String key = propertyName + '.' + i;
+            if (_env.containsKey(key)) {
+                String value = (String) _env.get(key);
+                String[] temp = value.split(":");
+                if(temp != null && temp.length > 0) {
+                    if (temp.length == 1) {
+                        properties.add(value.split(":")[0]);
+                    } else {
+                        properties.add(value.split(":")[1]);
+                    }
+                }
+            } else {
+                break;
+            }
+        }
+        properties.remove(id);
+        return properties;
     }
 
 }

@@ -44,16 +44,22 @@ public class SpringInit implements ServiceLifeCycle {
             ClassLoader oldClassLoader = thread.getContextClassLoader();
             try {
                 thread.setContextClassLoader(service.getClassLoader());
-                CONTEXT = new SysPropApplicationContextLoader(configFile);
-                Parameter load = service.getParameter("LoadOnStartup");
-                if (load != null && ((String) load.getValue()).equalsIgnoreCase("true")) {
-                    Parameter bean = service.getParameter("SpringBeanName");
-                    if (bean == null) throw new IllegalArgumentException("Missing 'SpringBeanName' parameter");
-                    String beanName = (String) bean.getValue();
-                    try {
-                        CONTEXT.getBean(beanName);
-                    } catch (Exception e) {
-                        throw new IllegalArgumentException("Unable to initialize bean '"+beanName+"'", e);
+                Parameter loadAllBeansOnStartup = service.getParameter("LoadAllBeansOnStartup");
+                if(loadAllBeansOnStartup != null && ((String) loadAllBeansOnStartup.getValue()).equalsIgnoreCase("true")){
+                    //WF-1574: it will load all beans on startup, as we need to load audit configuration.
+                    CONTEXT = new SysPropApplicationContextLoader(configFile, true);
+                } else {
+                    CONTEXT = new SysPropApplicationContextLoader(configFile);
+                    Parameter load = service.getParameter("LoadOnStartup");
+                    if (load != null && ((String) load.getValue()).equalsIgnoreCase("true")) {
+                        Parameter bean = service.getParameter("SpringBeanName");
+                        if (bean == null) throw new IllegalArgumentException("Missing 'SpringBeanName' parameter");
+                        String beanName = (String) bean.getValue();
+                        try {
+                            CONTEXT.getBean(beanName);
+                        } catch (Exception e) {
+                            throw new IllegalArgumentException("Unable to initialize bean '"+beanName+"'", e);
+                        }
                     }
                 }
             } catch (IOException except) {

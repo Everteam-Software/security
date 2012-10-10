@@ -34,8 +34,10 @@ public class Constants {
     public static final QName NAME = new QName(TOKEN_NS.getNamespaceURI(), "name");
 
     public static final QName VALUE = new QName(TOKEN_NS.getNamespaceURI(), "value");
-    
+
     public static final String PASSWORD_MASK = "IntalioEncryptedpassword#123";
 
+    public static final OMNamespace RBACADMIN_NS = OM_FACTORY
+            .createOMNamespace("http://tempo.intalio.org/security/RBACAdminService/", "RBACAdmin");
 
 }

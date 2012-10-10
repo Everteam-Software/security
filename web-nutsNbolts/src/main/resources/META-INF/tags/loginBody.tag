@@ -30,7 +30,7 @@
 	<tr>
 		<td style="height: 79px; " align="center">
 			<!-- Site Header b -->
-		          <img src="${logoPath}" width="200" height="29" alt="" />
+		        <!--   <img src="${logoPath}" width="200" height="29" alt="" />  -->
 			<!-- Site Header e -->
 		</td>
 	</tr>

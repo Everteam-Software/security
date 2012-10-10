@@ -15,9 +15,18 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import javax.xml.namespace.QName;
+import javax.xml.parsers.FactoryConfigurationError;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamReader;
+
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.intalio.tempo.security.authentication.AuthenticationAdmin;
 import org.intalio.tempo.security.authentication.AuthenticationException;
 import org.intalio.tempo.security.authentication.AuthenticationQuery;
@@ -25,6 +34,7 @@ import org.intalio.tempo.security.authentication.AuthenticationRuntime;
 import org.intalio.tempo.security.authentication.provider.AuthenticationProvider;
 import org.intalio.tempo.security.provider.SecurityProvider;
 import org.intalio.tempo.security.rbac.RBACAdmin;
+import org.intalio.tempo.security.rbac.RBACConstants;
 import org.intalio.tempo.security.rbac.RBACException;
 import org.intalio.tempo.security.rbac.RBACQuery;
 import org.intalio.tempo.security.rbac.RBACRuntime;
@@ -127,6 +137,9 @@ public final class SimpleSecurityProvider
 		_workflowAdminRoles = workflowAdminRoles;
 	}
 
+	public String getConfigFile() {
+        return _filename;
+    }
 
 	/**
      * Public no-arg constructor.
@@ -190,7 +203,7 @@ public final class SimpleSecurityProvider
     }
     
 
-    private InputStream getConfigStream()
+    public InputStream getConfigStream()
         throws IOException
     {
         String filename = SystemPropertyUtils.resolvePlaceholders(_filename);
@@ -339,12 +352,14 @@ public final class SimpleSecurityProvider
         
         private SimpleRBACQuery _query;
         private SimpleRBACRuntime _runtime;
+        private SimpleRBACAdmin _admin;
         
         // implement RBACProvider interface
 		SimpleRBACProvider( String realm )
         {
             _query = new SimpleRBACQuery( realm, SimpleSecurityProvider.this );
             _runtime = new SimpleRBACRuntime( realm, SimpleSecurityProvider.this );
+            _admin = new SimpleRBACAdmin(realm, SimpleSecurityProvider.this);
         }
 
         
@@ -352,8 +367,7 @@ public final class SimpleSecurityProvider
         public RBACAdmin getAdmin()
             throws RBACException
         {
-            // not supported
-            return null;
+            return _admin;
         }
         
         
@@ -419,5 +433,21 @@ public final class SimpleSecurityProvider
 
         
     } // class SimpleAuthorizationProvider
+
+
+    @Override
+    public Set<String> getAttributes(String forObject) throws RBACException {
+       Set<String> properties = new HashSet<String>();
+        if(forObject.equalsIgnoreCase("user")) {
+            properties.add(RBACConstants.PROPERTY_NAME);
+            properties.add(RBACConstants.PROPERTY_EMAIL);
+            properties.add(RBACConstants.PROPERTY_PASSWORD);
+            properties.add(RBACConstants.PROPERTY_ASSIGN_ROLES);
+        } else if(forObject.equalsIgnoreCase("role")) {
+            properties.add(RBACConstants.PROPERTY_DESCRIPTION);
+            properties.add(RBACConstants.PROPERTY_DESCENDANT_ROLE);
+        }
+        return properties;
+    }
     
 }

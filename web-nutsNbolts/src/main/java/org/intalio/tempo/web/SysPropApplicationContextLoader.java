@@ -18,6 +18,7 @@ import java.io.IOException;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.SystemPropertyUtils;
@@ -49,15 +50,32 @@ public class SysPropApplicationContextLoader {
      *             if exception occurs during loading of the application context
      */
     public SysPropApplicationContextLoader(String appContextFile) throws IOException {
+        this.loadAppContext(appContextFile, false);
+    }
+
+    public void loadAppContext(String appContextFile, boolean loadDefinitionOnStartup) {
         if (appContextFile == null) {
             throw new IllegalArgumentException("Argument 'contextFile' is null");
         }
         _appContextFile = SystemPropertyUtils.resolvePlaceholders(appContextFile);
-        if (_appContextFile.startsWith(FILE_PREFIX)) {
-            _appContextFile = _appContextFile.substring(FILE_PREFIX.length());
+        if (loadDefinitionOnStartup) {
+            _beanFactory = new ClassPathXmlApplicationContext(_appContextFile);
+        } else {
+            if (_appContextFile.startsWith(FILE_PREFIX)) {
+                _appContextFile = _appContextFile.substring(FILE_PREFIX.length());
+            }
+            Resource configResource = new FileSystemResource(_appContextFile);
+            _beanFactory = new XmlBeanFactory(configResource);
         }
-        Resource configResource = new FileSystemResource(_appContextFile);
-        _beanFactory = new XmlBeanFactory(configResource);
+    }
+
+    /**
+     * It will initialize all beans in contextFile. Created for WF-1574.
+     * @param appContextFile
+     * @param serviceName
+     */
+    public SysPropApplicationContextLoader(String appContextFile, boolean loadDefinitionOnStartup) {
+        this.loadAppContext(appContextFile, loadDefinitionOnStartup);
     }
 
     /**

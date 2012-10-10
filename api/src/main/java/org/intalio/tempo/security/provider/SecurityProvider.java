@@ -9,6 +9,8 @@
 
 package org.intalio.tempo.security.provider;
 
+import java.util.Set;
+
 import org.intalio.tempo.security.authentication.AuthenticationException;
 import org.intalio.tempo.security.authentication.provider.AuthenticationProvider;
 import org.intalio.tempo.security.rbac.RBACException;
@@ -91,5 +93,12 @@ public interface SecurityProvider
      */
     public void dispose()
         throws RBACException;
-    
+
+    /**
+     * This returns list of attributes depending on value of forObject, which either can be role or user.
+     * @param forObject
+     * @return
+     * @throws RBACException
+     */
+    public Set<String> getAttributes(String forObject) throws RBACException;
 }
