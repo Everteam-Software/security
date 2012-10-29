@@ -1,5 +1,7 @@
 package org.intalio.tempo.security;
 
+import java.util.Set;
+
 import org.intalio.tempo.security.authentication.AuthenticationException;
 import org.intalio.tempo.security.authentication.provider.AuthenticationProvider;
 import org.intalio.tempo.security.provider.SecurityProvider;
@@ -41,6 +43,12 @@ public class DummySecurityProvider implements SecurityProvider{
     public void setName(String name) {
         // TODO Auto-generated method stub
         
+    }
+
+    @Override
+    public Set<String> getAttributes(String forObject) throws RBACException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
