@@ -13,8 +13,11 @@
 package org.intalio.tempo.security.ws;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
+import javax.management.Query;
 import javax.xml.namespace.QName;
 
 import org.apache.axiom.om.OMElement;
@@ -45,6 +48,22 @@ public class OMParser {
         return text;
     }
 
+    public String[] getRequiredStringArray(QName parameter) throws IllegalArgumentException {
+        Iterator<OMElement> itr = _element.getChildElements();
+        ArrayList<String> textList = new ArrayList<String>();
+        while (itr.hasNext()) {
+            OMElement childElement = itr.next();
+            if (childElement.getQName().equals(parameter)) {
+                textList.add(childElement.getText());
+            }
+        }
+        if (textList == null || textList.size() == 0)
+            throw new IllegalArgumentException("Empty parameter: " + parameter);
+        if (LOG.isDebugEnabled())
+            LOG.debug("Parameter " + parameter + ": " + textList.toString());
+        return textList.toArray(new String[textList.size()]);
+    }
+
     public Property[] getProperties(QName parameter) throws IllegalArgumentException{
         OMElement e = _element.getFirstChildWithName(parameter);
         if (e == null)
@@ -53,14 +72,43 @@ public class OMParser {
         ArrayList<Property> props = new ArrayList<Property>();
         while (iter.hasNext()) {
             OMElement prop = iter.next();
-            OMElement name = prop.getFirstChildWithName(Constants.NAME);
+            OMElement name = prop.getFirstChildWithName(new QName(prop.getNamespace().getNamespaceURI(),"name"));
             if (name == null)
                 throw new IllegalArgumentException("Missing property name: " + prop);
-            OMElement value = prop.getFirstChildWithName(Constants.VALUE);
+            OMElement value = prop.getFirstChildWithName(new QName(prop.getNamespace().getNamespaceURI(),"value"));
             if (value == null)
                 throw new IllegalArgumentException("Missing property value: " + prop);
             props.add(new Property(name.getText(), value.getText()));
         }
         return props.toArray(new Property[props.size()]);
+    }
+
+    public Map<String,Property[]> getRequiredMapForAbstractType(QName parameter) {
+        Iterator<OMElement> iter = _element.getChildrenWithName(parameter);
+        Map<String,Property[]> abastractMap = new HashMap<String,Property[]>();
+        while (iter.hasNext()) {
+            OMElement abstractType = iter.next();
+            OMElement id = abstractType.getFirstChildWithName(new QName(abstractType.getNamespace().getNamespaceURI(),"id"));
+            if (id == null)
+                throw new IllegalArgumentException("Missing property name: " + abstractType);
+            OMElement realms = abstractType.getFirstChildWithName(new QName(abstractType.getNamespace().getNamespaceURI(),"realms"));
+            if (realms == null)
+                throw new IllegalArgumentException("Missing property name: " + abstractType);
+            OMElement details = abstractType.getFirstChildWithName(new QName(abstractType.getNamespace().getNamespaceURI(),"details"));
+            Iterator<OMElement> iterProp = details.getChildElements();
+            ArrayList<Property> props = new ArrayList<Property>();
+            while (iterProp.hasNext()) {
+                OMElement prop = iterProp.next();
+                OMElement name = prop.getFirstChildWithName(new QName(prop.getNamespace().getNamespaceURI(),"name"));
+                if (name == null)
+                    throw new IllegalArgumentException("Missing property name: " + prop);
+                OMElement value = prop.getFirstChildWithName(new QName(prop.getNamespace().getNamespaceURI(),"value"));
+                if (value == null)
+                    throw new IllegalArgumentException("Missing property value: " + prop);
+                props.add(new Property(name.getText(), value.getText()));
+            }
+            abastractMap.put(id.getText(), props.toArray(new Property[props.size()]));
+        }
+        return abastractMap;
     }
 }

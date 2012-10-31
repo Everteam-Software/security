@@ -52,7 +52,11 @@ class LDAPRBACProvider implements RBACProvider, LDAPProperties {
 
     private LDAPRBACQuery _query;
 
+    private LDAPRBACAdmin _rbacAdmin;
+
     private LDAPQueryEngine _engine;
+
+    private String _baseDN;
 
     /**
      * Constructor
@@ -62,6 +66,7 @@ class LDAPRBACProvider implements RBACProvider, LDAPProperties {
         super();
         _realm = realm;
         _engine = engine;
+        _baseDN = baseDN;
     }
 
     /**
@@ -72,6 +77,7 @@ class LDAPRBACProvider implements RBACProvider, LDAPProperties {
         if (!(config instanceof Map))
             throw new IllegalArgumentException("Configuration is expected to be a Map");
         _query = new LDAPRBACQuery((Map) config);
+        _rbacAdmin = new LDAPRBACAdmin(_engine.getProvider(),_baseDN, (Map) config);
     }
 
     /**
@@ -85,7 +91,7 @@ class LDAPRBACProvider implements RBACProvider, LDAPProperties {
      * @see org.intalio.tempo.security.rbac.provider.RBACProvider#getAdmin()
      */
     public RBACAdmin getAdmin() throws RBACException {
-        throw new RuntimeException("Method not implemented");
+        return _rbacAdmin;
     }
 
     /**
@@ -751,5 +757,39 @@ class LDAPRBACProvider implements RBACProvider, LDAPProperties {
                 throw new RBACException(ne);
             }
         }
+
+        /**
+         * @see org.intalio.tempo.security.rbac.RBACQuery#getRoles(java.lang.String)
+         */
+        @Override
+        public String[] getRoles(String realm) throws RBACException, RemoteException {
+            if (!_realm.equals(realm))
+                throw new RBACException("Unsupported realm, " + realm);
+
+            ArrayList<String> list = new ArrayList<String>();
+            try {
+                _engine.queryExtent(_roleBase, _roleId, list);
+            } catch (NamingException e) {
+                LOG.error("Error occured while getting roles",e);
+                throw new RBACException(e);
+            }
+            return prefix (list);
+        }
+
+        @Override
+        public String[] getUsers(String realm) throws RBACException, RemoteException {
+            if (!_realm.equals(realm))
+                throw new RBACException("Unsupported realm, " + realm);
+
+            ArrayList<String> list = new ArrayList<String>();
+            try {
+                _engine.queryExtent(_userBase, _userId, list);
+            } catch (NamingException e) {
+                LOG.error("Error occured while getting user",e);
+                throw new RBACException(e);
+            }
+            return prefix (list);
+        }
+
     }
 }

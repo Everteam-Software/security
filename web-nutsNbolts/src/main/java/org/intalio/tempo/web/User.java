@@ -23,10 +23,19 @@ public class User implements Serializable {
 
     private String _token;
 
+    private boolean isWorkFlowAdmin;
+
     public User(String name, String[] roles, String token) {
         _name = name;
         _roles = copyArray(roles);
         _token = token;
+    }
+
+    public User(String name, String[] roles, String token, boolean isWorkFlowAdmin) {
+        _name = name;
+        _roles = copyArray(roles);
+        _token = token;
+        this.isWorkFlowAdmin = isWorkFlowAdmin;
     }
 
     public String getName() {
@@ -48,6 +57,10 @@ public class User implements Serializable {
             }
         }
         return false;
+    }
+
+    public boolean isWorkFlowAdmin() {
+        return isWorkFlowAdmin;
     }
 
     public boolean hasOneRoleOf(String[] roles) {

@@ -346,7 +346,7 @@ public class SimpleTest
 
 
 		// check user properties		
-		name = new Property( RBACConstants.PROPERTY_FULL_NAME,
+		name = new Property( RBACConstants.PROPERTY_NAME,
 			 				 "Castor Workaholic" );
 		email = new Property( RBACConstants.PROPERTY_EMAIL,
 							  "castor@exolab.org" );

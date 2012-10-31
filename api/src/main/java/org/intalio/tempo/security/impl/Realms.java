@@ -519,5 +519,15 @@ public class Realms
     {
         return getAuthenticationQuery( user ).isWorkflowAdmin( user );
     }
+
+    @Override
+    public String[] getRoles(String realm) throws RBACException, RemoteException {
+        return getRBACQuery( realm ).getRoles(realm);
+    }
+
+    @Override
+    public String[] getUsers(String realm) throws RBACException, RemoteException {
+        return getRBACQuery( realm ).getUsers(realm);
+    }
     
 }

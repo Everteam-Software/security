@@ -59,4 +59,8 @@ public interface AuthenticationConstants
      */
     public static final String PROPERTY_X509_CERTIFICATE = "X509certificate";
     
+    /**
+     * List of roles property
+     */
+    public static final String PROPERTY_IS_WORKFLOW_ADMIN = "isWorkflowAdmin";
 }

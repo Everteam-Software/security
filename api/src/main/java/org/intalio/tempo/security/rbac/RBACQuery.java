@@ -216,7 +216,27 @@ public interface RBACQuery
     public String[] topRoles( String realm )
         throws RBACException, RemoteException;
 
+    /**
+     * Return the set of roles within a realm.
+     * <p>
+     * This is valid only if the realm exists.
+     *
+     * @param realm the specified realm
+     * @return identifiers of the top-level roles within the realm
+     */
+    public String[] getRoles( String realm )
+        throws RBACException, RemoteException;
     
+    /**
+     * Return the set of users within a realm.
+     * <p>
+     * This is valid only if the realm exists.
+     *
+     * @param realm the specified realm
+     * @return identifiers of the top-level roles within the realm
+     */
+    public String[] getUsers( String realm )
+        throws RBACException, RemoteException;
     /**
      * Return the set of ascendant roles for a given role.
      * <p>
@@ -225,6 +245,7 @@ public interface RBACQuery
      * @param role role identifier
      * @return identifiers of the ascendant roles
      */
+
     public String[] ascendantRoles( String role )
         throws RoleNotFoundException, RBACException, RemoteException;
 

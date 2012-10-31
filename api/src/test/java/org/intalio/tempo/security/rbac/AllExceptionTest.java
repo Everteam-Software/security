@@ -152,7 +152,7 @@ public class AllExceptionTest extends TestCase {
         RBACConstants constant = new RBACConstants();
         assertEquals(RBACConstants.PROPERTY_DESCRIPTION, constant.PROPERTY_DESCRIPTION);
         assertEquals(RBACConstants.PROPERTY_EMAIL, constant.PROPERTY_EMAIL);
-        assertEquals(RBACConstants.PROPERTY_FULL_NAME, constant.PROPERTY_FULL_NAME);
+        assertEquals(RBACConstants.PROPERTY_NAME, constant.PROPERTY_NAME);
     }
 
 }
