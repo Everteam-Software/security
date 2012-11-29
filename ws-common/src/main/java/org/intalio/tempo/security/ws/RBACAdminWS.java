@@ -34,14 +34,16 @@ public class RBACAdminWS extends BaseWS {
      * @return
      */
     public OMElement modifyUser(OMElement requestEl) throws AxisFault {
-            OMParser request = new OMParser(requestEl);
-            String realm = request.getRequiredString(RBACAdminConstants.REALM);
-            String user = request.getRequiredString(RBACAdminConstants.USER);
-            String action = request.getRequiredString(RBACAdminConstants.ACTION);
-            LOG.debug("Realm: " + realm + " User: " + user + " Action " + action);
-            try {
-                RBACProvider usersRBACProvider = _securityProvider.getRBACProvider(realm);
-                RBACAdmin usersRBACAdmin = usersRBACProvider.getAdmin();
+        OMParser request = new OMParser(requestEl);
+        String realm = request.getRequiredString(RBACAdminConstants.REALM);
+        String user = request.getRequiredString(RBACAdminConstants.USER);
+        String action = request.getRequiredString(RBACAdminConstants.ACTION);
+        LOG.debug("Realm: " + realm + " User: " + user + " Action " + action);
+        try {
+            RBACProvider usersRBACProvider = _securityProvider.getRBACProvider(realm);
+            RBACAdmin usersRBACAdmin = usersRBACProvider.getAdmin();
+            synchronized (this) {
+                LOG.debug("Executing synchronized block");
                 if (!checkUserExists(user, usersRBACProvider)) {
                     if (action.equals(RBACAdminConstants.ADD_ACTION)) {
                         Property[] props = request.getProperties(RBACAdminConstants.DETAILS);
@@ -56,8 +58,10 @@ public class RBACAdminWS extends BaseWS {
                 } else {
                     if (action.equals(RBACAdminConstants.EDIT_ACTION)) {
                         Property[] props = request.getProperties(RBACAdminConstants.DETAILS);
-                        checkAssignedRoles(props, usersRBACProvider);
-                        usersRBACAdmin.setUserProperties(user, props);
+                        synchronized (this) {
+                            checkAssignedRoles(props, usersRBACProvider);
+                            usersRBACAdmin.setUserProperties(user, props);
+                        }
                     } else if (action.equals(RBACAdminConstants.DELETE_ACTION)) {
                         usersRBACAdmin.deleteUser(user);
                     } else if (action.equals(RBACAdminConstants.ADD_ACTION)) {
@@ -66,12 +70,16 @@ public class RBACAdminWS extends BaseWS {
                         throw new Fault(e, getUserExistsExceptionResponse(e));
                     }
                 }
-            } catch (RBACException e) {
-                throw new Fault(e, getRBACExceptionResponse(e));
-            } catch (RemoteException e) {
-                throw new Fault(e, getRemoteExceptionResponse(e));
+                LOG.debug("Executed synchronized block");
             }
-            return getResponseElement(RBACAdminConstants.SUCCESS);
+        } catch (RBACException e) {
+            LOG.error("Error occured while modifying user for user: " + user + " action " + action + " realm: " + realm, e);
+            throw new Fault(e, getRBACExceptionResponse(e));
+        } catch (RemoteException e) {
+            LOG.error("Error occured while modifying user for user: " + user + " action " + action + " realm: " + realm, e);
+            throw new Fault(e, getRemoteExceptionResponse(e));
+        }
+        return getResponseElement(RBACAdminConstants.SUCCESS);
     }
 
     /**This method performs either add, delete or edit action for role
@@ -83,28 +91,37 @@ public class RBACAdminWS extends BaseWS {
         String realm = request.getRequiredString(RBACAdminConstants.REALM);
         String role = request.getRequiredString(RBACAdminConstants.ROLE);
         String action = request.getRequiredString(RBACAdminConstants.ACTION);
+        LOG.debug("Realm: " + realm + " Role: " + role + " Action " + action);
         try {
             RBACProvider usersRBACProvider = _securityProvider.getRBACProvider(realm);
             RBACAdmin usersRBACAdmin = usersRBACProvider.getAdmin();
-            if (!checkRoleExists(role, usersRBACProvider)) {
-                if (action.equals(RBACAdminConstants.ADD_ACTION)) {
-                    usersRBACAdmin.addRole(role, request.getProperties(RBACAdminConstants.DETAILS));
-                } else if (action.equals(RBACAdminConstants.EDIT_ACTION)
-                        || action.equals(RBACAdminConstants.DELETE_ACTION)) {
-                    RoleNotFoundException e = new RoleNotFoundException("Role: " + role + " was not found.");
-                    LOG.error("Role: " + role + " was not found.");
-                    throw new Fault(e, getRoleNotFoundExceptionResponse(e));
+            synchronized (this) {
+                LOG.debug("Executing synchronized block");
+                if (!checkRoleExists(role, usersRBACProvider)) {
+                    if (action.equals(RBACAdminConstants.ADD_ACTION)) {
+                        synchronized (this) {
+                            usersRBACAdmin.addRole(role, request.getProperties(RBACAdminConstants.DETAILS));
+                        }
+                    } else if (action.equals(RBACAdminConstants.EDIT_ACTION)
+                            || action.equals(RBACAdminConstants.DELETE_ACTION)) {
+                        RoleNotFoundException e = new RoleNotFoundException("Role: " + role + " was not found.");
+                        LOG.error("Role: " + role + " was not found.");
+                        throw new Fault(e, getRoleNotFoundExceptionResponse(e));
+                    }
+                } else {
+                    if (action.equals(RBACAdminConstants.EDIT_ACTION)) {
+                        synchronized (this) {
+                            usersRBACAdmin.setRoleProperties(role, request.getProperties(RBACAdminConstants.DETAILS));
+                        }
+                    } else if (action.equals(RBACAdminConstants.DELETE_ACTION)) {
+                        usersRBACAdmin.deleteRole(role);
+                    } else if (action.equals(RBACAdminConstants.ADD_ACTION)) {
+                        RoleExistsException e = new RoleExistsException("Role: " + role + " already exists");
+                        LOG.error("Role: " + role + " already exists");
+                        throw new Fault(e, getRoleExistsExceptionResponse(e));
+                    }
                 }
-            } else {
-                if (action.equals(RBACAdminConstants.EDIT_ACTION)) {
-                    usersRBACAdmin.setRoleProperties(role, request.getProperties(RBACAdminConstants.DETAILS));
-                } else if (action.equals(RBACAdminConstants.DELETE_ACTION)) {
-                    usersRBACAdmin.deleteRole(role);
-                } else if (action.equals(RBACAdminConstants.ADD_ACTION)) {
-                    RoleExistsException e = new RoleExistsException("Role: " + role + " already exists");
-                    LOG.error("Role: " + role + " already exists");
-                    throw new Fault(e, getRoleExistsExceptionResponse(e));
-                }
+                LOG.debug("Executed synchronized block");
             }
         } catch (RBACException e) {
             LOG.error("Error occured while modifying role for role: " + role + " action " + action + " realm: " + realm, e);
@@ -359,7 +376,7 @@ public class RBACAdminWS extends BaseWS {
         boolean exists = true;
         try {
             Property[] props = usersRBACProvider.getQuery().roleProperties(role);
-            if (props == null || props.length == 0) {
+            if (props == null) {
                 exists = false;
             }
         } catch (RoleNotFoundException e) {

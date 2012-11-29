@@ -342,7 +342,11 @@ public class LDAPSecurityProvider implements SecurityProvider {
         if (forObject.equals("user")) {
             propertyName = LDAPProperties.SECURITY_LDAP_USER_PROP;
             id = LDAPProperties.SECURITY_LDAP_USER_ID;
-            properties.add( _env.get(LDAPProperties.SECURITY_LDAP_USER_CREDENTIAL+".0").split(":")[0]);
+            if (_env.contains(LDAPProperties.SECURITY_LDAP_USER_CREDENTIAL+".0")) {
+                properties.add( _env.get(LDAPProperties.SECURITY_LDAP_USER_CREDENTIAL+".0").split(":")[0]);
+            } else if (_env.contains(LDAPProperties.SECURITY_LDAP_USER_CREDENTIAL+".1")) {
+                properties.add( _env.get(LDAPProperties.SECURITY_LDAP_USER_CREDENTIAL+".1").split(":")[0]);
+            }
         } else if (forObject.equals("role")) {
             propertyName = LDAPProperties.SECURITY_LDAP_ROLE_PROP;
             id = LDAPProperties.SECURITY_LDAP_ROLE_ID;
@@ -366,5 +370,4 @@ public class LDAPSecurityProvider implements SecurityProvider {
         properties.remove(id);
         return properties;
     }
-
 }

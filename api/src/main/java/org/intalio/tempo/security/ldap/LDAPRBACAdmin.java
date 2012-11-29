@@ -1,6 +1,7 @@
 package org.intalio.tempo.security.ldap;
 
 import java.rmi.RemoteException;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.naming.NamingException;
@@ -25,12 +26,17 @@ public class LDAPRBACAdmin implements RBACAdmin {
 
     private String _baseDN;
     private LDAPSecurityProvider _provider;
-    private Map _config;
+    private Map<String,String> _env;
+    private HashMap<String,String> _keyValue;
 
-    public LDAPRBACAdmin(LDAPSecurityProvider provider, String baseDN, Map map) {
+    public LDAPRBACAdmin(LDAPSecurityProvider provider, String baseDN, Map<String,String> map) {
         _provider = provider;
         _baseDN = baseDN;
-        _config = map;
+        _env = map;
+        _keyValue = new HashMap<String,String>();
+        getLdapKeys(_keyValue,"user");
+        getLdapKeys(_keyValue,"role");
+
     }
 
     @Override
@@ -124,23 +130,23 @@ public class LDAPRBACAdmin implements RBACAdmin {
 
     }
 
-    static private Attributes getAttributes(Property[] properties) {
+    private Attributes getAttributes(Property[] properties) {
         BasicAttributes myAttri = new BasicAttributes(true);
         for (Property prop : properties)
-            myAttri.put(prop.getName(), prop.getValue());
+            myAttri.put(_keyValue.get(prop.getName()), prop.getValue());
         return myAttri;
     }
 
     private String getUserId(String user) {
-        String userBase = (String) _config.get(LDAPProperties.SECURITY_LDAP_USER_BASE);
-        String userId = (String) _config.get(LDAPProperties.SECURITY_LDAP_USER_ID);
+        String userBase = (String) _env.get(LDAPProperties.SECURITY_LDAP_USER_BASE);
+        String userId = (String) _env.get(LDAPProperties.SECURITY_LDAP_USER_ID);
         String dn = userId + "=" + user + "," + userBase;
         return dn;
     }
 
     private String getRoleId(String role) {
-        String roleBase = (String) _config.get(LDAPProperties.SECURITY_LDAP_ROLE_BASE);
-        String roleId = (String) _config.get(LDAPProperties.SECURITY_LDAP_ROLE_ID);
+        String roleBase = (String) _env.get(LDAPProperties.SECURITY_LDAP_ROLE_BASE);
+        String roleId = (String) _env.get(LDAPProperties.SECURITY_LDAP_ROLE_ID);
         String dn = roleId + "=" + role + "," + roleBase;
         return dn;
     }
@@ -173,13 +179,48 @@ public class LDAPRBACAdmin implements RBACAdmin {
             ModificationItem[] mods = new ModificationItem[props.length];
             int i = 0;
             for (Property prop : props) {
-                Attribute attri = new BasicAttribute(prop.getName(), prop.getValue());
+                Attribute attri = new BasicAttribute(_keyValue.get(prop.getName()), prop.getValue());
                 mods[i++] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, attri);
             }
             context.modifyAttributes(dn, mods);
         } catch (Exception e) {
             LOG.error("Error occured while modifying attributes for context", e);
             throw new RBACException(e);
+        }
+    }
+
+    public void getLdapKeys(HashMap<String,String> map, String forObject) {
+        String propertyName = "";
+        String id = "";
+        if (forObject.equals("user")) {
+            propertyName = LDAPProperties.SECURITY_LDAP_USER_PROP;
+            id = LDAPProperties.SECURITY_LDAP_USER_ID;
+            if (_env.containsKey(LDAPProperties.SECURITY_LDAP_USER_CREDENTIAL+".0")) {
+                map.put( _env.get(LDAPProperties.SECURITY_LDAP_USER_CREDENTIAL+".0").split(":")[0]
+                        ,_env.get(LDAPProperties.SECURITY_LDAP_USER_CREDENTIAL+".0").split(":")[0]);
+            } else if (_env.containsKey(LDAPProperties.SECURITY_LDAP_USER_CREDENTIAL+".1")) {
+                map.put( _env.get(LDAPProperties.SECURITY_LDAP_USER_CREDENTIAL+".1").split(":")[0]
+                        ,_env.get(LDAPProperties.SECURITY_LDAP_USER_CREDENTIAL+".1").split(":")[0]);
+            }
+        } else if (forObject.equals("role")) {
+            propertyName = LDAPProperties.SECURITY_LDAP_ROLE_PROP;
+            id = LDAPProperties.SECURITY_LDAP_ROLE_ID;
+        }
+        for (int i = 0; true; i++) {
+            String key = propertyName + '.' + i;
+            if (_env.containsKey(key)) {
+                String value = (String) _env.get(key);
+                String[] temp = value.split(":");
+                if(temp != null && temp.length > 0) {
+                    if (temp.length == 1) {
+                        map.put(value.split(":")[0],value.split(":")[0]);
+                    } else {
+                        map.put(value.split(":")[1],value.split(":")[0]);
+                    }
+                }
+            } else {
+                break;
+            }
         }
     }
 }
