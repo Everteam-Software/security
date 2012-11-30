@@ -49,7 +49,11 @@ public class SimpleRBACAdmin implements RBACAdmin {
         try {
             updateConfigFile(document);
         } catch (RBACException e) {
-            deleteUser(user);
+            try {
+                deleteRole(user);
+            } catch (Exception ex) {
+                LOG.error("Error occured while trying to rollback the changes", e);
+            }
             throw e;
         }
     }
@@ -67,7 +71,11 @@ public class SimpleRBACAdmin implements RBACAdmin {
         try {
             updateConfigFile(document);
         } catch (RBACException e) {
-            deleteRole(role);
+            try {
+                deleteRole(role);
+            } catch (Exception ex) {
+                LOG.error("Error occured while trying to rollback the changes", e);
+            }
             throw e;
         }
     }
@@ -146,7 +154,11 @@ public class SimpleRBACAdmin implements RBACAdmin {
         try {
             updateConfigFile(document);
         } catch (RBACException e) {
-            deleteUser(user);
+            try {
+                deleteRole(user);
+            } catch (Exception ex) {
+                LOG.error("Error occured while trying to rollback the changes", e);
+            }
             throw e;
         }
     }
@@ -158,7 +170,11 @@ public class SimpleRBACAdmin implements RBACAdmin {
         try {
             updateConfigFile(document);
         } catch (RBACException e) {
-            deleteRole(role);
+            try {
+                deleteRole(role);
+            } catch (Exception ex) {
+                LOG.error("Error occured while trying to rollback the changes", e);
+            }
             throw e;
         }
     }
@@ -169,21 +185,21 @@ public class SimpleRBACAdmin implements RBACAdmin {
             fos = new FileOutputStream(_securityProvider.getConfigFile());
             document.serialize(fos);
         } catch (Exception e) {
-            LOG.error("Error occured while writing to configuration file:" + e.getMessage());
+            LOG.error("Error occured while writing to configuration file:", e);
             throw new RBACException(e.getMessage(), e);
         } finally {
             try {
                 fos.flush();
                 fos.close();
             } catch (IOException e) {
-                LOG.error("Error occured while closing the outputstream:" + e.getMessage());
+                LOG.error("Error occured while closing the outputstream:", e);
                 throw new RBACException(e.getMessage(), e);
             }
         }
         try {
             _securityProvider.init();
         } catch (AuthenticationException e) {
-            LOG.error("Error occured reloading security configuration: " + e.getMessage());
+            LOG.error("Error occured reloading security configuration: ", e);
             throw new RBACException(e.getMessage(), e);
         }
     }
@@ -193,10 +209,10 @@ public class SimpleRBACAdmin implements RBACAdmin {
         try {
             parser = XMLInputFactory.newInstance().createXMLStreamReader(_securityProvider.getConfigStream());
         } catch (Exception e) {
-            LOG.error("Error occured while creating XMLStreamReader instance" + e.getMessage());
+            LOG.error("Error occured while creating XMLStreamReader instance", e);
             throw new RBACException(e.getMessage());
         } catch (FactoryConfigurationError e) {
-            LOG.error("Error occured while creating XMLStreamReader instance" + e.getMessage());
+            LOG.error("Error occured while creating XMLStreamReader instance", e);
             throw new RBACException(e.getMessage());
         }
         StAXOMBuilder builder = new StAXOMBuilder(parser);

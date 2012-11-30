@@ -342,9 +342,9 @@ public class LDAPSecurityProvider implements SecurityProvider {
         if (forObject.equals("user")) {
             propertyName = LDAPProperties.SECURITY_LDAP_USER_PROP;
             id = LDAPProperties.SECURITY_LDAP_USER_ID;
-            if (_env.contains(LDAPProperties.SECURITY_LDAP_USER_CREDENTIAL+".0")) {
+            if (_env.containsKey(LDAPProperties.SECURITY_LDAP_USER_CREDENTIAL+".0")) {
                 properties.add( _env.get(LDAPProperties.SECURITY_LDAP_USER_CREDENTIAL+".0").split(":")[0]);
-            } else if (_env.contains(LDAPProperties.SECURITY_LDAP_USER_CREDENTIAL+".1")) {
+            } else if (_env.containsKey(LDAPProperties.SECURITY_LDAP_USER_CREDENTIAL+".1")) {
                 properties.add( _env.get(LDAPProperties.SECURITY_LDAP_USER_CREDENTIAL+".1").split(":")[0]);
             }
         } else if (forObject.equals("role")) {
