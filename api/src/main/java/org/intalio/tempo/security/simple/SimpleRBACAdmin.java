@@ -46,7 +46,16 @@ public class SimpleRBACAdmin implements RBACAdmin {
         LOG.debug("got document object");
         addElement(USER, user, properties, document);
         LOG.debug("element added");
-        updateConfigFile(document);
+        try {
+            updateConfigFile(document);
+        } catch (RBACException e) {
+            try {
+                deleteRole(user);
+            } catch (Exception ex) {
+                LOG.error("Error occured while trying to rollback the changes", e);
+            }
+            throw e;
+        }
     }
 
     @Override
@@ -59,7 +68,16 @@ public class SimpleRBACAdmin implements RBACAdmin {
     public void addRole(String role, Property[] properties) throws RoleNotFoundException, RBACException, RemoteException {
         OMDocument document = getDocumentElement();
         addElement(ROLE, role, properties, document);
-        updateConfigFile(document);
+        try {
+            updateConfigFile(document);
+        } catch (RBACException e) {
+            try {
+                deleteRole(role);
+            } catch (Exception ex) {
+                LOG.error("Error occured while trying to rollback the changes", e);
+            }
+            throw e;
+        }
     }
 
     @Override
@@ -118,47 +136,71 @@ public class SimpleRBACAdmin implements RBACAdmin {
 
     @Override
     public void setUserProperties(String user, Property[] properties) throws UserNotFoundException, RBACException, RemoteException {
+        boolean passwordExists = false;
         SimpleDatabase sd = _securityProvider.getDatabase();
         String password = sd.getUser(IdentifierUtils.normalize(user, _realm, false, '\\')).getPassword();
         OMDocument document = deleteElement(USER, user);
         Property[] property = new Property[properties.length + 1];
         for (int i = 0; i < properties.length; i++) {
             property[i] = properties[i];
+            if (property[i].getName().equals(PASSWORD)) {
+                passwordExists = true;
+            }
         }
-        property[properties.length] = new Property(PASSWORD, password);
+        if (!passwordExists) {
+            property[properties.length] = new Property(PASSWORD, password);
+        }
         addElement(USER, user, property, document);
-        updateConfigFile(document);
+        try {
+            updateConfigFile(document);
+        } catch (RBACException e) {
+            try {
+                deleteRole(user);
+            } catch (Exception ex) {
+                LOG.error("Error occured while trying to rollback the changes", e);
+            }
+            throw e;
+        }
     }
 
     @Override
     public void setRoleProperties(String role, Property[] properties) throws RoleNotFoundException, RBACException, RemoteException {
         OMDocument document = deleteElement(ROLE, role);
         addElement(ROLE, role, properties, document);
-        updateConfigFile(document);
+        try {
+            updateConfigFile(document);
+        } catch (RBACException e) {
+            try {
+                deleteRole(role);
+            } catch (Exception ex) {
+                LOG.error("Error occured while trying to rollback the changes", e);
+            }
+            throw e;
+        }
     }
 
-    private synchronized void updateConfigFile(OMDocument document) throws RBACException {
+    private void updateConfigFile(OMDocument document) throws RBACException {
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(_securityProvider.getConfigFile());
             document.serialize(fos);
         } catch (Exception e) {
-            LOG.error("Error occured while writing to configuration file:" + e.getMessage());
-            throw new RBACException(e.getMessage());
+            LOG.error("Error occured while writing to configuration file:", e);
+            throw new RBACException(e.getMessage(), e);
         } finally {
             try {
                 fos.flush();
                 fos.close();
             } catch (IOException e) {
-                LOG.error("Error occured while closing the outputstream:" + e.getMessage());
-                throw new RBACException(e.getMessage());
+                LOG.error("Error occured while closing the outputstream:", e);
+                throw new RBACException(e.getMessage(), e);
             }
         }
         try {
             _securityProvider.init();
         } catch (AuthenticationException e) {
-            LOG.error("Error occured reloading security configuration: " + e.getMessage());
-            throw new RBACException(e.getMessage());
+            LOG.error("Error occured reloading security configuration: ", e);
+            throw new RBACException(e.getMessage(), e);
         }
     }
 
@@ -167,17 +209,17 @@ public class SimpleRBACAdmin implements RBACAdmin {
         try {
             parser = XMLInputFactory.newInstance().createXMLStreamReader(_securityProvider.getConfigStream());
         } catch (Exception e) {
-            LOG.error("Error occured while creating XMLStreamReader instance" + e.getMessage());
+            LOG.error("Error occured while creating XMLStreamReader instance", e);
             throw new RBACException(e.getMessage());
         } catch (FactoryConfigurationError e) {
-            LOG.error("Error occured while creating XMLStreamReader instance" + e.getMessage());
+            LOG.error("Error occured while creating XMLStreamReader instance", e);
             throw new RBACException(e.getMessage());
         }
         StAXOMBuilder builder = new StAXOMBuilder(parser);
         return builder.getDocument();
     }
 
-    private synchronized OMDocument deleteElement(String elementName, String elementValue) throws RBACException {
+    private OMDocument deleteElement(String elementName, String elementValue) throws RBACException {
         OMDocument document = getDocumentElement();
         OMElement root = document.getOMDocumentElement();
         Iterator<OMElement> itr = root.getChildrenWithLocalName("realm");
@@ -198,7 +240,7 @@ public class SimpleRBACAdmin implements RBACAdmin {
         return null;
     }
 
-    private synchronized void addElement(String elementName, String elementValue, Property[] elementProperties, OMDocument document) throws RBACException {
+    private void addElement(String elementName, String elementValue, Property[] elementProperties, OMDocument document) throws RBACException {
         OMElement root = document.getOMDocumentElement();
         Iterator<OMElement> itr = root.getChildrenWithLocalName("realm");
         OMFactory factory = OMAbstractFactory.getOMFactory();
@@ -209,9 +251,11 @@ public class SimpleRBACAdmin implements RBACAdmin {
                 OMAttribute identifier = factory.createOMAttribute("identifier", realm.getNamespace(), elementValue);
                 roleElement.addAttribute(identifier);
                 for (Property property : elementProperties) {
-                    OMElement propertyElement = factory.createOMElement(property.getName(), realm.getNamespace());
-                    propertyElement.setText(property.getValue().toString());
-                    roleElement.addChild(propertyElement);
+                    if (property != null) {
+                        OMElement propertyElement = factory.createOMElement(property.getName(), realm.getNamespace());
+                        propertyElement.setText(property.getValue().toString());
+                        roleElement.addChild(propertyElement);
+                    }
                 }
                 realm.addChild(roleElement);
                 return;
