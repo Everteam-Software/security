@@ -376,7 +376,7 @@ public class RBACAdminWS extends BaseWS {
         boolean exists = true;
         try {
             Property[] props = usersRBACProvider.getQuery().roleProperties(role);
-            if (props == null) {
+            if (props == null || props.length == 0) {
                 exists = false;
             }
         } catch (RoleNotFoundException e) {

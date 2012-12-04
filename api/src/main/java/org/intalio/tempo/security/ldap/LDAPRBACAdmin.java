@@ -137,8 +137,15 @@ public class LDAPRBACAdmin implements RBACAdmin {
 
     private Attributes getAttributes(Property[] properties) {
         BasicAttributes myAttri = new BasicAttributes(true);
-        for (Property prop : properties)
-            myAttri.put(_keyValue.get(prop.getName()), prop.getValue());
+        for (Property prop : properties) {
+            String key = _keyValue.get(prop.getName());
+            Attribute attr = myAttri.get(key);
+            if (attr == null) {
+                myAttri.put(new BasicAttribute(key, prop.getValue()));
+            } else {
+                attr.add(prop.getValue());
+            }
+        }
         return myAttri;
     }
 
