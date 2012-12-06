@@ -402,6 +402,8 @@ public class LoginController extends UIController {
             BindException errors) throws Exception {
         // Checking whether logged in
         ApplicationState state = getApplicationState(request);
+        LOG.debug("logIn() state=" + state);
+
         if (state.getCurrentUser() != null) {
             return redirectAfterLogin(request, response);
         }
@@ -417,6 +419,7 @@ public class LoginController extends UIController {
                 }
                 setSingleLoginCookie(response, user.getToken());
                 String prevAction = state.getPreviousAction();
+                LOG.debug("logIn() prevAction=" + prevAction);
                 if (prevAction == null) {
                     return redirectAfterLogin(request, response);
                 } else {
@@ -465,7 +468,10 @@ public class LoginController extends UIController {
             throws Exception {
         ApplicationState state = getApplicationState(request);
         LOG.debug("showForm() state=" + state);
-
+        String preAction = request.getParameter("prevAction");
+        if(preAction != null && !preAction.equals("")) {
+            state.setPreviousAction(preAction);
+        }
         // Checking whether logged in
         User user = state.getCurrentUser();
 
