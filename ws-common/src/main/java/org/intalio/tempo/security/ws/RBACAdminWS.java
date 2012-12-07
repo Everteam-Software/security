@@ -47,7 +47,6 @@ public class RBACAdminWS extends BaseWS {
                 if (!checkUserExists(user, usersRBACProvider)) {
                     if (action.equals(RBACAdminConstants.ADD_ACTION)) {
                         Property[] props = request.getProperties(RBACAdminConstants.DETAILS);
-                        checkAssignedRoles(props, usersRBACProvider);
                         usersRBACAdmin.addUser(user, props);
                     } else if (action.equals(RBACAdminConstants.EDIT_ACTION)
                             || action.equals(RBACAdminConstants.DELETE_ACTION)) {
@@ -58,10 +57,7 @@ public class RBACAdminWS extends BaseWS {
                 } else {
                     if (action.equals(RBACAdminConstants.EDIT_ACTION)) {
                         Property[] props = request.getProperties(RBACAdminConstants.DETAILS);
-                        synchronized (this) {
-                            checkAssignedRoles(props, usersRBACProvider);
-                            usersRBACAdmin.setUserProperties(user, props);
-                        }
+                        usersRBACAdmin.setUserProperties(user, props);
                     } else if (action.equals(RBACAdminConstants.DELETE_ACTION)) {
                         usersRBACAdmin.deleteUser(user);
                     } else if (action.equals(RBACAdminConstants.ADD_ACTION)) {
@@ -383,15 +379,6 @@ public class RBACAdminWS extends BaseWS {
             exists = false;
         }
         return exists;
-    }
-
-    private static void checkAssignedRoles(Property[] props, RBACProvider usersRBACProvider) throws RemoteException, RBACException {
-        for (Property prop : props) {
-            if (prop.getName().equals("assignRole")) {
-                if (!checkRoleExists(prop.getValue().toString(), usersRBACProvider))
-                    throw new RBACException("Assigned role:" + prop.getValue().toString() + " does not exists");
-            }
-        }
     }
 
     private static OMElement elementProperty(String name, String Value) {
