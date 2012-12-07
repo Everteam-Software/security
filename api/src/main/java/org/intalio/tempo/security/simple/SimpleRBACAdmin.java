@@ -19,9 +19,11 @@ import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.intalio.tempo.security.Property;
 import org.intalio.tempo.security.authentication.AuthenticationException;
 import org.intalio.tempo.security.rbac.RBACAdmin;
+import org.intalio.tempo.security.rbac.RBACConstants;
 import org.intalio.tempo.security.rbac.RBACException;
 import org.intalio.tempo.security.rbac.RoleNotFoundException;
 import org.intalio.tempo.security.rbac.UserNotFoundException;
+import org.intalio.tempo.security.rbac.provider.RBACProvider;
 import org.intalio.tempo.security.util.IdentifierUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +44,7 @@ public class SimpleRBACAdmin implements RBACAdmin {
 
     @Override
     public void addUser(String user, Property[] properties) throws RBACException, RemoteException {
+        checkValidRoles(properties);
         OMDocument document = getDocumentElement();
         LOG.debug("got document object");
         addElement(USER, user, properties, document);
@@ -66,6 +69,7 @@ public class SimpleRBACAdmin implements RBACAdmin {
 
     @Override
     public void addRole(String role, Property[] properties) throws RoleNotFoundException, RBACException, RemoteException {
+        checkValidRoles(properties);
         OMDocument document = getDocumentElement();
         addElement(ROLE, role, properties, document);
         try {
@@ -136,6 +140,7 @@ public class SimpleRBACAdmin implements RBACAdmin {
 
     @Override
     public void setUserProperties(String user, Property[] properties) throws UserNotFoundException, RBACException, RemoteException {
+        checkValidRoles(properties);
         boolean passwordExists = false;
         SimpleDatabase sd = _securityProvider.getDatabase();
         String password = sd.getUser(_realm+"\\"+user).getPassword();
@@ -165,6 +170,7 @@ public class SimpleRBACAdmin implements RBACAdmin {
 
     @Override
     public void setRoleProperties(String role, Property[] properties) throws RoleNotFoundException, RBACException, RemoteException {
+        checkValidRoles(properties);
         OMDocument document = deleteElement(ROLE, role);
         addElement(ROLE, role, properties, document);
         try {
@@ -263,4 +269,26 @@ public class SimpleRBACAdmin implements RBACAdmin {
         }
     }
 
+    private void checkValidRoles(Property[] props) throws RemoteException, RBACException {
+        for (Property prop : props) {
+            if (prop.getName().equals(RBACConstants.PROPERTY_ASSIGN_ROLES)
+                    || prop.getName().equals(RBACConstants.PROPERTY_DESCENDANT_ROLE)) {
+                if (!checkRoleExists(prop.getValue().toString()))
+                    throw new RBACException("Mentioned role: " + prop.getValue().toString() + " does not exists");
+            }
+        }
+    }
+
+    private boolean checkRoleExists(String role) throws RemoteException, RBACException {
+        boolean exists = true;
+        try {
+            Property[] props = _securityProvider.getRBACProvider(_realm).getQuery().roleProperties(role);
+            if (props == null || props.length == 0) {
+                exists = false;
+            }
+        } catch (RoleNotFoundException e) {
+            exists = false;
+        }
+        return exists;
+    }
 }
