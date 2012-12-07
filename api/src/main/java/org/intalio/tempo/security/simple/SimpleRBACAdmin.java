@@ -138,7 +138,7 @@ public class SimpleRBACAdmin implements RBACAdmin {
     public void setUserProperties(String user, Property[] properties) throws UserNotFoundException, RBACException, RemoteException {
         boolean passwordExists = false;
         SimpleDatabase sd = _securityProvider.getDatabase();
-        String password = sd.getUser(IdentifierUtils.normalize(user, _realm, false, '\\')).getPassword();
+        String password = sd.getUser(_realm+"\\"+user).getPassword();
         OMDocument document = deleteElement(USER, user);
         Property[] property = new Property[properties.length + 1];
         for (int i = 0; i < properties.length; i++) {
