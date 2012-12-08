@@ -77,7 +77,7 @@ class LDAPRBACProvider implements RBACProvider, LDAPProperties {
         if (!(config instanceof Map))
             throw new IllegalArgumentException("Configuration is expected to be a Map");
         _query = new LDAPRBACQuery((Map) config);
-        _rbacAdmin = new LDAPRBACAdmin(_engine.getProvider(),_baseDN, (Map<String,String>) config);
+        _rbacAdmin = new LDAPRBACAdmin(_engine.getProvider(),_baseDN, (Map<String,String>) config, _realm);
     }
 
     /**

@@ -86,25 +86,31 @@ public final class Property
 	}
 
 
-    /**
+	/**
      * Return true if this object is equal to another.
      */
-    public boolean equals( Object obj )
-    {
-        Property other;
-        
-        if ( obj instanceof Property == false ) {
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
             return false;
-        }
-        
-        other = (Property) obj;
-        if ( other._value == null ) {
-			return ( other._name.equals( this._name ) &&
-					 this._value == null );
-        }
-        return ( other._name.equals( this._name ) &&
-                 other._value.equals( this._value ) );
+        if (getClass() != obj.getClass())
+            return false;
+        Property other = (Property) obj;
+        if (_name == null) {
+            if (other._name != null)
+                return false;
+        } else if (!_name.equals(other._name))
+            return false;
+        if (_value == null) {
+            if (other._value != null)
+                return false;
+        } else if (!_value.equals(other._value))
+            return false;
+        return true;
     }
+
 
     /**
      * Obtain a String representation of this Property
@@ -115,13 +121,17 @@ public final class Property
     {
         return "{"+_name+", "+_value+"}";
     }
-    
+
     /**
      * Return a hash code for this object.
      */
-    public int hashCode()
-    {
-        return _name.hashCode();
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((_name == null) ? 0 : _name.hashCode());
+        result = prime * result + ((_value == null) ? 0 : _value.hashCode());
+        return result;
     }
     
 }
