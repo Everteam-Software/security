@@ -54,7 +54,7 @@ public class SimpleDatabase
     /**
      * Whether identifiers are case-sensitive.
      */
-    private boolean _caseSensitive = false;
+    private boolean _caseSensitive = true;
     
     
     /**
@@ -108,7 +108,8 @@ public class SimpleDatabase
 	 */
 	public void setCaseSensitive( String value )
 	{
-		_caseSensitive = "true".equals( value.toLowerCase() );
+	    // Now we support only case sensitive users and roles. So case sensitive property in security.xml file is invalid now.
+	    //_caseSensitive = "true".equals( value.toLowerCase() );
 	}
 
 
