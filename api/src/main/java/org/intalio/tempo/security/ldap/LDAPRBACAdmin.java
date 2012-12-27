@@ -2,7 +2,10 @@ package org.intalio.tempo.security.ldap;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.naming.Context;
@@ -30,11 +33,13 @@ public class LDAPRBACAdmin implements RBACAdmin {
     protected final static Logger LOG = LoggerFactory.getLogger(LDAPRBACAdmin.class);
 
     private String _baseDN;
+    private String _realm;
     private LDAPSecurityProvider _provider;
     private Map<String, String> _env;
     private HashMap<String, String> _keyValue;
 
-    public LDAPRBACAdmin(LDAPSecurityProvider provider, String baseDN, Map<String, String> map) {
+    public LDAPRBACAdmin(LDAPSecurityProvider provider, String baseDN, Map<String, String> map, String realm) {
+        _realm = realm;
         _provider = provider;
         _baseDN = baseDN;
         _env = map;
@@ -124,21 +129,34 @@ public class LDAPRBACAdmin implements RBACAdmin {
     @Override
     public void setUserProperties(String user, Property[] properties) throws UserNotFoundException, RBACException, RemoteException {
         String dn = getUserId(user);
-        modifyAttributes(_env.get(LDAPProperties.SECURITY_LDAP_USER_BASE), dn, properties);
+        Property[] oldProps = _provider.getRBACProvider(_realm).getQuery().userProperties(user);
+        List<Property> oldOnes = new ArrayList<Property>(Arrays.asList(oldProps));
+        List<Property> newOnes = new ArrayList<Property>(Arrays.asList(properties));
+        modifyAttributes(dn, oldOnes, newOnes);
 
     }
 
     @Override
     public void setRoleProperties(String role, Property[] properties) throws RoleNotFoundException, RBACException, RemoteException {
         String dn = getRoleId(role);
-        modifyAttributes(_env.get(LDAPProperties.SECURITY_LDAP_ROLE_BASE), dn, properties);
+        Property[] oldProps = _provider.getRBACProvider(_realm).getQuery().roleProperties(role);
+        List<Property> oldOnes = new ArrayList<Property>(Arrays.asList(oldProps));
+        List<Property> newOnes = new ArrayList<Property>(Arrays.asList(properties));
+        modifyAttributes( dn, oldOnes, newOnes);
 
     }
 
     private Attributes getAttributes(Property[] properties) {
         BasicAttributes myAttri = new BasicAttributes(true);
-        for (Property prop : properties)
-            myAttri.put(_keyValue.get(prop.getName()), prop.getValue());
+        for (Property prop : properties) {
+            String key = _keyValue.get(prop.getName());
+            Attribute attr = myAttri.get(key);
+            if (attr == null) {
+                myAttri.put(new BasicAttribute(key, prop.getValue()));
+            } else {
+                attr.add(prop.getValue());
+            }
+        }
         return myAttri;
     }
 
@@ -186,7 +204,7 @@ public class LDAPRBACAdmin implements RBACAdmin {
         }
     }
 
-    private void modifyAttributes(String base, String dn, Property[] props) throws RBACException {
+    private void modifyAttributes(String dn, List<Property> oldProps, List<Property> newProps) throws RBACException {
         DirContext root = null;
         try {
             String password = null;
@@ -198,31 +216,67 @@ public class LDAPRBACAdmin implements RBACAdmin {
             root = _provider.getRootContext();
             DirContext context = getContext(root, _baseDN);
             ArrayList<ModificationItem> mods = new ArrayList<ModificationItem>();
-            int replace = 0 ,i = 0 ;
-            String filter = dn.split(",")[0];
-            ArrayList<String> attributeList = getAttributeList(context, base, filter);
-            for (Property prop : props) {
-                String name = _keyValue.get(prop.getName());
-                if (!name.toLowerCase().contains("objectclass")) {
-                    if (( i = attributeList.indexOf(name.toLowerCase())) != -1) {
-                        replace = DirContext.REPLACE_ATTRIBUTE;
-                        attributeList.remove(i);
-                        LOG.debug("Adding to replace name" +name);
-                    } else {
-                        replace = DirContext.ADD_ATTRIBUTE;
-                        LOG.debug("Adding to add name" +name);
+            HashMap<String, Attribute> attris = new HashMap<String, Attribute>();
+            Iterator<Property> iter = newProps.iterator();
+            while(iter.hasNext()){
+                Property nProp = iter.next();
+                String name = _keyValue.get(nProp.getName());
+                LOG.debug("Iterating new property name: " +name+" value: "+nProp.getValue());
+
+                if (name.equalsIgnoreCase("objectclass")) {
+                    if(oldProps.contains(nProp)) {
+                        oldProps.remove(nProp);
                     }
-                    Attribute attri = new BasicAttribute(name, prop.getValue());
-                    mods.add(new ModificationItem(replace, attri));
+                    iter.remove();
+                } else if (name.equalsIgnoreCase(password)) {
+                    Attribute attri = new BasicAttribute(name, nProp.getValue());
+                    mods.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE, attri));
+                    iter.remove();
+                } else {
+                    if(oldProps.contains(nProp)) {
+                        oldProps.remove(nProp);
+                        iter.remove();
+                        continue;
+                    } else {
+                        boolean found = false;
+                        int whatToDo = 0;
+                        Iterator<Property> oIter = oldProps.iterator();
+                        while(oIter.hasNext()){
+                            Property oProp = oIter.next();
+                            LOG.debug("new property: " +nProp.toString());
+                            LOG.debug("Old property: " +oProp.toString());
+
+                            if(name.equalsIgnoreCase(_keyValue.get(oProp.getName()))) {
+                                LOG.debug("Adding to replace name: " +name);
+                                oIter.remove();
+                                whatToDo = DirContext.REPLACE_ATTRIBUTE;
+                                found = true;
+                                break;
+                            }
+                        }
+                        if(!found) {
+                            whatToDo = DirContext.ADD_ATTRIBUTE;
+                            LOG.debug("Adding to add name: " +name);
+                        }
+                        if(attris.containsKey(name)) {
+                            Attribute attri = attris.get(name);
+                            attri.add(nProp.getValue());
+                            LOG.debug("Adding to existing attribute: " +name);
+                        } else {
+                            Attribute attri = new BasicAttribute(name, nProp.getValue());
+                            mods.add(new ModificationItem(whatToDo, attri));
+                            attris.put(name, attri);
+                        }
+                        iter.remove();
+                    }
                 }
             }
-            if(attributeList.size()>0) {
-                for(String attributeId: attributeList) {
-                    if (!(attributeId.toLowerCase().contains("objectclass") || attributeId.toLowerCase().contains(password.toLowerCase()))) {
-                    Attribute attri = new BasicAttribute(attributeId);
+            for (Property oProp : oldProps) {
+                String name = oProp.getName();
+                if(!name.equalsIgnoreCase("objectclass")) {
+                    Attribute attri = new BasicAttribute(name);
                     mods.add(new ModificationItem(DirContext.REMOVE_ATTRIBUTE, attri));
-                    LOG.debug("Adding to remove name" +attributeId);
-                    }
+                    LOG.debug("Adding to remove name: " +name);
                 }
             }
             context.modifyAttributes(dn, mods.toArray(new ModificationItem[mods.size()]));
@@ -264,24 +318,6 @@ public class LDAPRBACAdmin implements RBACAdmin {
                 break;
             }
         }
-    }
-
-    private ArrayList<String> getAttributeList(DirContext context, String base, String filter) throws NamingException {
-        ArrayList<String> returnList = new ArrayList<String>();
-        String[] filterArray = filter.split("=");
-        Attributes matchAttrs = new BasicAttributes(true); // ignore attribute name case
-
-        matchAttrs.put(new BasicAttribute(filterArray[0], filterArray[1]));
-        NamingEnumeration answer = context.search(base, matchAttrs);
-        SearchResult sr = (SearchResult) answer.next();
-        Attributes attrs = sr.getAttributes();
-        NamingEnumeration<Attribute> attributes = (NamingEnumeration<Attribute>) attrs.getAll();
-        while (attributes.hasMore()) {
-            String id = attributes.next().getID();
-            LOG.debug("Adding key name: " +id);
-            returnList.add(id.toLowerCase());
-        }
-        return returnList;
     }
 
     private synchronized DirContext getContext(DirContext root, String branch) throws NamingException {
