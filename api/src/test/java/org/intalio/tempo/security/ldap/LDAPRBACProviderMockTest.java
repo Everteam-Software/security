@@ -466,16 +466,18 @@ public class LDAPRBACProviderMockTest extends TestCase {
 			rbacProvider.getAdmin();
 		}catch(Exception e){
 			ex = e;
+			assertEquals(ex.getClass(), RuntimeException.class);
 		}
-		assertEquals(ex.getClass(), RuntimeException.class);
+		
 		
 		ex = null;
 		try{
 			rbacProvider.getRuntime();
 		}catch(Exception e){
 			ex = e;
+			assertEquals(ex.getClass(), RuntimeException.class);
 		}
-		assertEquals(ex.getClass(), RuntimeException.class);
+		
 	}
 	
 	public void testDispose()throws Exception{
