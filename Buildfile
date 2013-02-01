@@ -4,7 +4,13 @@ require "buildr/cobertura"
 # Keep this structure to allow the build system to update version numbers.
 VERSION_NUMBER = "6.5.03-SNAPSHOT"
 
-require "dependencies.rb"
+DP_VERSION_NUMBER="1.0.4"
+DEPENDENCIES = "#{ENV['HOME']}/.m2/repository/org/intalio/common/dependencies/#{DP_VERSION_NUMBER}/dependencies-#{DP_VERSION_NUMBER}.rb"
+unless ENV["M2_REPO"] != ''
+  DEPENDENCIES = "#{ENV['M2_REPO']}/org/intalio/common/dependencies/#{DP_VERSION_NUMBER}/dependencies-#{DP_VERSION_NUMBER}.rb"
+end
+load DEPENDENCIES
+
 require "repositories.rb"
 
 desc "Security"
