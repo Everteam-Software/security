@@ -22,6 +22,7 @@ import org.intalio.tempo.security.authentication.AuthenticationException;
 import org.intalio.tempo.security.rbac.RBACConstants;
 import org.intalio.tempo.security.token.TokenService;
 import org.intalio.tempo.security.util.PropertyUtils;
+import org.jasypt.util.text.BasicTextEncryptor;
 import org.jmock.Expectations;
 import org.junit.Assert;
 import org.junit.runner.RunWith;
@@ -83,8 +84,10 @@ public class TokenServiceTest extends TestCase {
     @Specification
     public void testTokenServiceWithManyRoles() throws Exception {
         TokenService service = getTokenService();
-
-        String token = service.authenticateUser("proto\\ADK", "ADK");
+        BasicTextEncryptor encryptor = new BasicTextEncryptor();
+        // setPassword uses hash to decrypt password which should be same as hash of encryptor
+		encryptor.setPassword("IntalioEncryptedpassword#123");
+		String token = service.authenticateUser("proto\\ADK", encryptor.encrypt("ADK"));
         System.out.println(token.length());
         assertNotNull(token);
 
@@ -110,15 +113,17 @@ public class TokenServiceTest extends TestCase {
         Property[] props;
 
         service = getTokenService();
-
+        BasicTextEncryptor encryptor = new BasicTextEncryptor();
+        // setPassword uses hash to decrypt password which should be same as hash of encryptor
+		encryptor.setPassword("IntalioEncryptedpassword#123");
         // authenticate
-        token = service.authenticateUser("exolab\\castor", "castor");
+        token = service.authenticateUser("exolab\\castor", encryptor.encrypt("castor"));
         assertNotNull(token);
         assertTrue(token.length() > 0);
 
         // negative authenticate test (invalid password)
         try {
-            badToken = service.authenticateUser("exolab\\castor", "BAD_PASSWORD");
+            badToken = service.authenticateUser("exolab\\castor", encryptor.encrypt("BAD_PASSWORD"));
             throw new Exception("Negative authenticate test failed: " + badToken);
         } catch (AuthenticationException except) {
             // expected exception
