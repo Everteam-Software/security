@@ -24,6 +24,8 @@ public class User implements Serializable {
     private String _token;
 
     private boolean isWorkFlowAdmin;
+    
+    private String _displayName;
 
     public User(String name, String[] roles, String token) {
         _name = name;
@@ -36,6 +38,14 @@ public class User implements Serializable {
         _roles = copyArray(roles);
         _token = token;
         this.isWorkFlowAdmin = isWorkFlowAdmin;
+    }
+    
+    public User(String name, String[] roles, String token, boolean isWorkFlowAdmin, String displayName) {
+        _name = name;
+        _roles = copyArray(roles);
+        _token = token;
+        this.isWorkFlowAdmin = isWorkFlowAdmin;
+        _displayName = displayName;
     }
 
     public String getName() {
@@ -80,4 +90,14 @@ public class User implements Serializable {
         System.arraycopy(a, 0, b, 0, a.length);
         return b;
     }
+
+	public String getDisplayName() {
+		return _displayName;
+	}
+
+	public void setDisplayName(String _displayName) {
+		this._displayName = _displayName;
+	}
+    
+    
 }
