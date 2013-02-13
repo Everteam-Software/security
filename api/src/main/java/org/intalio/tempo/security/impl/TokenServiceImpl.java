@@ -127,8 +127,8 @@ public class TokenServiceImpl implements TokenService {
         // TODO we should use _realms to normalize
 //        user = IdentifierUtils.normalize(user, _realms.getDefaultRealm(), false, '\\');
 	    boolean caseSensitive = true;
-	    if(_realms.getSecurityProviders().get(0) instanceof SimpleSecurityProvider && !((SimpleSecurityProvider)_realms.getSecurityProviders().get(0)).getDatabase().isCaseSensitive())
-        caseSensitive = false;
+	    String realms = (IdentifierUtils.getRealm(user).equals(""))?_realms.getDefaultRealm():IdentifierUtils.getRealm(user);
+        caseSensitive = _realms.getSecurityProvider(realms).isCaseSensitive();
 	    user = IdentifierUtils.normalize(user, _realms.getDefaultRealm(), caseSensitive, '\\');
 
         // place session information in token
