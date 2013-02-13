@@ -66,7 +66,8 @@ public class LDAPSecurityProvider implements SecurityProvider {
     
     private Map<String,LDAPAuthenticationProvider> _auths;
     
-    
+    private boolean caseSensitive = false;
+
     /**
      * Constructor
      */
@@ -369,5 +370,14 @@ public class LDAPSecurityProvider implements SecurityProvider {
         }
         properties.remove(id);
         return properties;
+    }
+
+    public void setCaseSensitive(boolean caseSensitive) {
+        this.caseSensitive = caseSensitive;
+    }
+
+    @Override
+    public boolean isCaseSensitive() {
+        return caseSensitive;
     }
 }
