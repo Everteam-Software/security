@@ -58,6 +58,8 @@ public final class SimpleSecurityProvider
      */
     private HashMap<String,RBACProvider> _rbacMap;
 
+    private boolean caseSensitive = false;
+
     /**
      * Authentication providders: Map of { String, AuthenticationProvider }.
      */
@@ -310,6 +312,7 @@ public final class SimpleSecurityProvider
 			LOG.info( "Reload security database " + _filename );
 		}		
 		try {
+		    SimpleDatabase.setCaseSensitive(caseSensitive);
 			_database = SimpleDatabase.load( getConfigStream() );
 		} catch ( Exception except ) {
 			LOG.error( "Error reloading security database " + _filename, except );
@@ -448,6 +451,15 @@ public final class SimpleSecurityProvider
             properties.add(RBACConstants.PROPERTY_DESCENDANT_ROLE);
         }
         return properties;
+    }
+
+    public void setCaseSensitive(boolean caseSensitive) {
+        this.caseSensitive = caseSensitive;
+    }
+
+    @Override
+    public boolean isCaseSensitive() {
+        return caseSensitive;
     }
     
 }
