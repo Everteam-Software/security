@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -73,6 +75,10 @@ public class LoginController extends UIController {
     private String _defaultRedirectAfterLogin;
 
     private String _loginPageURL;
+    
+    public static String  _displayName = "{user}";
+    
+    private static final Pattern DISPLAY_NAME_REGEX = Pattern.compile("\\{(.+?)\\}");
 
     private static SecureRandom _random;
 
@@ -196,6 +202,29 @@ public class LoginController extends UIController {
     public static String extractUser(Property[] props) {
         return extractProperty(AuthenticationConstants.PROPERTY_USER, props);
     }
+    
+    public static String extractUserDisplayName(Property[] props) {
+    	String displayName = StringUtils.trimToNull(_displayName);
+    	List<String> attributes = getAttributeValues(displayName);
+    	for (String attribute : attributes) {
+    		String propertyValue = extractProperty(attribute, props);
+    		if(propertyValue == null)
+    			propertyValue = "";
+    		displayName = StringUtils.trimToNull(displayName.replace("{"+attribute+"}", propertyValue));
+		}
+    	if(displayName == null)
+        	displayName = extractUser(props);
+    	return displayName;
+    }
+    
+    private static List<String> getAttributeValues(String str) {
+	    final List<String> tagValues = new ArrayList<String>();
+	    final Matcher matcher = DISPLAY_NAME_REGEX.matcher(str);
+	    while (matcher.find()) {
+	        tagValues.add(matcher.group(1));
+	    }
+	    return tagValues;
+	}
 
     public static String[] extractRoles(Property[] props) {
         String rolesCommaList = extractProperty(AuthenticationConstants.PROPERTY_ROLES, props);
@@ -247,9 +276,10 @@ public class LoginController extends UIController {
                 try {
                     Property[] props = _tokenService.getTokenProperties(token);
                     String name = extractUser(props);
+                    String displayName = extractUserDisplayName(props);
                     String[] roles = extractRoles(props);
                     Property isWorkFlowAdmin = PropertyUtils.getProperty(props, "isWorkflowAdmin");
-                    user = new User(name, roles, token, Boolean.parseBoolean(isWorkFlowAdmin.getValue().toString()));
+                    user = new User(name, roles, token, Boolean.parseBoolean(isWorkFlowAdmin.getValue().toString()), displayName);
                 } catch (Exception ex) {
                     LOG.error("Exception while verifying security token: "+ex);
                 }
@@ -314,9 +344,10 @@ public class LoginController extends UIController {
             }
 
             String name = extractUser(props);
+            String displayName = extractUserDisplayName(props);
             String[] roles = extractRoles(props);
             Property isWorkFlowAdmin = PropertyUtils.getProperty(props, "isWorkflowAdmin");
-            User user = new User(name, roles, token, Boolean.parseBoolean(isWorkFlowAdmin.getValue().toString()));
+            User user = new User(name, roles, token, Boolean.parseBoolean(isWorkFlowAdmin.getValue().toString()), displayName);
             if (grantedRoles.length > 0 && !user.hasOneRoleOf(grantedRoles)) {
                 throw new SecurityException("User does not have one of the following role: "
                         + StringArrayUtils.toCommaDelimited(grantedRoles));
@@ -518,6 +549,14 @@ public class LoginController extends UIController {
         BPMS_DESCRIPTOR_PARSER.addBpmsBuildVersionsPropertiesToMap(model);
         return new ModelAndView(Constants.LOGIN_VIEW, model);
     }
+
+    public String getDisplayName() {
+		return _displayName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this._displayName = displayName;
+	}
 
     public static class LoginValidator implements org.springframework.validation.Validator {
         private static final String USERNAME_PARAM = "username";
