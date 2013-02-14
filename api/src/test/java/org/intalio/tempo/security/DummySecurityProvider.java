@@ -51,4 +51,10 @@ public class DummySecurityProvider implements SecurityProvider{
         return null;
     }
 
+	@Override
+	public boolean isCaseSensitive() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }
