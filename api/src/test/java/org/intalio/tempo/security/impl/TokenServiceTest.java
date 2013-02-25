@@ -22,6 +22,7 @@ import org.intalio.tempo.security.authentication.AuthenticationException;
 import org.intalio.tempo.security.rbac.RBACConstants;
 import org.intalio.tempo.security.token.TokenService;
 import org.intalio.tempo.security.util.PropertyUtils;
+import org.jasypt.util.text.BasicTextEncryptor;
 import org.jmock.Expectations;
 import org.junit.Assert;
 import org.junit.runner.RunWith;
@@ -82,20 +83,22 @@ public class TokenServiceTest extends TestCase {
 
     @Specification
     public void testTokenServiceWithManyRoles() throws Exception {
-        TokenService service = getTokenService();
+         TokenService service = getTokenService();
+         BasicTextEncryptor encryptor = new BasicTextEncryptor();
+         // setPassword uses hash to decrypt password which should be same as hash of encryptor
+          encryptor.setPassword("IntalioEncryptedpassword#123");
+          String token = service.authenticateUser("proto\\ADK", encryptor.encrypt("ADK"));
+         System.out.println(token.length());
+         assertNotNull(token);
 
-        String token = service.authenticateUser("proto\\ADK", "ADK");
-        System.out.println(token.length());
-        assertNotNull(token);
+         System.out.println(token);
 
-        System.out.println(token);
-
-        assertTrue(token.length() > 0);
-        // verify the token is not too big
-        assertTrue(token.length() < 1000);
-        // check we can create a valid URI with this token
-        URI uri = URI.create("http://localhost:8080/init.xpl?token=" + token);
-        assertNotNull(uri);
+         assertTrue(token.length() > 0);
+         // verify the token is not too big
+         assertTrue(token.length() < 1000);
+         // check we can create a valid URI with this token
+         URI uri = URI.create("http://localhost:8080/init.xpl?token=" + token);
+         assertNotNull(uri);
     }
 
     /**
@@ -111,14 +114,17 @@ public class TokenServiceTest extends TestCase {
 
         service = getTokenService();
 
+        BasicTextEncryptor encryptor = new BasicTextEncryptor();
+        // setPassword uses hash to decrypt password which should be same as hash of encryptor
+        encryptor.setPassword("IntalioEncryptedpassword#123");
         // authenticate
-        token = service.authenticateUser("exolab\\castor", "castor");
+        token = service.authenticateUser("exolab\\castor", encryptor.encrypt("castor"));
         assertNotNull(token);
         assertTrue(token.length() > 0);
 
         // negative authenticate test (invalid password)
         try {
-            badToken = service.authenticateUser("exolab\\castor", "BAD_PASSWORD");
+            badToken = service.authenticateUser("exolab\\castor",  encryptor.encrypt("BAD_PASSWORD"));
             throw new Exception("Negative authenticate test failed: " + badToken);
         } catch (AuthenticationException except) {
             // expected exception
@@ -146,6 +152,16 @@ public class TokenServiceTest extends TestCase {
         assertNotNull(token);
         assertTrue(token.length() > 0);
 
+        //check token for roles, when caseSensitive is false
+        //the user anonymous has assign role PARTICIPANT, this we must get in lower case as caseSensitive is false
+        token = service.authenticateUser("exolab\\anonymous", encryptor.encrypt("anonymous"));
+        assertNotNull(token);
+        assertTrue(token.length() > 0);
+        Property[] properties = service.getTokenProperties(token);
+        Property property = PropertyUtils.getProperty(properties, "roles");
+
+        assertNotNull(property);
+        assertEquals(property.getValue(),"exolab\\participant");
     }
 
     @Subject
