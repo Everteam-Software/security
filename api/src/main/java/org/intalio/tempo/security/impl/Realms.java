@@ -49,7 +49,8 @@ public class Realms
      */
     private String _defaultRealm = "default";
     
-    
+    private boolean caseSensitive = false;
+
     public Realms()
     {
         // nothing
@@ -66,7 +67,7 @@ public class Realms
             String[] realms = provider.getRealms();
             for ( int i=0; i<realms.length; i++ ) {
 //                _realms.put( realms[i].toLowerCase(), provider );
-                if(provider instanceof SimpleSecurityProvider && !((SimpleSecurityProvider) provider).getDatabase().isCaseSensitive())
+                if(!caseSensitive)
                     _realms.put(realms[i].toLowerCase(), provider );
                 else
                     _realms.put( realms[i], provider );
@@ -111,7 +112,7 @@ public class Realms
 		if ( realm == null || realm.length() == 0 ) {
 			realm = _defaultRealm;
 		}			
-		if (_realms.get("") instanceof SimpleSecurityProvider && !((SimpleSecurityProvider)_realms.get("")).getDatabase().isCaseSensitive())
+		if (!caseSensitive)
 		    realm = realm.toLowerCase();
 
 		return _realms.get( realm );
@@ -530,4 +531,12 @@ public class Realms
         return getRBACQuery( realm ).getUsers(realm);
     }
     
+
+    public boolean isCaseSensitive() {
+        return caseSensitive;
+	}
+
+    public void setCaseSensitive(boolean caseSensitive) {
+        this.caseSensitive = caseSensitive;
+	}
 }
