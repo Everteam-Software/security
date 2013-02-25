@@ -151,6 +151,16 @@ public class TokenServiceTest extends TestCase {
         assertNotNull(token);
         assertTrue(token.length() > 0);
 
+        //check token for roles, when caseSensitive is false
+        //the user anonymous has assign role PARTICIPANT, this we must get in lower case as caseSensitive is false
+        token = service.authenticateUser("exolab\\anonymous", encryptor.encrypt("anonymous"));
+        assertNotNull(token);
+        assertTrue(token.length() > 0);
+        Property[] properties = service.getTokenProperties(token);
+        Property property = PropertyUtils.getProperty(properties, "roles");
+
+        assertNotNull(property);
+        assertEquals(property.getValue(),"exolab\\participant");
     }
 
     @Subject
