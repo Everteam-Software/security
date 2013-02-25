@@ -54,7 +54,7 @@ public class SimpleDatabase
     /**
      * Whether identifiers are case-sensitive.
      */
-    private boolean _caseSensitive = true;
+    private static boolean _caseSensitive = false;
     
     
     /**
@@ -82,9 +82,16 @@ public class SimpleDatabase
      * Checks if simple security is caseSensitive
      * @return
      */
-	public boolean isCaseSensitive(){
-		    return this._caseSensitive;
+	public static boolean isCaseSensitive(){
+		    return _caseSensitive;
 	}
+
+	/**
+     * Sets value for caseSensitive
+     */
+    public static void setCaseSensitive(boolean caseSensetive) {
+        _caseSensitive = caseSensetive;
+    }
 
 	/**
 	 * Get the default realm.
@@ -102,16 +109,6 @@ public class SimpleDatabase
 	{
 		_defaultRealm = realm;
 	}
-
-	/**
-	 * Set the default realm.
-	 */
-	public void setCaseSensitive( String value )
-	{
-	    // Now we support only case sensitive users and roles. So case sensitive property in security.xml file is invalid now.
-	    //_caseSensitive = "true".equals( value.toLowerCase() );
-	}
-
 
 	/**
 	 * Get a given realm.
