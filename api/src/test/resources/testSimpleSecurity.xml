@@ -15,8 +15,6 @@
 
     <defaultRealm>intalio</defaultRealm>
 
-    <caseSensitive>false</caseSensitive>
-
     <realm identifier="intalio">
 
         <user identifier="prod-manager1">
@@ -133,18 +131,18 @@
             <email></email>
             <password>anonymous</password>
 
-            <assignRole>participant</assignRole>
+            <assignRole>PARTICIPANT</assignRole>
         </user>
 
         <role identifier="committer">
             <description>Committer</description>
             
-            <descendantRole>participant</descendantRole>
+            <descendantRole>PARTICIPANT</descendantRole>
 
             <permission operation="commit" object="cvs"/>
         </role>
 
-        <role identifier="participant">
+        <role identifier="PARTICIPANT">
             <description>Community Participant</description>
             
             <permission operation="checkout" object="cvs"/>
