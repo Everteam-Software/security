@@ -143,8 +143,10 @@ public class TokenServiceImpl implements TokenService {
         props.add(issueProp);
         props.add(new Property(AuthenticationConstants.PROPERTY_IS_WORKFLOW_ADMIN, Boolean.toString(isWorkflowAdmin(user))));
         if (!_cacheRoles) {
-            String[] roles = _realms.authorizedRoles(user);
-            props.add(new Property(AuthenticationConstants.PROPERTY_ROLES, StringArrayUtils.toCommaDelimited(roles)));
+            String roles = StringArrayUtils.toCommaDelimited(_realms.authorizedRoles(user));
+            if(!caseSensitive)
+                roles = roles.toLowerCase();
+            props.add(new Property(AuthenticationConstants.PROPERTY_ROLES, roles));
         }
         if ((password != null && _passwordAsAProperty))
             props.add(new Property(AuthenticationConstants.PROPERTY_PASSWORD, password));
@@ -227,8 +229,11 @@ public class TokenServiceImpl implements TokenService {
             rolesForUser = (Property) _userAndRoles.get(user);
             if (rolesForUser == null) {
                 try {
-                    String[] roles = _realms.authorizedRoles(user);
-                    rolesForUser = new Property(AuthenticationConstants.PROPERTY_ROLES, StringArrayUtils.toCommaDelimited(roles));
+                    String roles = StringArrayUtils.toCommaDelimited(_realms.authorizedRoles(user));
+                    boolean caseSensitive = _realms.getSecurityProvider(IdentifierUtils.getRealm(user)).isCaseSensitive();
+                    if(!caseSensitive)
+                        roles = roles.toLowerCase();
+                    rolesForUser = new Property(AuthenticationConstants.PROPERTY_ROLES, roles);
                 } catch (RBACException e) {
                     throw new AuthenticationException("Could not get roles for user:"+user);
                 }
