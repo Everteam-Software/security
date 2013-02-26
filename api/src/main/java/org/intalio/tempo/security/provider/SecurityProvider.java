@@ -101,9 +101,4 @@ public interface SecurityProvider
      * @throws RBACException
      */
     public Set<String> getAttributes(String forObject) throws RBACException;
-
-    /**
-     * Return the boolean value indicating whether security provider is case sensitive or not.
-     */
-    public boolean isCaseSensitive();
 }
