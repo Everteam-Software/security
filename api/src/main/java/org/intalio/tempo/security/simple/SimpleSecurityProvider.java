@@ -58,8 +58,6 @@ public final class SimpleSecurityProvider
      */
     private HashMap<String,RBACProvider> _rbacMap;
 
-    private boolean caseSensitive = false;
-
     /**
      * Authentication providders: Map of { String, AuthenticationProvider }.
      */
@@ -244,8 +242,7 @@ public final class SimpleSecurityProvider
     {
         if (!_rbacMap.containsKey(realm)) 
             throw new RBACException("Realm, "+realm+", is not supported by this Security Provider!");
-//        return (RBACProvider) _rbacMap.get( realm.toLowerCase() );
-        if(_database.isCaseSensitive())
+        if (SimpleDatabase.isCaseSensitive())
             return (RBACProvider) _rbacMap.get( realm );
         else
             return (RBACProvider) _rbacMap.get( realm.toLowerCase() );
@@ -257,10 +254,10 @@ public final class SimpleSecurityProvider
         throws AuthenticationException
     {
 //        return (AuthenticationProvider) _authMap.get( realm.toLowerCase() );
-        if(!_database.isCaseSensitive())
-            return (AuthenticationProvider) _authMap.get( realm.toLowerCase() );
-        else
+          if (SimpleDatabase.isCaseSensitive())
             return (AuthenticationProvider) _authMap.get( realm );
+          else
+            return (AuthenticationProvider) _authMap.get( realm.toLowerCase() );
     }
 
 
@@ -312,7 +309,6 @@ public final class SimpleSecurityProvider
 			LOG.info( "Reload security database " + _filename );
 		}		
 		try {
-		    SimpleDatabase.setCaseSensitive(caseSensitive);
 			_database = SimpleDatabase.load( getConfigStream() );
 		} catch ( Exception except ) {
 			LOG.error( "Error reloading security database " + _filename, except );
@@ -328,13 +324,13 @@ public final class SimpleSecurityProvider
 			
 			auth = new SimpleAuthenticationProvider( realms[i] );
 //			_authMap.put( realms[i].toLowerCase(), auth );
-            if(_database.isCaseSensitive()){
-               _rbacMap.put( realms[i], rbac );                      
+	        if (SimpleDatabase.isCaseSensitive()) {
+               _rbacMap.put( realms[i], rbac );
                _authMap.put( realms[i], auth );
-            }else{
-               _rbacMap.put( realms[i].toLowerCase(), rbac );                      
-               _authMap.put( realms[i].toLowerCase(), auth );
-            }
+	        } else {
+	           _rbacMap.put( realms[i].toLowerCase(), rbac );
+	           _authMap.put( realms[i].toLowerCase(), auth );
+	        }
 			
 		}
 
@@ -453,13 +449,4 @@ public final class SimpleSecurityProvider
         return properties;
     }
 
-    public void setCaseSensitive(boolean caseSensitive) {
-        this.caseSensitive = caseSensitive;
-    }
-
-    @Override
-    public boolean isCaseSensitive() {
-        return caseSensitive;
-    }
-    
 }

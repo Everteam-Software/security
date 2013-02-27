@@ -128,7 +128,7 @@ public class TokenServiceImpl implements TokenService {
 //        user = IdentifierUtils.normalize(user, _realms.getDefaultRealm(), false, '\\');
 	    boolean caseSensitive = true;
 	    String realms = (IdentifierUtils.getRealm(user).equals(""))?_realms.getDefaultRealm():IdentifierUtils.getRealm(user);
-        caseSensitive = _realms.getSecurityProvider(realms).isCaseSensitive();
+        caseSensitive = _realms.isCaseSensitive();
 	    user = IdentifierUtils.normalize(user, _realms.getDefaultRealm(), caseSensitive, '\\');
 
         // place session information in token
@@ -230,7 +230,7 @@ public class TokenServiceImpl implements TokenService {
             if (rolesForUser == null) {
                 try {
                     String roles = StringArrayUtils.toCommaDelimited(_realms.authorizedRoles(user));
-                    boolean caseSensitive = _realms.getSecurityProvider(IdentifierUtils.getRealm(user)).isCaseSensitive();
+                    boolean caseSensitive = _realms.isCaseSensitive();
                     if(!caseSensitive)
                         roles = roles.toLowerCase();
                     rolesForUser = new Property(AuthenticationConstants.PROPERTY_ROLES, roles);
