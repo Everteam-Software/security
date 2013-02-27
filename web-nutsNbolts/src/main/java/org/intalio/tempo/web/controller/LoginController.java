@@ -401,32 +401,6 @@ public class LoginController extends UIController {
         }
     }
 
-    public void sendUserAndRolesToPopulateCache(User user, String serverUrl) {
-        String url = serverUrl + "/gi/populaterolescache";
-        String userName = user.getName();
-        String[] userRoles = user.getRoles();
-        String userRolesAsString = arrayToString(userRoles, ",");
-        PostMethod post = new PostMethod(url);
-        post.addParameter("username", userName);
-        post.addParameter("roles", userRolesAsString);
-        LOG.debug("Sending post request to: " + url);
-        executePost(post);
-    }
-
-    public void sendUserToInvalidateCache(String userName, String serverUrl) {
-        String url = serverUrl + "/gi/invalidaterolescache";
-        PostMethod post = new PostMethod(url);
-        post.addParameter("username", userName);
-        LOG.debug("Sending post request to: " + url);
-        executePost(post);
-    }
-
-    public String getServerUrl(HttpServletRequest request) {
-        String serverUrl = "http://" + request.getServerName() + ":" + request.getServerPort();
-        LOG.debug("Server url is: " + serverUrl);
-        return serverUrl;
-    }
-
     // @note(alex) Called by reflection - see UIController
     @SuppressWarnings("unchecked")
     public ModelAndView logIn(HttpServletRequest request, HttpServletResponse response, LoginCommand login,
@@ -442,8 +416,6 @@ public class LoginController extends UIController {
             User user = authenticate(login.getUsername(), login.getPassword(), errors);
             if (user != null) {
                 state.setCurrentUser(user);
-                String serverUrl = getServerUrl(request);
-                sendUserAndRolesToPopulateCache(user, serverUrl);
                 if (login.isAutoLogin()) {
                     // set autoLogin
                     setAutoLoginCookie(response, user.getToken());
@@ -471,10 +443,8 @@ public class LoginController extends UIController {
             BindException errors) throws Exception {
         ApplicationState state = getApplicationState(request);
         if (state != null) {
-            String serverUrl = getServerUrl(request);
             if (state.getCurrentUser() != null){
                 String userName = state.getCurrentUser().getName();
-                sendUserToInvalidateCache(userName, serverUrl);
                 LOG.debug("Logout: user=" + userName);
             }
             state.setCurrentUser(null);
