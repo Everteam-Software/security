@@ -3,9 +3,22 @@ require "buildr/cobertura"
 
 # Keep this structure to allow the build system to update version numbers.
 VERSION_NUMBER = "6.5.03-SNAPSHOT"
+DP_VERSION_NUMBER="1.0.1"
 
-require "dependencies.rb"
+if ENV['DP_VERSION_NUMBER'] != ''
+DP_VERSION_NUMBER = "#{ENV['DP_VERSION_NUMBER']}"
+end
+
 require "repositories.rb"
+
+# We need to download the artifact before we load the same
+artifact("org.intalio.common:dependencies:rb:#{DP_VERSION_NUMBER}").invoke
+
+DEPENDENCIES = "#{ENV['HOME']}/.m2/repository/org/intalio/common/dependencies/#{DP_VERSION_NUMBER}/dependencies-#{DP_VERSION_NUMBER}.rb"
+if ENV["M2_REPO"] != ''
+  DEPENDENCIES = "#{ENV['M2_REPO']}/org/intalio/common/dependencies/#{DP_VERSION_NUMBER}/dependencies-#{DP_VERSION_NUMBER}.rb"
+end
+load DEPENDENCIES
 
 desc "Security"
 define "security" do
@@ -16,7 +29,7 @@ define "security" do
 
   desc "Security Framework"
   define "api" do
-    compile.with AXIOM, CAS_CLIENT, DOM4J, CASTOR, LOG4J, SLF4J, SPRING[:core], XERCES, OPENSSO_CLIENT_SDK, SERVLET_API,JASYPT
+    compile.with AXIOM, CAS_CLIENT, DOM4J, CASTOR, LOG4J, SLF4J[:api], SLF4J[:log4j12], SLF4J[:jcl104overslf4j], SPRING[:core], XERCES[:impl], XERCES[:parserapi], OPENSSO_CLIENT_SDK, SERVLET_API,JASYPT
 
     test.exclude "*BaseSuite"
     test.exclude "*FuncTestSuite"
@@ -32,14 +45,14 @@ define "security" do
   
   desc "Security Web-Service Common Library"
   define "ws-common" do
-    compile.with project("api"),APACHE_COMMONS[:httpclient], AXIOM, AXIS2, SLF4J, SPRING[:core], STAX_API ,JASYPT
+    compile.with project("api"),APACHE_COMMONS[:httpclient], AXIOM, AXIS2.values, SLF4J[:api], SLF4J[:log4j12], SLF4J[:jcl104overslf4j], SPRING[:core], STAX_API ,JASYPT
     package :jar
   end
   
   desc "Security Web-Service Client"
   define "ws-client" do
-    compile.with projects("api", "ws-common"),JASYPT,AXIOM, AXIS2, SLF4J, STAX_API,APACHE_COMMONS[:httpclient], SPRING[:core], BPMS_COMMON
-    test.with APACHE_COMMONS[:httpclient], APACHE_COMMONS[:codec], CASTOR, LOG4J, SUNMAIL, XERCES, WS_COMMONS_SCHEMA, WSDL4J, WOODSTOX, CAS_CLIENT, INSTINCT, BPMS_COMMON
+    compile.with projects("api", "ws-common"),JASYPT,AXIOM, AXIS2.values, SLF4J[:api], SLF4J[:log4j12], SLF4J[:jcl104overslf4j], STAX_API,APACHE_COMMONS[:httpclient], SPRING[:core], BPMS_COMMON
+    test.with APACHE_COMMONS[:httpclient], APACHE_COMMONS[:codec], CASTOR, LOG4J, SUNMAIL, XERCES[:impl], XERCES[:parserapi], WS_COMMONS_SCHEMA, WSDL4J, WOODSTOX, CAS_CLIENT, INSTINCT, BPMS_COMMON
 
     # Remember to set JAVA_OPTIONS before starting Jetty
     # export JAVA_OPTIONS=-Dorg.intalio.tempo.configDirectory=/home/boisvert/svn/tempo/security-ws2/src/test/resources
@@ -62,14 +75,14 @@ define "security" do
 
   desc "Security Web-Service"
   define "ws-service" do
-    compile.with projects("api", "ws-common"), AXIOM, AXIS2, SLF4J, SPRING[:core], STAX_API  
-    package(:aar).with :libs => [ projects("api", "ws-common"), CASTOR, SLF4J, SPRING[:core], CAS_CLIENT ]
+    compile.with projects("api", "ws-common"), AXIOM, AXIS2.values, SLF4J[:api], SLF4J[:log4j12], SLF4J[:jcl104overslf4j], SPRING[:core], STAX_API  
+    package(:aar).with :libs => [ projects("api", "ws-common"), CASTOR, SLF4J[:api], SLF4J[:log4j12], SLF4J[:jcl104overslf4j], SPRING[:core], CAS_CLIENT ]
   end
   
   desc "Common spring and web related classes"
   define "web-nutsNbolts" do
-    libs = AXIS2, APACHE_COMMONS[:lang], INTALIO_STATS, JSON_NAGGIT, JSP_API, LOG4J, SERVLET_API, SLF4J, SPRING[:core], SPRING[:webmvc], APACHE_COMMONS[:httpclient]
-    test_libs = libs + [JUNIT, INSTINCT, SPRING_MOCK, AXIOM, project("ws-client"), STAX_API, WSDL4J, WS_COMMONS_SCHEMA]
+    libs = AXIS2.values, APACHE_COMMONS[:lang], INTALIO_STATS, JSON_NAGGIT, JSP_API, LOG4J, SERVLET_API, SLF4J[:api], SLF4J[:log4j12], SLF4J[:jcl104overslf4j], SPRING[:core], SPRING[:webmvc], APACHE_COMMONS[:httpclient]
+    test_libs = libs + [JUNIT, INSTINCT, SPRING[:mock], AXIOM, project("ws-client"), STAX_API, WSDL4J, WS_COMMONS_SCHEMA]
     compile.with projects("api"), test_libs
     package :jar
   end

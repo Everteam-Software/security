@@ -50,5 +50,4 @@ public class DummySecurityProvider implements SecurityProvider{
         // TODO Auto-generated method stub
         return null;
     }
-
 }

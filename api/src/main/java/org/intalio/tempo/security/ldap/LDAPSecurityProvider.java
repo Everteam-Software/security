@@ -65,8 +65,7 @@ public class LDAPSecurityProvider implements SecurityProvider {
     private Map<String,LDAPRBACProvider> _rbacs;
     
     private Map<String,LDAPAuthenticationProvider> _auths;
-    
-    
+
     /**
      * Constructor
      */

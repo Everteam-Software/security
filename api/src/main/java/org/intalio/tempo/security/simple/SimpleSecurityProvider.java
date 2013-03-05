@@ -242,8 +242,7 @@ public final class SimpleSecurityProvider
     {
         if (!_rbacMap.containsKey(realm)) 
             throw new RBACException("Realm, "+realm+", is not supported by this Security Provider!");
-//        return (RBACProvider) _rbacMap.get( realm.toLowerCase() );
-        if(_database.isCaseSensitive())
+        if (SimpleDatabase.isCaseSensitive())
             return (RBACProvider) _rbacMap.get( realm );
         else
             return (RBACProvider) _rbacMap.get( realm.toLowerCase() );
@@ -255,10 +254,10 @@ public final class SimpleSecurityProvider
         throws AuthenticationException
     {
 //        return (AuthenticationProvider) _authMap.get( realm.toLowerCase() );
-        if(!_database.isCaseSensitive())
-            return (AuthenticationProvider) _authMap.get( realm.toLowerCase() );
-        else
+          if (SimpleDatabase.isCaseSensitive())
             return (AuthenticationProvider) _authMap.get( realm );
+          else
+            return (AuthenticationProvider) _authMap.get( realm.toLowerCase() );
     }
 
 
@@ -325,13 +324,13 @@ public final class SimpleSecurityProvider
 			
 			auth = new SimpleAuthenticationProvider( realms[i] );
 //			_authMap.put( realms[i].toLowerCase(), auth );
-            if(_database.isCaseSensitive()){
-               _rbacMap.put( realms[i], rbac );                      
+	        if (SimpleDatabase.isCaseSensitive()) {
+               _rbacMap.put( realms[i], rbac );
                _authMap.put( realms[i], auth );
-            }else{
-               _rbacMap.put( realms[i].toLowerCase(), rbac );                      
-               _authMap.put( realms[i].toLowerCase(), auth );
-            }
+	        } else {
+	           _rbacMap.put( realms[i].toLowerCase(), rbac );
+	           _authMap.put( realms[i].toLowerCase(), auth );
+	        }
 			
 		}
 
@@ -449,5 +448,5 @@ public final class SimpleSecurityProvider
         }
         return properties;
     }
-    
+
 }
