@@ -9,11 +9,16 @@
 
 package org.intalio.tempo.security.simple;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+
+import org.dom4j.Document;
+import org.dom4j.Node;
+import org.dom4j.io.SAXReader;
 import org.exolab.castor.mapping.Mapping;
 import org.exolab.castor.xml.Unmarshaller;
 import org.xml.sax.InputSource;
@@ -37,7 +42,7 @@ public class SimpleDatabase
      */
     private static final String MAPPING_FILE =
         "/org/intalio/tempo/security/simple/SimpleDatabase.properties";
-
+    public static final String CONFIG_DIR_PROPERTY = "org.intalio.tempo.configDirectory";
 
     /**
      * Loaded mapping
@@ -50,13 +55,11 @@ public class SimpleDatabase
      */
     private HashMap<String,SimpleRealm> _realms;
 
-
     /**
      * Whether identifiers are case-sensitive.
      */
-    private boolean _caseSensitive = true;
-    
-    
+    private static boolean _caseSensitive = false;
+
     /**
      * Realm separator character.
      */
@@ -67,8 +70,7 @@ public class SimpleDatabase
      * Default realm.
      */
     private String _defaultRealm = "";
-    
-    
+
     /**
      * Default constructor used for marshalling.
      */
@@ -76,15 +78,14 @@ public class SimpleDatabase
     {
         _realms = new HashMap<String,SimpleRealm>();
     }
-    
-    
+
     /**
      * Checks if simple security is caseSensitive
      * @return
      */
-	public boolean isCaseSensitive(){
-		    return this._caseSensitive;
-	}
+    public static boolean isCaseSensitive(){
+         return _caseSensitive;
+    }
 
 	/**
 	 * Get the default realm.
@@ -102,16 +103,6 @@ public class SimpleDatabase
 	{
 		_defaultRealm = realm;
 	}
-
-	/**
-	 * Set the default realm.
-	 */
-	public void setCaseSensitive( String value )
-	{
-	    // Now we support only case sensitive users and roles. So case sensitive property in security.xml file is invalid now.
-	    //_caseSensitive = "true".equals( value.toLowerCase() );
-	}
-
 
 	/**
 	 * Get a given realm.
@@ -319,5 +310,24 @@ public class SimpleDatabase
        for ( int i=0; i<identifiers.length; i++ ) {
            identifiers[ i ] = normalize( identifiers[ i ] );
        }
+    }
+
+    static {
+        String configDir = System.getProperty(CONFIG_DIR_PROPERTY);
+        if (configDir == null) {
+            throw new RuntimeException("System property " + CONFIG_DIR_PROPERTY + " not defined.");
+        }
+        File _configDir = new File(configDir, "securityConfig.xml");
+        if (!_configDir.exists()) {
+            throw new RuntimeException("Configuration directory " + _configDir.getAbsolutePath() + " doesn't exist.");
+        }
+
+        try {
+            Document doc = new SAXReader().read(_configDir);
+            Node node = doc.selectSingleNode("//*[@name='caseSensitive']/value");
+            _caseSensitive = "true".equalsIgnoreCase(node.getText());
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to find caseSensitive property in securityConfig.xml file",e);
+        }
     }
 }
