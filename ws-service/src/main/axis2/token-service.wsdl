@@ -36,14 +36,16 @@
 				</xsd:sequence>
 			</xsd:complexType>
 
-			<xsd:element name="authenticateUser">
-				<xsd:complexType>
-					<xsd:sequence>
-						<xsd:element name="user" type="xsd:string" />
-						<xsd:element name="password" type="xsd:string" />
-					</xsd:sequence>
-				</xsd:complexType>
-			</xsd:element>
+            <xsd:complexType name="authenticateUserType">
+                <xsd:sequence>
+                    <xsd:element name="user" type="xsd:string" />
+                    <xsd:element name="password" type="xsd:string" />
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:element name="authenticateUser" type="tns:authenticateUserType" />
+
+            <xsd:element name="authenticateEncryptedUser" type="tns:authenticateUserType" />
 
 			<xsd:element name="authenticateUserWithCredentials">
 				<xsd:complexType>
@@ -133,6 +135,14 @@
 		<wsdl:part name="payload" element="tns:isWorkflowAdminResponse"/>
 	</wsdl:message>
 
+    <wsdl:message name="authenticateEncryptedUser">
+        <wsdl:part name="payload" element="tns:authenticateEncryptedUser" />
+    </wsdl:message>
+
+    <wsdl:message name="authenticateEncryptedUserResponse">
+        <wsdl:part name="payload" element="tns:authenticateUserResponse" />
+    </wsdl:message>
+
 	<wsdl:message name="authenticateUser">
 		<wsdl:part name="payload" element="tns:authenticateUser" />
 	</wsdl:message>
@@ -185,6 +195,11 @@
 			<wsdl:output message="tns:authenticateUserResponse" />
 		</wsdl:operation>
 
+        <wsdl:operation name="authenticateEncryptedUser">
+            <wsdl:input message="tns:authenticateEncryptedUser" />
+            <wsdl:output message="tns:authenticateEncryptedUserResponse" />
+        </wsdl:operation>
+
 		<wsdl:operation name="getTokenProperties">
 			<wsdl:input message="tns:getTokenProperties" />
 			<wsdl:output message="tns:getTokenPropertiesResponse" />
@@ -228,6 +243,16 @@
 				<soap:body parts="payload" use="literal" />
 			</wsdl:output>
 		</wsdl:operation>
+
+        <wsdl:operation name="authenticateEncryptedUser">
+            <soap:operation soapAction="authenticateEncryptedUser" />
+            <wsdl:input>
+                <soap:body parts="payload" use="literal" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body parts="payload" use="literal" />
+            </wsdl:output>
+        </wsdl:operation>
 
 		<wsdl:operation name="getTokenProperties">
 			<soap:operation soapAction="getTokenProperties" />
