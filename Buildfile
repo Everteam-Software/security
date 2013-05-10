@@ -1,4 +1,4 @@
-# Some test comment
+# Some test comment & some more
 require "buildr/xmlbeans"
 require "buildr/cobertura"
 require "install.rb"
