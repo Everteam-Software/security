@@ -68,7 +68,7 @@ define "security" do
   
   desc "Common spring and web related classes"
   define "web-nutsNbolts" do
-    libs = AXIS2.values, APACHE_COMMONS[:lang], INTALIO_STATS, JSON_NAGGIT, JSP_API, LOG4J, SERVLET_API, SLF4J[:api], SLF4J[:log4j12], SLF4J[:jcl104overslf4j], SPRING[:core], SPRING[:webmvc], APACHE_COMMONS[:httpclient]
+    libs = AXIS2.values, APACHE_COMMONS[:lang], INTALIO_STATS, JSON_NAGGIT, JSP_API, LOG4J, SERVLET_API, SLF4J[:api], SLF4J[:log4j12], SLF4J[:jcl104overslf4j], SPRING[:core], SPRING[:webmvc], APACHE_COMMONS[:httpclient],INTALIO_LICENSE
     test_libs = libs + [JUNIT, INSTINCT, SPRING[:mock], AXIOM, project("ws-client"), STAX_API, WSDL4J, WS_COMMONS_SCHEMA]
     compile.with projects("api"), test_libs
     package :jar
