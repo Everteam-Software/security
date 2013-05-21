@@ -14,7 +14,10 @@ package org.intalio.tempo.web.controller;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.security.SecureRandom;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +49,7 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
+import com.intalio.bpms.license.IntalioSigner;
 
 public class LoginController extends UIController {
     private static final BpmsDescriptorParser BPMS_DESCRIPTOR_PARSER = new BpmsDescriptorParser();
@@ -65,6 +69,12 @@ public class LoginController extends UIController {
     public static final String MONITORING = "/monitoring/";
     
     public static final String BPMS_CONSOLE = "/bpms-console/";
+    
+    public static final String DATE_FORMAT = "yyyy-MM-dd";
+
+    public static final String ENT_LICENSE_EXPIRY = "enterprise";
+
+    public static final String LICENSE_EXPIRY = "license";
 
     private static final Logger LOG = LogManager.getLogger(LoginController.class);
 
@@ -81,6 +91,8 @@ public class LoginController extends UIController {
     private static final Pattern DISPLAY_NAME_REGEX = Pattern.compile("\\{(.+?)\\}");
 
     private static SecureRandom _random;
+    
+    private  boolean licenseExpires = false;
 
     static {
         try {
@@ -460,7 +472,9 @@ public class LoginController extends UIController {
         Map model = new HashMap();
         model.put("login", new LoginCommand());
         BPMS_DESCRIPTOR_PARSER.addBpmsBuildVersionsPropertiesToMap(model);
-
+        String licenseExpiryDate = getLicenseEnterpriseDate();
+        if (licenseExpires)
+            model.put("license", licenseExpiryDate);
         return new ModelAndView(Constants.LOGIN_VIEW, model);
     }
 
@@ -517,9 +531,33 @@ public class LoginController extends UIController {
         Map model = errors.getModel();
         model.put("login", new LoginCommand());
         BPMS_DESCRIPTOR_PARSER.addBpmsBuildVersionsPropertiesToMap(model);
+        String licenseExpiryDate = getLicenseEnterpriseDate();
+        if (licenseExpires)
+            model.put("license", licenseExpiryDate);
         return new ModelAndView(Constants.LOGIN_VIEW, model);
     }
 
+    public String getLicenseEnterpriseDate() {
+        String licenseExpiryDate = IntalioSigner.getKeyDate(ENT_LICENSE_EXPIRY);
+        if (licenseExpiryDate != null && licenseExpiryDate != "") {
+            DateFormat licenseExpiryDateFormat = new SimpleDateFormat(
+                    DATE_FORMAT);
+            Calendar licenseExpiryCal = Calendar.getInstance();
+            try {
+                licenseExpiryCal.setTime(licenseExpiryDateFormat
+                        .parse(licenseExpiryDate));
+            } catch (java.text.ParseException e) {
+                LOG.error("Exeception occured while parsing date", e);
+            }
+            Calendar cur_Date = Calendar.getInstance();
+            cur_Date.add(Calendar.MONTH, 1);
+            if (licenseExpiryCal.getTimeInMillis() <= cur_Date
+                    .getTimeInMillis()) {
+                licenseExpires = true;
+            }
+        }
+        return licenseExpiryDate;
+    }
     public String getDisplayName() {
 		return _displayName;
 	}
