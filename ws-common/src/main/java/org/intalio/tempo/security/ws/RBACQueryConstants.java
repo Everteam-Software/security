@@ -52,4 +52,18 @@ public class RBACQueryConstants {
 	    public static final QName OBJECT = new QName(RBACQUERY_NS.getNamespaceURI(), "object", RBAC_PREFIX);
 	    public static final QName OPERATION = new QName(RBACQUERY_NS.getNamespaceURI(), "operation", RBAC_PREFIX);
 	    public static final QName REALM = new QName(RBACQUERY_NS.getNamespaceURI(), "realm", RBAC_PREFIX);
+
+        /**
+         * QName for getAssignedUsers Operation.
+         */
+        public static final QName ASSIGNED_USERS = new QName(
+            RBACQUERY_NS.getNamespaceURI(), "getAssignedUsers",
+            RBAC_PREFIX);
+
+        /**
+         * QName for getAssignedUsersRequest.
+         */
+        public static final QName ASSIGNED_USERS_REQUEST = new QName(
+            RBACQUERY_NS.getNamespaceURI(), "getAssignedUsersRequest",
+            RBAC_PREFIX);
 }
