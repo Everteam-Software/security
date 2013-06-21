@@ -23,8 +23,7 @@ import org.intalio.tempo.security.rbac.RBACConstants;
 import org.intalio.tempo.security.rbac.RBACException;
 import org.intalio.tempo.security.rbac.RoleNotFoundException;
 import org.intalio.tempo.security.rbac.UserNotFoundException;
-import org.intalio.tempo.security.rbac.provider.RBACProvider;
-import org.intalio.tempo.security.util.IdentifierUtils;
+import org.intalio.tempo.security.impl.Realms;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,10 +35,12 @@ public class SimpleRBACAdmin implements RBACAdmin {
     private static final String USER = "user";
     private static final String ROLE = "role";
     private static final String PASSWORD = "password";
+    private static boolean _CASESENSITIVE = false;
 
     public SimpleRBACAdmin(String realm, SimpleSecurityProvider simpleSecurityProvider) {
         _securityProvider = simpleSecurityProvider;
         _realm = realm;
+        _CASESENSITIVE = Realms.isCaseSensitive();
     }
 
     @Override
@@ -236,7 +237,14 @@ public class SimpleRBACAdmin implements RBACAdmin {
                 Iterator<OMElement> itrUser = realm.getChildrenWithLocalName(elementName);
                 while (itrUser.hasNext()) {
                     OMElement roleElement = itrUser.next();
-                    if (roleElement.getAttribute(new QName("identifier")).getAttributeValue().equals(elementValue)) {
+                    if (_CASESENSITIVE
+                            && roleElement
+                                    .getAttribute(new QName("identifier"))
+                                    .getAttributeValue().equals(elementValue)) {
+                        roleElement.detach();
+                    } else if (roleElement
+                            .getAttribute(new QName("identifier"))
+                            .getAttributeValue().equalsIgnoreCase(elementValue)) {
                         roleElement.detach();
                     }
                 }
