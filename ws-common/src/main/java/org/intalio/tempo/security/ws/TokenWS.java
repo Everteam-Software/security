@@ -23,6 +23,8 @@ import static org.intalio.tempo.security.ws.TokenConstants.TOKEN;
 import static org.intalio.tempo.security.ws.TokenConstants.USER;
 import static org.intalio.tempo.security.ws.TokenConstants.IS_WORKFLOW_ADMIN;
 import static org.intalio.tempo.security.ws.TokenConstants.IS_WORKFLOW_ADMIN_RESPONSE;
+import static org.intalio.tempo.security.ws.TokenConstants.IS_CASE_SENSITIVE;
+import static org.intalio.tempo.security.ws.TokenConstants.IS_CASE_SENSITIVE_RESPONSE;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
@@ -173,6 +175,29 @@ public class TokenWS extends BaseWS {
         OMElement response = OM_FACTORY.createOMElement(IS_WORKFLOW_ADMIN_RESPONSE);
         OMElement responseToken = OM_FACTORY.createOMElement(IS_WORKFLOW_ADMIN, response);
         responseToken.setText(String.valueOf(isWorkflowAdmin));
+        return response;    
+    
+    }
+    
+    public OMElement isRoleCaseSensitive(OMElement requestEl) throws AxisFault {
+        
+        OMParser request = new OMParser(requestEl);       
+        boolean isRoleCaseSensitive;
+        try {
+            initStatics();
+            isRoleCaseSensitive = _tokenService.isRoleCaseSensitive();
+        } catch (Exception except) {
+            if (LOG.isDebugEnabled())
+                LOG.debug("isRoleCaseSensitive:\n" + requestEl, except);
+            throw new RuntimeException(except);
+        }
+        return isRoleCaseSensitiveResponse(isRoleCaseSensitive);
+    }
+    
+    private OMElement isRoleCaseSensitiveResponse(boolean isRoleCaseSensitive) {
+        OMElement response = OM_FACTORY.createOMElement(IS_CASE_SENSITIVE_RESPONSE);
+        OMElement responseToken = OM_FACTORY.createOMElement(IS_CASE_SENSITIVE, response);
+        responseToken.setText(String.valueOf(isRoleCaseSensitive));
         return response;    
     
     }

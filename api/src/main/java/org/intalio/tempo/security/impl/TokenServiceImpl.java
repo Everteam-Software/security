@@ -24,8 +24,6 @@ import org.intalio.tempo.security.util.MD5;
 import org.intalio.tempo.security.util.PropertyUtils;
 import org.intalio.tempo.security.util.StringArrayUtils;
 import org.intalio.tempo.security.util.TimeExpirationMap;
-import org.intalio.tempo.security.simple.SimpleSecurityProvider;
-
 import org.jasypt.util.text.BasicTextEncryptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -312,5 +310,11 @@ public class TokenServiceImpl implements TokenService {
     	return _realms.isWorkflowAdmin(user);
     	
     	
+    }
+    
+    public boolean isRoleCaseSensitive() throws  RemoteException, RBACException{       
+        return _realms.isCaseSensitive();
+        
+        
     }
 }

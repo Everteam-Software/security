@@ -21,10 +21,7 @@ import javax.xml.namespace.QName;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
-import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
-import org.apache.axis2.transport.http.HTTPConstants;
-import org.apache.commons.httpclient.HttpClient;
 import org.intalio.tempo.security.Property;
 import org.intalio.tempo.security.authentication.AuthenticationException;
 import org.intalio.tempo.security.rbac.RBACException;
@@ -185,5 +182,17 @@ public class TokenClient implements TokenService {
 	
 	public boolean isChunking() {
 		return Boolean.parseBoolean(this.httpChunking);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.intalio.tempo.security.token.TokenService#isRoleCaseSensitive()
+	 */
+	@Override
+	public boolean isRoleCaseSensitive() throws RemoteException, RBACException {
+	    
+	        OMElement request = element(TokenConstants.IS_CASE_SENSITIVE);
+	        OMParser response = invoke(TokenConstants.IS_CASE_SENSITIVE.getLocalPart(), request);	        
+	        return Boolean.valueOf(response.getRequiredString(TokenConstants.IS_CASE_SENSITIVE));
+	    
 	}
 }

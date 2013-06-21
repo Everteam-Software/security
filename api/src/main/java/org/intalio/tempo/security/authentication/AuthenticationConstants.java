@@ -63,4 +63,9 @@ public interface AuthenticationConstants
      * List of roles property
      */
     public static final String PROPERTY_IS_WORKFLOW_ADMIN = "isWorkflowAdmin";
+    
+    /**
+     * iCaseSensitive Property
+     */
+    public static final String PROPERTY_IS_CASE_SENSITIVE = "isCaseSenstive";
 }
