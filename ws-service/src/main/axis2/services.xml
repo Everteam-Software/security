@@ -58,6 +58,9 @@
     <operation name="isWorkflowAdmin">
         <messageReceiver class="org.apache.axis2.receivers.RawXMLINOutMessageReceiver"/>
     </operation>
+    <operation name="isRoleCaseSensitive">
+        <messageReceiver class="org.apache.axis2.receivers.RawXMLINOutMessageReceiver"/>
+    </operation>
 	<operation name="getTokenFromOpenSSOToken">
         <messageReceiver class="org.apache.axis2.receivers.RawXMLINOutMessageReceiver"/>
     </operation>

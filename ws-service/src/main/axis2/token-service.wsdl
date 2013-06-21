@@ -97,6 +97,16 @@
 					</xsd:sequence>
 				</xsd:complexType>
 			</xsd:element>
+			<xsd:element name="isRoleCaseSensitive">
+			</xsd:element>
+			<xsd:element name="isRoleCaseSensitiveResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="isRoleCaseSensitive"
+							type="xsd:boolean" />
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
 			<xsd:element name="getTokenResponse">
 				<xsd:complexType>
 					<xsd:sequence>
@@ -133,6 +143,14 @@
 	
     <wsdl:message name="isWorkflowAdminResponse">
 		<wsdl:part name="payload" element="tns:isWorkflowAdminResponse"/>
+	</wsdl:message>
+	
+	<wsdl:message name="isRoleCaseSensitiveRequest">
+		<wsdl:part name="payload" element="tns:isRoleCaseSensitive"/>
+	</wsdl:message>
+	
+    <wsdl:message name="isRoleCaseSensitiveResponse">
+		<wsdl:part name="payload" element="tns:isRoleCaseSensitiveResponse"/>
 	</wsdl:message>
 
     <wsdl:message name="authenticateEncryptedUser">
@@ -216,6 +234,11 @@
 		<wsdl:operation name="isWorkflowAdmin">
 			<wsdl:input message="tns:isWorkflowAdminRequest"></wsdl:input>
 			<wsdl:output message="tns:isWorkflowAdminResponse"></wsdl:output>
+		</wsdl:operation>	
+		
+		<wsdl:operation name="isRoleCaseSensitive">
+			<wsdl:input message="tns:isRoleCaseSensitiveRequest"></wsdl:input>
+			<wsdl:output message="tns:isRoleCaseSensitiveResponse"></wsdl:output>
 		</wsdl:operation>		
 	</wsdl:portType>
 
@@ -292,7 +315,16 @@
 			<wsdl:output>
 				<soap:body parts="payload" use="literal" />
 			</wsdl:output>
-		</wsdl:operation>			
+		</wsdl:operation>
+		<wsdl:operation name="isRoleCaseSensitive">
+			<soap:operation soapAction="isRoleCaseSensitive" />
+			<wsdl:input>
+				<soap:body parts="payload" use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body parts="payload" use="literal" />
+			</wsdl:output>
+		</wsdl:operation>		
 	</wsdl:binding>
 
 	<wsdl:service name="TokenService">

@@ -30,8 +30,12 @@ public class TokenConstants {
     public static final QName GET_TOKEN_PROPERTIES = new QName(TOKEN_NS.getNamespaceURI(), "getTokenProperties", TOKEN_PREFIX);
     
     public static final QName IS_WORKFLOW_ADMIN = new QName(TOKEN_NS.getNamespaceURI(), "isWorkflowAdmin", TOKEN_PREFIX);
-
+      
     public static final QName IS_WORKFLOW_ADMIN_RESPONSE = new QName(TOKEN_NS.getNamespaceURI(), "isWorkflowAdminResponse", TOKEN_PREFIX);
+    
+    public static final QName IS_CASE_SENSITIVE = new QName(TOKEN_NS.getNamespaceURI(), "isRoleCaseSensitive", TOKEN_PREFIX);
+
+    public static final QName IS_CASE_SENSITIVE_RESPONSE = new QName(TOKEN_NS.getNamespaceURI(), "isRoleCaseSensitiveResponse", TOKEN_PREFIX);
     
     public static final QName GET_TOKEN_PROPERTIES_RESPONSE = new QName(TOKEN_NS.getNamespaceURI(), "getTokenPropertiesResponse", TOKEN_PREFIX);
 

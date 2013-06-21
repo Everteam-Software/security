@@ -97,4 +97,11 @@ public interface TokenService
      */
 	public String getTokenFromOpenSSOToken(String tokenId)
 		throws AuthenticationException, RBACException, RemoteException;
+	
+    /**
+     * Get whether the role is case sensitive or not
+     * 
+     * @return boolean
+     */
+    public boolean isRoleCaseSensitive() throws RemoteException, RBACException;
 }
