@@ -49,7 +49,7 @@ public class Realms
      */
     private String _defaultRealm = "default";
     
-    private boolean caseSensitive = false;
+    private static boolean caseSensitive = false;
 
     public Realms()
     {
@@ -532,11 +532,11 @@ public class Realms
     }
     
 
-    public boolean isCaseSensitive() {
+    public static boolean isCaseSensitive() {
         return caseSensitive;
 	}
 
     public void setCaseSensitive(boolean caseSensitive) {
-        this.caseSensitive = caseSensitive;
+        Realms.caseSensitive = caseSensitive;
 	}
 }
