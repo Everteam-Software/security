@@ -130,7 +130,7 @@ public class TokenWS extends BaseWS {
     
     public OMElement isWorkflowAdmin(OMElement requestEl) throws AxisFault {
         OMParser request = new OMParser(requestEl);
-        String user = request.getRequiredString(TOKEN);
+        String user = request.getRequiredString(USER);
 
         boolean isWorkflowAdmin;
         try {
