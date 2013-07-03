@@ -10,9 +10,9 @@ public class RBACAdminConstants {
     public static final String DELETE_ACTION = "delete";
     public static final String EDIT_ACTION = "edit";
     public static final String SUCCESS = "success";
-    public static final QName NAME = new QName(RBACADMIN_NS.getNamespaceURI(), "name");
+    public static final QName NAME = new QName(RBACADMIN_NS.getNamespaceURI(), "name", RBAC_ADMIN_PREFIX);
 
-    public static final QName VALUE = new QName(RBACADMIN_NS.getNamespaceURI(), "value");
+    public static final QName VALUE = new QName(RBACADMIN_NS.getNamespaceURI(), "value", RBAC_ADMIN_PREFIX);
 
 
     public static final QName MODIFY_USER = new QName(RBACADMIN_NS.getNamespaceURI(), "modifyUser", RBAC_ADMIN_PREFIX);
@@ -30,8 +30,8 @@ public class RBACAdminConstants {
     public static final QName ROLE = new QName(RBACADMIN_NS.getNamespaceURI(), "role", RBAC_ADMIN_PREFIX);
     public static final QName ROLES = new QName(RBACADMIN_NS.getNamespaceURI(), "roles", RBAC_ADMIN_PREFIX);
     public static final QName USERS = new QName(RBACADMIN_NS.getNamespaceURI(), "users", RBAC_ADMIN_PREFIX);
-    public static final QName PROPERTY = new QName(RBACADMIN_NS.getNamespaceURI(), "property");
-    public static final QName PROPERTIES = new QName(RBACADMIN_NS.getNamespaceURI(), "properties");
+    public static final QName PROPERTY = new QName(RBACADMIN_NS.getNamespaceURI(), "property", RBAC_ADMIN_PREFIX);
+    public static final QName PROPERTIES = new QName(RBACADMIN_NS.getNamespaceURI(), "properties", RBAC_ADMIN_PREFIX);
     public static final QName DETAILS = new QName(RBACADMIN_NS.getNamespaceURI(), "details", RBAC_ADMIN_PREFIX);
     public static final QName RESPONSE = new QName(RBACADMIN_NS.getNamespaceURI(), "response", RBAC_ADMIN_PREFIX);
     public static final QName TOKEN = new QName(RBACADMIN_NS.getNamespaceURI(), "token", RBAC_ADMIN_PREFIX);
