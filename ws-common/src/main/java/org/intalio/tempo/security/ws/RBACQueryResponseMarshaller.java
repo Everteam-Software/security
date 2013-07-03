@@ -112,8 +112,8 @@ public class RBACQueryResponseMarshaller {
 
         for (int i = 0; i < properties.length; i++) {
             OMElement property = OM_FACTORY.createOMElement(RBACQueryConstants.PROPERTY, response);
-            OMElement value = OM_FACTORY.createOMElement(RBACQueryConstants.NAME, property);
-            OMElement name = OM_FACTORY.createOMElement(RBACQueryConstants.VALUE, property);
+            OMElement name = OM_FACTORY.createOMElement(RBACQueryConstants.NAME, property);
+            OMElement value = OM_FACTORY.createOMElement(RBACQueryConstants.VALUE, property);
             value.setText((String) properties[i].getValue());
             name.setText((String) properties[i].getName());
         }
@@ -126,8 +126,8 @@ public class RBACQueryResponseMarshaller {
 
         for (int i = 0; i < properties.length; i++) {
             OMElement property = OM_FACTORY.createOMElement(RBACQueryConstants.PROPERTY, response);
-            OMElement value = OM_FACTORY.createOMElement(RBACQueryConstants.NAME, property);
-            OMElement name = OM_FACTORY.createOMElement(RBACQueryConstants.VALUE, property);
+            OMElement name = OM_FACTORY.createOMElement(RBACQueryConstants.NAME, property);
+            OMElement value = OM_FACTORY.createOMElement(RBACQueryConstants.VALUE, property);
             value.setText((String) properties[i].getValue());
             name.setText((String) properties[i].getName());
             response.addChild(property);
