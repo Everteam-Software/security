@@ -82,6 +82,8 @@ public class LoginController extends UIController {
 
     private static SecureRandom _random;
 
+    private static List<String> _displayNameTags = null;
+
     static {
         try {
             _random = SecureRandom.getInstance("SHA1PRNG");
@@ -204,26 +206,29 @@ public class LoginController extends UIController {
     }
     
     public static String extractUserDisplayName(Property[] props) {
-    	String displayName = StringUtils.trimToNull(_displayName);
+        String displayName = StringUtils.trimToEmpty(_displayName);
     	List<String> attributes = getAttributeValues(displayName);
     	for (String attribute : attributes) {
-    		String propertyValue = extractProperty(attribute, props);
-    		if(propertyValue == null)
-    			propertyValue = "";
-    		displayName = StringUtils.trimToNull(displayName.replace("{"+attribute+"}", propertyValue));
+            String propertyValue = extractProperty(attribute, props);
+            if(propertyValue == null) { propertyValue = ""; }
+            displayName = StringUtils.replace(displayName, "{"+attribute+"}", propertyValue);
 		}
-    	if(displayName == null)
+        if(StringUtils.trimToNull(displayName) == null) {
         	displayName = extractUser(props);
+        }
     	return displayName;
     }
     
     private static List<String> getAttributeValues(String str) {
-	    final List<String> tagValues = new ArrayList<String>();
-	    final Matcher matcher = DISPLAY_NAME_REGEX.matcher(str);
-	    while (matcher.find()) {
-	        tagValues.add(matcher.group(1));
-	    }
-	    return tagValues;
+        if (_displayNameTags == null) {
+            final List<String> tagValues = new ArrayList<String>();
+            final Matcher matcher = DISPLAY_NAME_REGEX.matcher(str);
+            while (matcher.find()) {
+                tagValues.add(matcher.group(1));
+            }
+            _displayNameTags = tagValues;
+        }
+	    return _displayNameTags;
 	}
 
     public static String[] extractRoles(Property[] props) {
