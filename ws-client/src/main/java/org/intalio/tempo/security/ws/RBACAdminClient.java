@@ -134,7 +134,7 @@ public class RBACAdminClient {
     public final String[] getAttributes(final String forObject)
             throws AxisFault {
         OMElement request = element(RBACAdminConstants.GET_ATTRIBUTES);
-        request.addChild(elementText(RBACAdminConstants.TOKEN, forObject));
+        request.addChild(elementText(RBACAdminConstants.OBJECT, forObject));
         OMParser response = invoke(
                 RBACAdminConstants.GET_ATTRIBUTES.getLocalPart(), request);
         return response.getRequiredStringArray(RBACAdminConstants.ATTRIBUTE);

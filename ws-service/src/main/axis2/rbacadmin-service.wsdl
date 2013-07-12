@@ -65,7 +65,7 @@
 			<xsd:element name="getAttributes">
 				<xsd:complexType>
 					<xsd:sequence>
-						<xsd:element name="token" type="xsd:string" />
+						<xsd:element name="object" type="xsd:string" />
 					</xsd:sequence>
 				</xsd:complexType>
 			</xsd:element>
