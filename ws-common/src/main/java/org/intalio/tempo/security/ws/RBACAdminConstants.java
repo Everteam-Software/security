@@ -40,6 +40,7 @@ public class RBACAdminConstants {
     public static final QName ROLE_TYPE = new QName(RBACADMIN_NS.getNamespaceURI(), "roleType", RBAC_ADMIN_PREFIX);
     public static final QName USER_TYPE = new QName(RBACADMIN_NS.getNamespaceURI(), "userType", RBAC_ADMIN_PREFIX);
     public static final QName ID = new QName(RBACADMIN_NS.getNamespaceURI(), "id", RBAC_ADMIN_PREFIX);
+    public static final QName OBJECT = new QName(RBACADMIN_NS.getNamespaceURI(), "object", RBAC_ADMIN_PREFIX);
 
     public static final QName AUTHENTICATION_EXCEPTION = new QName(RBACADMIN_NS.getNamespaceURI(), "AuthenticationFault", RBAC_ADMIN_PREFIX);
     public static final QName RBAC_EXCEPTION = new QName(RBACADMIN_NS.getNamespaceURI(), "RBACFault", RBAC_ADMIN_PREFIX);

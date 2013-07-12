@@ -262,7 +262,7 @@ public class RBACAdminWS extends BaseWS {
      */
     public OMElement getAttributes(OMElement requestEl) throws AxisFault {
         OMParser request = new OMParser(requestEl);
-        String element = request.getRequiredString(RBACAdminConstants.TOKEN);
+        String element = request.getRequiredString(RBACAdminConstants.OBJECT);
         Set<String> attributes = null;
         LOG.debug("Getting Attributes for " + element);
         try {
