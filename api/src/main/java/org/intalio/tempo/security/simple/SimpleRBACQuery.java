@@ -122,7 +122,7 @@ class SimpleRBACQuery
 		SimpleDatabase  database;
         
 		database = _provider.getDatabase();
-        role = database.normalize( role );
+        role = database.normalize( role, _realm );
 
         simpleRole = database.getRole( role );
         if ( simpleRole == null ) {
