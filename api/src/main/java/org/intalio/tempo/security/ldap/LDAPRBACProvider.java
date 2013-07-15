@@ -155,6 +155,12 @@ class LDAPRBACProvider implements RBACProvider, LDAPProperties {
         throw new IllegalArgumentException(sb.toString());
     }
 
+    private String[] toArray(Collection<String> col) {
+        String[] result = new String[col.size()];
+        col.toArray(result);
+        return result;
+    }
+
     private String[] prefix(Collection<String> col) {
         String[] result = new String[col.size()];
         col.toArray(result);
@@ -306,7 +312,7 @@ class LDAPRBACProvider implements RBACProvider, LDAPProperties {
                 if (found == LDAPQueryEngine.RELATION_NOT_FOUND)
                     return EMPTY_STRINGS;
 
-                return prefix(list);
+                return toArray(list);
             } catch (NameNotFoundException nnfe) {
                 if (LOG.isInfoEnabled())
                     LOG.info("Role, " + role + ", is not found!");

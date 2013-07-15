@@ -225,6 +225,21 @@ public class LDAPSecurityProvider implements SecurityProvider {
     }
 
     /**
+     * method to get realm for input dn.
+     * @param dn String
+     * @return realm String
+     */
+    public final String getRealm(final String dn) {
+        Set<String> realms = _realms.keySet();
+        for (String realm : realms) {
+            if (dn.equals(_realms.get(realm))) {
+                return realm;
+            }
+        }
+        return _default;
+    }
+
+    /**
      * @see org.intalio.tempo.security.provider.SecurityProvider#getRBACProvider(java.lang.String)
      */
     public synchronized RBACProvider getRBACProvider(String realm) throws RBACException {
