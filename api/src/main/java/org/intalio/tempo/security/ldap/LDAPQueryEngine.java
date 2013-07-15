@@ -45,6 +45,8 @@ public class LDAPQueryEngine {
 
     private final static Inverter ID_STRIPER    = new IDStriper();
 
+    private final static Inverter DN_STRIPER  = new DNStriper();
+
     private final static Object[] EMPTY_ARGS    = new Object[0];
 
     public final static short RESULT_FOUND          = 1;
@@ -442,7 +444,8 @@ public class LDAPQueryEngine {
                     String res = fields.get(i).toString();
                     if (filter==null || isPass(filter, res)) {
                         found = true;
-                        result.add(BASE_STRIPER.invert(res));
+                        String realm =  _provider.getRealm(DN_STRIPER.invert(res));
+                        result.add(realm + "\\" +BASE_STRIPER.invert(res));
                     }
                 }
             } while (subResult.hasMore());
@@ -543,6 +546,15 @@ public class LDAPQueryEngine {
             if ( eq==-1 || comma==-1 )
                 throw new IllegalArgumentException("Invalid format "+s);
             return s.substring(eq+1,comma);
+        }
+    }
+
+    static class DNStriper implements Inverter {
+        public String invert( String s ) {
+            int dn = s.indexOf(",dc=");
+            if ( dn==-1 )
+                throw new IllegalArgumentException("Invalid format "+s);
+            return s.substring(dn+1);
         }
     }
 

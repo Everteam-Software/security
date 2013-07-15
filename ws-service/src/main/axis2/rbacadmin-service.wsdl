@@ -118,13 +118,19 @@
 			<xsd:element name="getRealms" type="xsd:string" maxOccurs="1" minOccurs="0"/>
 			<xsd:element name="getRoles" type="xsd:string" maxOccurs="1" minOccurs="0"/>
 			<xsd:element name="getUsers" type="xsd:string" maxOccurs="1" minOccurs="0"/>
-			<xsd:element name="details" type="tns:properties" />
+			<xsd:element name="getPropertiesResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="details" type="tns:properties"/>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
 		</xsd:schema>
 	</wsdl:types>
 
 
-	<wsdl:message name="details">
-		<wsdl:part name="payload" element="tns:details" />
+	<wsdl:message name="getPropertiesResponse">
+		<wsdl:part name="payload" element="tns:getPropertiesResponse" />
 	</wsdl:message>
 	<wsdl:message name="modifyUser">
 		<wsdl:part name="payload" element="tns:modifyUser" />
@@ -222,7 +228,7 @@
 		</wsdl:operation>
 		<wsdl:operation name="getProperties">
 			<wsdl:input message="tns:getProperties" />
-			<wsdl:output message="tns:details" />
+			<wsdl:output message="tns:getPropertiesResponse" />
 			<wsdl:fault message="tns:RemoteFault" name="RemoteFault" />
 			<wsdl:fault message="tns:RBACFault" name="RBACFault" />
 		</wsdl:operation>

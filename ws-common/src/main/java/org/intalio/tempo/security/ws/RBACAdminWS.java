@@ -309,7 +309,7 @@ public class RBACAdminWS extends BaseWS {
                     + realm, e);
             throw new Fault(e, getRemoteExceptionResponse(e));
         }
-        OMElement response = OM_FACTORY.createOMElement(RBACAdminConstants.GET_PROPERTIES);
+        OMElement response = OM_FACTORY.createOMElement(RBACAdminConstants.GET_PROPERTIES_RESPONSE);
         OMElement responseToken = OM_FACTORY.createOMElement(RBACAdminConstants.DETAILS, response);
         for (Property prop : properties) {
             responseToken.addChild(elementProperty(prop.getName(), prop.getValue().toString()));
