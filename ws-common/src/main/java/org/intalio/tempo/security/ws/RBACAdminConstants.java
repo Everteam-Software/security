@@ -22,6 +22,7 @@ public class RBACAdminConstants {
     public static final QName GET_USERS = new QName(RBACADMIN_NS.getNamespaceURI(), "getUsers", RBAC_ADMIN_PREFIX);
     public static final QName GET_ATTRIBUTES = new QName(RBACADMIN_NS.getNamespaceURI(), "getAttributes", RBAC_ADMIN_PREFIX);
     public static final QName GET_PROPERTIES = new QName(RBACADMIN_NS.getNamespaceURI(), "getProperties", RBAC_ADMIN_PREFIX);
+    public static final QName GET_PROPERTIES_RESPONSE = new QName(RBACADMIN_NS.getNamespaceURI(), "getPropertiesResponse", RBAC_ADMIN_PREFIX);
 
     public static final QName ACTION = new QName(RBACADMIN_NS.getNamespaceURI(), "action", RBAC_ADMIN_PREFIX);
     public static final QName REALM = new QName(RBACADMIN_NS.getNamespaceURI(), "realm", RBAC_ADMIN_PREFIX);
