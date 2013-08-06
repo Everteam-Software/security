@@ -25,6 +25,7 @@ import static org.intalio.tempo.security.ws.TokenConstants.IS_WORKFLOW_ADMIN;
 import static org.intalio.tempo.security.ws.TokenConstants.IS_WORKFLOW_ADMIN_RESPONSE;
 import static org.intalio.tempo.security.ws.TokenConstants.IS_CASE_SENSITIVE;
 import static org.intalio.tempo.security.ws.TokenConstants.IS_CASE_SENSITIVE_RESPONSE;
+import static org.intalio.tempo.security.ws.TokenConstants.OPENSSO_TOKEN;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
@@ -212,6 +213,27 @@ public class TokenWS extends BaseWS {
         try {
         	initStatics();
             token = _tokenService.getTokenFromTicket(ticket, serviceURL);
+        } catch (AuthenticationException except) {
+            if (LOG.isDebugEnabled())
+                LOG.debug("authenticateUser:\n" + requestEl, except);
+            throw AxisFault.makeFault(except);
+        } catch (Exception except) {
+            if (LOG.isDebugEnabled())
+                LOG.debug("authenticateUser:\n" + requestEl, except);
+            throw new RuntimeException(except);
+        }
+
+        return authenticateUserResponse(token);
+    }
+
+    public OMElement getTokenFromOpenSSOToken(OMElement requestEl) throws AxisFault {
+        OMParser request = new OMParser(requestEl);
+        String openSSOToken = request.getRequiredString(OPENSSO_TOKEN);
+
+        String token;
+        try {
+            initStatics();
+            token = _tokenService.getTokenFromOpenSSOToken(openSSOToken);
         } catch (AuthenticationException except) {
             if (LOG.isDebugEnabled())
                 LOG.debug("authenticateUser:\n" + requestEl, except);
