@@ -63,7 +63,7 @@ define "security" do
   desc "Security Web-Service"
   define "ws-service" do
     compile.with projects("api", "ws-common"), AXIOM, AXIS2.values, SLF4J[:api], SLF4J[:log4j12], SLF4J[:jcl104overslf4j], SPRING[:core], STAX_API  
-    package(:aar).with :libs => [ projects("api", "ws-common"), CASTOR, SLF4J[:api], SLF4J[:log4j12], SLF4J[:jcl104overslf4j], SPRING[:core], CAS_CLIENT ]
+    package(:aar).with :libs => [ projects("api", "ws-common"), CASTOR, SLF4J[:api], SLF4J[:log4j12], SLF4J[:jcl104overslf4j], SPRING[:core], CAS_CLIENT, OPENSSO_CLIENT_SDK ]
   end
   
   desc "Common spring and web related classes"
