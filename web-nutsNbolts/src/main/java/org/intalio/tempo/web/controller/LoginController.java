@@ -556,7 +556,11 @@ public class LoginController extends UIController {
         /**
          * Maximum text length
          */
-        private static final int PASSWORD_MAX_LENGTH = 20;
+        private static int PASSWORD_MAX_LENGTH = 40;
+
+        public void setMaxPasswordLength(int maxPasswordLength) {
+            PASSWORD_MAX_LENGTH = maxPasswordLength;
+        }
 
         public void validate(Object obj, Errors errors) {
             LOG.debug("Validate: " + obj + " " + errors);
