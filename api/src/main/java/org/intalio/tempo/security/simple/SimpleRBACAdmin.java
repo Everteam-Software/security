@@ -241,11 +241,11 @@ public class SimpleRBACAdmin implements RBACAdmin {
                             && roleElement
                                     .getAttribute(new QName("identifier"))
                                     .getAttributeValue().equals(elementValue)) {
-                        roleElement.detach();
+                        itrUser.remove();
                     } else if (roleElement
                             .getAttribute(new QName("identifier"))
                             .getAttributeValue().equalsIgnoreCase(elementValue)) {
-                        roleElement.detach();
+                        itrUser.remove();
                     }
                 }
                 return document;
