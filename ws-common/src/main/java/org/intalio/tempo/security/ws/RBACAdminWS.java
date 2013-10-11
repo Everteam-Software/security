@@ -30,6 +30,14 @@ import org.slf4j.LoggerFactory;
 public class RBACAdminWS extends BaseWS {
     private static final Logger LOG = LoggerFactory.getLogger(RBACAdminWS.class);
 
+    /**
+     * Constructor for RBAC Admin Service.
+     */
+    public RBACAdminWS() {
+      // Initialize Security Provider before any service call.
+      initStatics();
+    }
+
     /**This method performs either add, delete or edit action for user
      * @param requestEl
      * @return
