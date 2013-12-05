@@ -21,6 +21,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.httpclient.HttpStatus;
 import org.intalio.tempo.web.controller.LoginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,8 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 
 public class LoginFilter implements javax.servlet.Filter {
     private static final Logger LOG = LoggerFactory.getLogger(LoginFilter.class);
+    private static final String TRUE = "true";
+    private static final String AJAX = "ajax";
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) 
         throws IOException, ServletException
@@ -43,6 +46,7 @@ public class LoginFilter implements javax.servlet.Filter {
                 return;
             }
 
+            boolean isAjaxCall = TRUE.equals(req.getHeader(AJAX));
             String secureSession = LoginController.getSecureRandomSession(req);
             String secureCookie = LoginController.getSecureRandomCookie(req);
             if (secureSession != null) {
@@ -60,9 +64,15 @@ public class LoginFilter implements javax.servlet.Filter {
             User user = login.getCurrentUser(req);
             if (user == null) {
                 // authentication failed or not available
-                LOG.info("User not logged in, redirecting to login page: "+login.getLoginPageURL());
-                LoginController.setRedirectAfterLoginCookie(resp, req.getRequestURI());
-                resp.sendRedirect(login.getLoginPageURL());
+                LOG.info("User not logged in, redirecting to login page: "
+                        + login.getLoginPageURL());
+                if (isAjaxCall) {
+                    resp.setStatus(HttpStatus.SC_UNAUTHORIZED);
+                } else {
+                    LoginController.setRedirectAfterLoginCookie(resp,
+                            req.getRequestURI());
+                    resp.sendRedirect(login.getLoginPageURL());
+                }
             } else {
                 // authenticated: synchronize secure random
                 if (secureCookie != null) {
