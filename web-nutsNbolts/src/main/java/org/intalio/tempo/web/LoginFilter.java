@@ -12,6 +12,8 @@
 package org.intalio.tempo.web;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -29,18 +31,19 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 public class LoginFilter implements javax.servlet.Filter {
-    private static final Logger LOG = LoggerFactory.getLogger(LoginFilter.class);
+    private static final Logger LOG = LoggerFactory
+            .getLogger(LoginFilter.class);
     private static final String TRUE = "true";
     private static final String AJAX = "ajax";
 
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) 
-        throws IOException, ServletException
-    {
+    public void doFilter(ServletRequest request, ServletResponse response,
+            FilterChain chain) throws IOException, ServletException {
         if (request instanceof HttpServletRequest) {
             HttpServletRequest req = (HttpServletRequest) request;
             HttpServletResponse resp = (HttpServletResponse) response;
-            
-            if (req.getRequestURI().endsWith("/login.htm") || req.getRequestURI().endsWith("/login")) {
+
+            if (req.getRequestURI().endsWith("/login.htm")
+                    || req.getRequestURI().endsWith("/login")) {
                 // don't protect login page
                 chain.doFilter(request, response);
                 return;
@@ -57,10 +60,15 @@ public class LoginFilter implements javax.servlet.Filter {
                 }
             }
 
-            WebApplicationContext context = WebApplicationContextUtils.getRequiredWebApplicationContext(req.getSession().getServletContext());
-            LoginController login = (LoginController) context.getBean("loginController");
-            if (login == null) throw new IllegalStateException("Missing 'loginController' object in Spring webapp context");
-            
+            WebApplicationContext context = WebApplicationContextUtils
+                    .getRequiredWebApplicationContext(req.getSession()
+                            .getServletContext());
+            LoginController login = (LoginController) context
+                    .getBean("loginController");
+            if (login == null)
+                throw new IllegalStateException(
+                        "Missing 'loginController' object in Spring webapp context");
+
             User user = login.getCurrentUser(req);
             if (user == null) {
                 // authentication failed or not available
@@ -71,7 +79,7 @@ public class LoginFilter implements javax.servlet.Filter {
                 } else {
                     LoginController.setRedirectAfterLoginCookie(resp,
                             req.getRequestURI());
-                    resp.sendRedirect(login.getLoginPageURL());
+                    resp.sendRedirect(generateUrl(login.getLoginPageURL(), req));
                 }
             } else {
                 // authenticated: synchronize secure random
@@ -89,6 +97,19 @@ public class LoginFilter implements javax.servlet.Filter {
         } else {
             LOG.warn("ServletRequest was not HttpServletRequest; ignoring request.");
         }
+    }
+
+    private String generateUrl(String loginUrl, HttpServletRequest req)
+            throws UnsupportedEncodingException {
+        StringBuilder urlBuilder = new StringBuilder(loginUrl);
+        try {
+        urlBuilder.append("?prevAction=");
+        urlBuilder.append(URLEncoder.encode(req.getRequestURI() + "?"
+                + req.getQueryString().toString(), "UTF-8"));
+        } catch (Exception e) {
+            LOG.warn("Exception encoding the url for previous action",e);
+        }
+        return urlBuilder.toString();
     }
 
     public void init(FilterConfig config) throws ServletException {
