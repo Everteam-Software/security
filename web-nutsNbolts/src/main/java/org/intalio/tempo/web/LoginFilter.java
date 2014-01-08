@@ -103,11 +103,15 @@ public class LoginFilter implements javax.servlet.Filter {
             throws UnsupportedEncodingException {
         StringBuilder urlBuilder = new StringBuilder(loginUrl);
         try {
-        urlBuilder.append("?prevAction=");
-        urlBuilder.append(URLEncoder.encode(req.getRequestURI() + "?"
-                + req.getQueryString().toString(), "UTF-8"));
+            urlBuilder.append("?prevAction=");
+            urlBuilder.append(URLEncoder.encode(req.getRequestURI(), "UTF-8"));
+
+            if (req.getQueryString() != null) {
+                urlBuilder.append(URLEncoder.encode("?"
+                        + req.getQueryString().toString(), "UTF-8"));
+            }
         } catch (Exception e) {
-            LOG.warn("Exception encoding the url for previous action",e);
+            LOG.warn("Exception encoding the url for previous action", e);
         }
         return urlBuilder.toString();
     }
