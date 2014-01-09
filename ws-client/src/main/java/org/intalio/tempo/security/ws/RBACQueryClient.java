@@ -76,6 +76,20 @@ public class RBACQueryClient {
     }
     
     /**
+     * call operation getAssignedUsers.
+     * @param role String
+     * @return users String[]
+     * @throws AxisFault service Exception
+     */
+    public final String[] getAssignedRoles(final String user) throws AxisFault {
+        OMElement request = element(RBACQueryConstants.ASSIGNED_ROLES_REQUEST);
+        request.addChild(elementText(RBACQueryConstants.USER, user));
+        OMParser response = invoke(
+                RBACQueryConstants.ASSIGNED_ROLES.getLocalPart(), request);
+        return response.getRequiredStringArray(RBACQueryConstants.ROLE);
+    }
+
+    /**
      * invoke operation.
      * @param action String
      * @param request OMElement
