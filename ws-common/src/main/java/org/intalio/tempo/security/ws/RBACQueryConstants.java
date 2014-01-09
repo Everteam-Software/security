@@ -66,4 +66,18 @@ public class RBACQueryConstants {
         public static final QName ASSIGNED_USERS_REQUEST = new QName(
             RBACQUERY_NS.getNamespaceURI(), "getAssignedUsersRequest",
             RBAC_PREFIX);
+
+        /**
+         * QName for getAssignedRoles Operation.
+         */
+        public static final QName ASSIGNED_ROLES = new QName(
+            RBACQUERY_NS.getNamespaceURI(), "getAssignedRoles",
+            RBAC_PREFIX);
+
+        /**
+         * QName for getAssignedRolesRequest.
+         */
+        public static final QName ASSIGNED_ROLES_REQUEST = new QName(
+            RBACQUERY_NS.getNamespaceURI(), "getAssignedRolesRequest",
+            RBAC_PREFIX);
 }
