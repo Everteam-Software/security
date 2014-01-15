@@ -7,6 +7,9 @@
                 <ref bean="securityProvider"/>
           	</list>
 		</property>
+		<property name="caseSensitive">
+			<value>false</value>
+		</property>
     </bean>
 
     <bean id="securityProvider" class="org.intalio.tempo.security.simple.SimpleSecurityProvider" init-method="init">

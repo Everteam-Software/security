@@ -64,7 +64,7 @@ public class SimpleTest
     public void setUp()
         throws Exception
     {
-        // nothing
+        System.setProperty("org.intalio.tempo.configDirectory", "src/test/resources/");
     }
 
     public void tearDown() 

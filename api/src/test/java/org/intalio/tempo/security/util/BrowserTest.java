@@ -7,6 +7,11 @@ public class BrowserTest extends TestCase{
 		junit.textui.TestRunner.run(BrowserTest.class);
 	}
 	
+    public void setUp() throws Exception {
+        System.setProperty("org.intalio.tempo.configDirectory",
+                "src/test/resources/");
+    }
+
 	public void testMain()throws Exception{
 		String[] args = new String[]{"-config", "src/test/resources/SimpleSpringTest.xml", "-roles", "-users"};
 		

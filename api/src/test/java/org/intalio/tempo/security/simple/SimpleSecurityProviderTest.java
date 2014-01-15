@@ -18,6 +18,11 @@ public class SimpleSecurityProviderTest extends TestCase {
         junit.textui.TestRunner.run(SimpleSecurityProviderTest.class);
     }
     
+    public void setUp() throws Exception {
+        System.setProperty("org.intalio.tempo.configDirectory",
+                "src/test/resources/");
+    }
+
     public void testInitialize(){
         SimpleSecurityProvider provider = new SimpleSecurityProvider();
         Exception actualE = null;

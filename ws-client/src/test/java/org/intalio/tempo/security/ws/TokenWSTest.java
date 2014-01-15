@@ -18,10 +18,14 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
+import java.util.Iterator;
+
+import javax.xml.namespace.QName;
 
 import junit.framework.Assert;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMNode;
 import org.apache.axis2.AxisFault;
 import org.intalio.tempo.security.Property;
 import org.intalio.tempo.security.authentication.AuthenticationException;
@@ -124,6 +128,13 @@ public class TokenWSTest {
         protected OMParser invoke(String action, OMElement request) throws AxisFault {
             try {
                 Method method = _tokenWS.getClass().getMethod(action, OMElement.class);
+
+                Iterator iterator = request.getChildrenWithName(TokenConstants.TOKEN);
+                if(iterator.hasNext()) {
+                    OMElement element = (OMElement) iterator.next();
+                    request.addChild(elementText(TokenConstants.USER, element.getText()));
+                }
+
                 OMElement response = (OMElement) method.invoke(_tokenWS, request);
                 return new OMParser(response);
             } catch (InvocationTargetException except) {

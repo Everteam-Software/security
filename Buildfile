@@ -39,7 +39,8 @@ define "security" do
   desc "Security Web-Service Client"
   define "ws-client" do
     compile.with projects("api", "ws-common"),JASYPT,AXIOM, AXIS2.values, SLF4J[:api], SLF4J[:log4j12], SLF4J[:jcl104overslf4j], STAX_API,APACHE_COMMONS[:httpclient], SPRING[:core], BPMS_COMMON
-    test.with APACHE_COMMONS[:httpclient], APACHE_COMMONS[:codec], CASTOR, LOG4J, SUNMAIL, XERCES[:impl], XERCES[:parserapi], WS_COMMONS_SCHEMA, WSDL4J, WOODSTOX, CAS_CLIENT, INSTINCT, BPMS_COMMON
+    test.exclude "*TokenWSGetTokenFromTicketTest"
+    test.with DOM4J, JAXEN, APACHE_COMMONS[:httpclient], APACHE_COMMONS[:codec], CASTOR, LOG4J, SUNMAIL, XERCES[:impl], XERCES[:parserapi], WS_COMMONS_SCHEMA, WSDL4J, WOODSTOX, CAS_CLIENT, INSTINCT, BPMS_COMMON
 
     # Remember to set JAVA_OPTIONS before starting Jetty
     # export JAVA_OPTIONS=-Dorg.intalio.tempo.configDirectory=/home/boisvert/svn/tempo/security-ws2/src/test/resources

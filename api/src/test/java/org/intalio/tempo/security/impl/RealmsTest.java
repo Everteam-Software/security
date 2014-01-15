@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import com.googlecode.instinct.expect.ExpectThat;
 import com.googlecode.instinct.expect.ExpectThatImpl;
+import com.googlecode.instinct.expect.behaviour.Mocker;
 import com.googlecode.instinct.integrate.junit4.InstinctRunner;
 import com.googlecode.instinct.marker.annotate.Mock;
 import com.googlecode.instinct.marker.annotate.Specification;
@@ -32,30 +33,36 @@ public class RealmsTest extends TestCase {
     final static ExpectThat expect = new ExpectThatImpl();
     @Subject
     Realms _realms;
-    @Mock
+
     SecurityProvider sp;
-    @Mock
+
     RBACProvider rbac;
-//    @Mock
-//    RBACProvider rbac_test;
-    @Mock
     RBACAdmin rbacAdmin;
-    @Mock
     RBACQuery rbacQuery;
-    @Mock
     RBACRuntime rbacRuntime;
-    @Mock
+
     AuthenticationProvider ap;
-    @Mock
     AuthenticationQuery authQuery;
-    @Mock
     AuthenticationRuntime authRuntime;
-    @Mock
     AuthenticationAdmin authAdmin;
+
     String[] realms = new String[] { "intalio", "test" };
 
     @Specification
     public void testAll()throws Exception{
+
+        sp = Mocker.mock(SecurityProvider.class);
+
+        rbacAdmin = Mocker.mock(RBACAdmin.class);
+        rbac = Mocker.mock(RBACProvider.class);
+        rbacQuery = Mocker.mock(RBACQuery.class);
+        rbacRuntime = Mocker.mock(RBACRuntime.class);
+
+        ap = Mocker.mock(AuthenticationProvider.class);
+        authAdmin = Mocker.mock(AuthenticationAdmin.class);
+        authQuery = Mocker.mock(AuthenticationQuery.class);
+        authRuntime = Mocker.mock(AuthenticationRuntime.class);
+
         expect.that(new Expectations(){{
             atLeast(1).of(sp).getRealms();will(returnValue(realms));
             atLeast(1).of(sp).getRBACProvider("intalio");will(returnValue(rbac));            
@@ -162,6 +169,7 @@ public class RealmsTest extends TestCase {
         realms.deleteRole("test/role1");
         realms.deleteUser("test/user1");
              
+        Mocker.reset();
     }
     // private SimpleSecurityProvider createSimpleSecurityProvider() throws
     // Exception{

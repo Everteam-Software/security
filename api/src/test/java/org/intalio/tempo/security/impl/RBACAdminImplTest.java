@@ -11,8 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import com.googlecode.instinct.expect.ExpectThat;
 import com.googlecode.instinct.expect.ExpectThatImpl;
+import com.googlecode.instinct.expect.behaviour.Mocker;
 import com.googlecode.instinct.integrate.junit4.InstinctRunner;
-import com.googlecode.instinct.marker.annotate.Mock;
 import com.googlecode.instinct.marker.annotate.Specification;
 import com.googlecode.instinct.marker.annotate.Stub;
 import com.googlecode.instinct.marker.annotate.Subject;
@@ -22,8 +22,8 @@ public class RBACAdminImplTest extends TestCase {
     protected transient Logger _log = LoggerFactory.getLogger(getClass());
     final static ExpectThat expect = new ExpectThatImpl();
     @Subject RBACAdminImpl rbac;
-    @Mock Realms provider;
-    @Mock RBACAdmin admin;
+    Realms provider;
+    RBACAdmin admin;
     @Stub(auto = false)   Property[] properties = new Property[0];
     @Stub(auto = false)String role= "test/role1";
     @Stub(auto = false)String user = "test/user1";
@@ -33,7 +33,8 @@ public class RBACAdminImplTest extends TestCase {
     @Specification
     public void testAll()throws Exception{
 
-      
+      provider = Mocker.mock(Realms.class);
+      admin = Mocker.mock(RBACAdmin.class);
         
         expect.that(new Expectations(){{
             atLeast(1).of(provider).getRBACAdmin("test/role1");will(returnValue(admin));
@@ -67,5 +68,7 @@ public class RBACAdminImplTest extends TestCase {
         rbac.deleteInheritance("test/manager", "test/worker");
         rbac.setUserProperties(user, properties);
         rbac.setRoleProperties(role, properties);
+
+        Mocker.reset();
      }
 }

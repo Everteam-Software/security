@@ -146,7 +146,7 @@ public class TokenClient implements TokenService {
 		return OM_FACTORY.createOMElement(name);
 	}
 
-	private static OMElement elementText(QName name, String text) {
+	protected static OMElement elementText(QName name, String text) {
 		OMElement element = OM_FACTORY.createOMElement(name);
 		element.setText(text);
 		return element;

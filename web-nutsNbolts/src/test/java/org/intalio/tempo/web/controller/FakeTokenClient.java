@@ -31,12 +31,19 @@ public class FakeTokenClient extends TokenClient{
         Property name = new Property();
         name.setName("user");
         name.setValue("test1");
+
         Property roles = new Property();
         roles.setName("roles");
         roles.setValue("test/role1;test/role2");
-        Property[] ret = new Property[2];
+
+        Property isWorkflowAdmin = new Property();
+        isWorkflowAdmin.setName("isWorkflowAdmin");
+        isWorkflowAdmin.setValue("false");
+
+        Property[] ret = new Property[3];
         ret[0] = name;
         ret[1] = roles;
+        ret[2] = isWorkflowAdmin;
         return ret;
     }
 }
