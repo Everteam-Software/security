@@ -16,6 +16,7 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
 
 import com.googlecode.instinct.expect.ExpectThat;
 import com.googlecode.instinct.expect.ExpectThatImpl;
+import com.googlecode.instinct.expect.behaviour.Mocker;
 import com.googlecode.instinct.integrate.junit4.InstinctRunner;
 import com.googlecode.instinct.marker.annotate.BeforeSpecification;
 import com.googlecode.instinct.marker.annotate.Mock;
@@ -31,13 +32,10 @@ public class LoginFilterTest {
     @Subject
     LoginFilter loginFilter;
     
-    @Mock
     FilterChain filterChain;
     
-    @Mock
     HttpServletRequest request;
     
-    @Mock
     HttpSession session;
 
     FakeHttpServletResponse response = new FakeHttpServletResponse();
@@ -52,6 +50,10 @@ public class LoginFilterTest {
         context.setServletContext(msc);
         context.refresh();
         msc.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, context);
+
+        filterChain = Mocker.mock(FilterChain.class);
+        request = Mocker.mock(HttpServletRequest.class);
+        session = Mocker.mock(HttpSession.class);
     }
     
     @Specification
@@ -74,6 +76,7 @@ public class LoginFilterTest {
         expect.that(new Expectations() {
             {
                 atLeast(1).of(request).getRequestURI(); will(returnValue("http://localhost/tasks.htm"));
+                atLeast(1).of(request).getHeader("ajax"); will(returnValue("false"));
                 one(request).getSession(); will(returnValue(session));
                 one(session).getAttribute("SECURE_RANDOM"); will(returnValue("secure"));
                 atLeast(1).of(request).getCookies(); will(returnValue(cookies));
@@ -88,15 +91,16 @@ public class LoginFilterTest {
         expect.that(new Expectations() {
             {
                 atLeast(1).of(request).getRequestURI(); will(returnValue("http://localhost/tasks.htm"));
+                atLeast(1).of(request).getHeader("ajax"); will(returnValue("false"));
                 allowing(request).getSession(); will(returnValue(session));
                 one(session).getAttribute("SECURE_RANDOM"); will(returnValue("secure"));
                 allowing(request).getCookies();
                 one(session).getServletContext(); will(returnValue(msc));
-                allowing(filterChain);
+                atLeast(1).of(request).getQueryString(); will(returnValue(""));
             }
         });
         loginFilter.doFilter(request, response, filterChain);
-        Assert.assertEquals(response.getRedirectURL(), "/login.htm");
+        Assert.assertTrue(response.getRedirectURL().contains("/login.htm"));
     }
     
     @Specification

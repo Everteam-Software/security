@@ -15,8 +15,6 @@
 
     <defaultRealm>intalio</defaultRealm>
 
-    <caseSensitive>false</caseSensitive>
-
     <realm identifier="intalio">
         <user identifier="admin">
 			<name>Admininistrator</name>

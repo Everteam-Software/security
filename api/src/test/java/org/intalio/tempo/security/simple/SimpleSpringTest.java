@@ -32,6 +32,11 @@ public class SimpleSpringTest
 {
     protected transient Logger _log = LoggerFactory.getLogger( getClass() );
 
+    public void setUp() throws Exception {
+        System.setProperty("org.intalio.tempo.configDirectory",
+                "src/test/resources/");
+    }
+
     /**
      * Get Realms instance
      */

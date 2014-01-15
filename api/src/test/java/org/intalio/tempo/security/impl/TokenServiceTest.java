@@ -49,6 +49,11 @@ import edu.yale.its.tp.cas.client.ProxyTicketValidator;
 public class TokenServiceTest extends TestCase {
     protected transient Logger _log = LoggerFactory.getLogger(getClass());
 
+    public void setUp() throws Exception {
+        System.setProperty("org.intalio.tempo.configDirectory",
+                "src/test/resources/");
+    }
+
     /**
      * Get TokenService instance
      */

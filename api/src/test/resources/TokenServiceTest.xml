@@ -9,11 +9,13 @@
                 <ref bean="simpleSecurity"/>
           	</list>
 		</property>
+		<property name="caseSensitive">
+			<value>false</value>
+		</property>
     </bean>
 
     <bean id="simpleSecurity" class="org.intalio.tempo.security.simple.SimpleSecurityProvider" init-method="init">
         <property name="configFile"><value>testSimpleSecurity.xml</value></property>
-        <property name="caseSensitive"><value>false</value></property>
     </bean>
 
     <bean id="tokenHandler" class="org.intalio.tempo.security.impl.TokenHandler">
