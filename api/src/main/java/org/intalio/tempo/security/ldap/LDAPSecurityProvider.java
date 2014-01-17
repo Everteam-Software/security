@@ -27,6 +27,7 @@ import javax.naming.directory.InitialDirContext;
 
 import org.intalio.tempo.security.authentication.AuthenticationException;
 import org.intalio.tempo.security.authentication.provider.AuthenticationProvider;
+import org.intalio.tempo.security.impl.Realms;
 import org.intalio.tempo.security.provider.SecurityProvider;
 import org.intalio.tempo.security.rbac.RBACException;
 import org.intalio.tempo.security.rbac.provider.RBACProvider;
@@ -242,28 +243,38 @@ public class LDAPSecurityProvider implements SecurityProvider {
     /**
      * @see org.intalio.tempo.security.provider.SecurityProvider#getRBACProvider(java.lang.String)
      */
-    public synchronized RBACProvider getRBACProvider(String realm) throws RBACException {
+    public synchronized RBACProvider getRBACProvider(String realm)
+            throws RBACException {
 
-        if (realm==null || "".equals(realm))
+        if (realm == null || "".equals(realm))
             realm = _default;
-        if (!_realms.containsKey(realm))
-            throw new RBACException("Realm, "+realm+", is not supported by this Security Provider!");
-        
+        if (Realms.isCaseSensitive()) {
+            if (!_realms.containsKey(realm))
+                throw new RBACException("Realm, " + realm
+                        + ", is not supported by this Security Provider!");
+        } else {
+            if (!_realms.containsKey(realm)) {
+                realm = fetchRealmKeyIgnoreCase(realm);
+                if (realm == null)
+                    throw new RBACException("Realm, " + realm
+                            + ", is not supported by this Security Provider!");
+            }
+        }
         if (_rbacs.containsKey(realm))
-            return (RBACProvider)_rbacs.get(realm);
+            return (RBACProvider) _rbacs.get(realm);
 
         Context context = null;
         try {
             String dn = _realms.get(realm);
-            
+
             // make sure the sub _context exist
             context = getContext(dn);
-            
-            LDAPQueryEngine engine  = new LDAPQueryEngine(this, dn);
+
+            LDAPQueryEngine engine = new LDAPQueryEngine(this, dn);
             LDAPRBACProvider rbac = new LDAPRBACProvider(realm, engine, dn);
             rbac.initialize(_env);
             _rbacs.put(realm, rbac);
-            
+
             return rbac;
         } catch (NamingException ne) {
             throw new RBACException(ne);
@@ -276,30 +287,41 @@ public class LDAPSecurityProvider implements SecurityProvider {
      * @see org.intalio.tempo.security.provider.SecurityProvider#getAuthenticationProvider(java.lang.String)
      */
     public synchronized AuthenticationProvider getAuthenticationProvider(String realm)
-    throws AuthenticationException {
+ throws AuthenticationException {
 
-        if (realm==null || "".equals(realm))
+        if (realm == null || "".equals(realm))
             realm = _default;
-        if (!_realms.containsKey(realm))
-            throw new AuthenticationException("Realm, "+realm+", is not supported by this Security Provider!");
-        
+        if (Realms.isCaseSensitive()) {
+            if (!_realms.containsKey(realm))
+                throw new AuthenticationException("Realm, " + realm
+                        + ", is not supported by this Security Provider!");
+        } else {
+            if (!_realms.containsKey(realm)) {
+                realm = fetchRealmKeyIgnoreCase(realm);
+                if (realm == null)
+                    throw new AuthenticationException("Realm, " + realm
+                            + ", is not supported by this Security Provider!");
+            }
+        }
+
         if (_auths.containsKey(realm))
-            return (LDAPAuthenticationProvider)_auths.get(realm);
+            return (LDAPAuthenticationProvider) _auths.get(realm);
 
         Context context = null;
         try {
             String dn = _realms.get(realm);
-            
+
             // make sure the sub _context exist
             context = getContext(dn);
-            
-            LDAPQueryEngine engine  = new LDAPQueryEngine(this, dn);
-            LDAPAuthenticationProvider auth = new LDAPAuthenticationProvider(realm, engine, dn, _env);
+
+            LDAPQueryEngine engine = new LDAPQueryEngine(this, dn);
+            LDAPAuthenticationProvider auth = new LDAPAuthenticationProvider(
+                    realm, engine, dn, _env);
             auth.setWorkflowAdminRoles(_workflowAdminRoles);
             auth.setWorkflowAdminUsers(_workflowAdminUsers);
             auth.initialize(_env);
             _auths.put(realm, auth);
-    
+
             return auth;
         } catch (NamingException ne) {
             throw new AuthenticationException(ne);
@@ -383,5 +405,17 @@ public class LDAPSecurityProvider implements SecurityProvider {
         }
         properties.remove(id);
         return properties;
+    }
+
+    private String fetchRealmKeyIgnoreCase(String realm) {
+        String realmKey = null;
+        Set<String> keys = _realms.keySet();
+        for (String key : keys) {
+            if (key.equalsIgnoreCase(realm)) {
+                realmKey = key;
+                break;
+            }
+        }
+        return realmKey;
     }
 }

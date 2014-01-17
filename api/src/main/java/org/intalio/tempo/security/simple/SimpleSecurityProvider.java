@@ -32,6 +32,7 @@ import org.intalio.tempo.security.authentication.AuthenticationException;
 import org.intalio.tempo.security.authentication.AuthenticationQuery;
 import org.intalio.tempo.security.authentication.AuthenticationRuntime;
 import org.intalio.tempo.security.authentication.provider.AuthenticationProvider;
+import org.intalio.tempo.security.impl.Realms;
 import org.intalio.tempo.security.provider.SecurityProvider;
 import org.intalio.tempo.security.rbac.RBACAdmin;
 import org.intalio.tempo.security.rbac.RBACConstants;
@@ -242,7 +243,7 @@ public final class SimpleSecurityProvider
     {
         if (!_rbacMap.containsKey(realm)) 
             throw new RBACException("Realm, "+realm+", is not supported by this Security Provider!");
-        if (SimpleDatabase.isCaseSensitive())
+        if (Realms.isCaseSensitive())
             return (RBACProvider) _rbacMap.get( realm );
         else
             return (RBACProvider) _rbacMap.get( realm.toLowerCase() );
@@ -254,7 +255,7 @@ public final class SimpleSecurityProvider
         throws AuthenticationException
     {
 //        return (AuthenticationProvider) _authMap.get( realm.toLowerCase() );
-          if (SimpleDatabase.isCaseSensitive())
+          if (Realms.isCaseSensitive())
             return (AuthenticationProvider) _authMap.get( realm );
           else
             return (AuthenticationProvider) _authMap.get( realm.toLowerCase() );
@@ -324,7 +325,7 @@ public final class SimpleSecurityProvider
 			
 			auth = new SimpleAuthenticationProvider( realms[i] );
 //			_authMap.put( realms[i].toLowerCase(), auth );
-	        if (SimpleDatabase.isCaseSensitive()) {
+	        if (Realms.isCaseSensitive()) {
                _rbacMap.put( realms[i], rbac );
                _authMap.put( realms[i], auth );
 	        } else {

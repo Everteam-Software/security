@@ -22,6 +22,7 @@ import org.dom4j.io.SAXReader;
 import org.exolab.castor.mapping.Mapping;
 import org.exolab.castor.xml.Unmarshaller;
 import org.xml.sax.InputSource;
+import org.intalio.tempo.security.impl.Realms;
 import org.intalio.tempo.security.util.IdentifierUtils;
 
 /**
@@ -56,11 +57,6 @@ public class SimpleDatabase
     private HashMap<String,SimpleRealm> _realms;
 
     /**
-     * Whether identifiers are case-sensitive.
-     */
-    private static boolean _caseSensitive = false;
-
-    /**
      * Realm separator character.
      */
     private char _separator = '\\';
@@ -77,14 +73,6 @@ public class SimpleDatabase
     public SimpleDatabase()
     {
         _realms = new HashMap<String,SimpleRealm>();
-    }
-
-    /**
-     * Checks if simple security is caseSensitive
-     * @return
-     */
-    public static boolean isCaseSensitive(){
-         return _caseSensitive;
     }
 
 	/**
@@ -212,7 +200,7 @@ public class SimpleDatabase
         	throw new IllegalArgumentException( "Realm has no identifier" );
         }
         
-        if ( ! _caseSensitive ) {
+        if ( ! Realms.isCaseSensitive() ) {
             id = id.toLowerCase();
         }
 
@@ -289,7 +277,7 @@ public class SimpleDatabase
      */
     public String normalize( String identifier )
     {
-       return IdentifierUtils.normalize( identifier, _defaultRealm, _caseSensitive, _separator );
+       return IdentifierUtils.normalize( identifier, _defaultRealm, Realms.isCaseSensitive(), _separator );
     }
     
 
@@ -298,7 +286,7 @@ public class SimpleDatabase
      */
     public String normalize( String identifier, String defaultRealm )
     {
-       return IdentifierUtils.normalize( identifier, defaultRealm, _caseSensitive, _separator );
+       return IdentifierUtils.normalize( identifier, defaultRealm, Realms.isCaseSensitive(), _separator );
     }
 
     
@@ -312,22 +300,4 @@ public class SimpleDatabase
        }
     }
 
-    static {
-        String configDir = System.getProperty(CONFIG_DIR_PROPERTY);
-        if (configDir == null) {
-            throw new RuntimeException("System property " + CONFIG_DIR_PROPERTY + " not defined.");
-        }
-        File _configDir = new File(configDir, "securityConfig.xml");
-        if (!_configDir.exists()) {
-            throw new RuntimeException("Configuration directory " + _configDir.getAbsolutePath() + " doesn't exist.");
-        }
-
-        try {
-            Document doc = new SAXReader().read(_configDir);
-            Node node = doc.selectSingleNode("//*[@name='caseSensitive']/value");
-            _caseSensitive = "true".equalsIgnoreCase(node.getText());
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to find caseSensitive property in securityConfig.xml file",e);
-        }
-    }
 }
