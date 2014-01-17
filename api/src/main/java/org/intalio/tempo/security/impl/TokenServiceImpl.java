@@ -124,9 +124,7 @@ public class TokenServiceImpl implements TokenService {
     public String createToken(String user, String password) throws RBACException, RemoteException, AuthenticationException {
         // TODO we should use _realms to normalize
 //        user = IdentifierUtils.normalize(user, _realms.getDefaultRealm(), false, '\\');
-	    boolean caseSensitive = true;
-	    String realms = (IdentifierUtils.getRealm(user).equals(""))?_realms.getDefaultRealm():IdentifierUtils.getRealm(user);
-        caseSensitive = _realms.isCaseSensitive();
+        boolean caseSensitive = Realms.isCaseSensitive();
 	    user = IdentifierUtils.normalize(user, _realms.getDefaultRealm(), caseSensitive, '\\');
 
         // place session information in token
