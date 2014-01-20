@@ -66,10 +66,6 @@ public class Realms
         for ( SecurityProvider provider : providers ) {
             String[] realms = provider.getRealms();
             for ( int i=0; i<realms.length; i++ ) {
-//                _realms.put( realms[i].toLowerCase(), provider );
-                if(!caseSensitive)
-                    _realms.put(realms[i].toLowerCase(), provider );
-                else
                     _realms.put( realms[i], provider );
             }
         }
@@ -105,18 +101,21 @@ public class Realms
     
     
     /**
-	 * Get _context SecurityProvider for a given realm. 
-	 */
-    public SecurityProvider getSecurityProvider( String realm )
-    {
-		if ( realm == null || realm.length() == 0 ) {
-			realm = _defaultRealm;
-		}			
-		if (!caseSensitive)
-		    realm = realm.toLowerCase();
-
-		return _realms.get( realm );
-	}
+     * Get _context SecurityProvider for a given realm.
+     */
+    public SecurityProvider getSecurityProvider(String realm) {
+        if (realm == null || realm.length() == 0) {
+            realm = _defaultRealm;
+        }
+            if (!(_realms.containsKey(realm) || caseSensitive))
+                for (String key : _realms.keySet()) {
+                    if (key.equalsIgnoreCase(realm)) {
+                        realm = key;
+                        break;
+                    }
+                }
+        return _realms.get(realm);
+    }
 
 	/**
 	 * Get AuthenticationProvider for a given realm. 
