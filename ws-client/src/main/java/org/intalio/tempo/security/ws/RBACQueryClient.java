@@ -90,6 +90,24 @@ public class RBACQueryClient {
     }
 
     /**
+     * call operation getDescendantRoles.
+     * @param user String
+     * @return roles String[]
+     * @throws AxisFault service Exception
+     */
+    public final String[] getDescendantRoles(final String user)
+            throws AxisFault {
+        OMElement request = element(RBACQueryConstants.USER_DESCEDANT_ROLES_REQUEST);
+        request.addChild(elementText(RBACQueryConstants.USER, user));
+
+        OMParser response = invoke(
+                RBACQueryConstants.USER_DESCEDANT_ROLES_REQUEST.getLocalPart(),
+                request);
+
+        return response.getRequiredStringArray(RBACQueryConstants.ROLE);
+    }
+
+    /**
      * invoke operation.
      * @param action String
      * @param request OMElement

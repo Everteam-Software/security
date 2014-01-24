@@ -112,6 +112,8 @@
 			<xsd:element name="getAscendantRolesResponse" type="tns:roles"/>
 			<xsd:element name="getDescendantRolesRequest" type="tns:role"/>
 			<xsd:element name="getDescendantRolesResponse" type="tns:roles"/>
+			<xsd:element name="getUserDescendantRolesRequest" type="tns:user"/>
+			<xsd:element name="getUserDescendantRolesResponse" type="tns:roles"/>
 			<xsd:element name="getUserPropertiesRequest" type="tns:user"/>
 			<xsd:element name="getUserPropertiesResponse" type="tns:PropertiesType"/>
 			<xsd:element name="getRolePropertiesRequest" type="tns:role"/>
@@ -179,6 +181,12 @@
 	</wsdl:message>
 	<wsdl:message name="getDescendantRolesResponse">
 		<wsdl:part name="payload" element="tns:getDescendantRolesResponse" />
+	</wsdl:message>
+	<wsdl:message name="getUserDescendantRolesRequest">
+		<wsdl:part name="payload" element="tns:getUserDescendantRolesRequest" />
+	</wsdl:message>
+	<wsdl:message name="getUserDescendantRolesResponse">
+		<wsdl:part name="payload" element="tns:getUserDescendantRolesResponse" />
 	</wsdl:message>
 	<wsdl:message name="getUserPropertiesRequest">
 		<wsdl:part name="payload" element="tns:getUserPropertiesRequest" />
@@ -284,6 +292,14 @@
 		<wsdl:operation name="getDescendantRoles">
 			<wsdl:input message="tns:getDescendantRolesRequest" />
 			<wsdl:output message="tns:getDescendantRolesResponse" />
+			<wsdl:fault message="tns:RoleNotFoundFault" name="RoleNotFoundFault"/>
+			<wsdl:fault message="tns:RemoteFault" name="RemoteFault" />
+			<wsdl:fault message="tns:RBACFault" name="RBACFault" />
+			<wsdl:fault message="tns:IllegalArgumentFault" name="IllegalArgumentFault" />
+		</wsdl:operation>
+		<wsdl:operation name="getUserDescendantRoles">
+			<wsdl:input message="tns:getUserDescendantRolesRequest" />
+			<wsdl:output message="tns:getUserDescendantRolesResponse" />
 			<wsdl:fault message="tns:RoleNotFoundFault" name="RoleNotFoundFault"/>
 			<wsdl:fault message="tns:RemoteFault" name="RemoteFault" />
 			<wsdl:fault message="tns:RBACFault" name="RBACFault" />
@@ -507,7 +523,28 @@
 			<wsdl:fault name="IllegalArgumentFault">
 				<soap:fault use="literal" name="IllegalArgumentFault"/>
 			</wsdl:fault>
-		</wsdl:operation>		
+		</wsdl:operation>
+		<wsdl:operation name="getUserDescendantRoles">
+			<soap:operation soapAction="getUserDescendantRoles" />
+			<wsdl:input>
+				<soap:body parts="payload" use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body parts="payload" use="literal" />
+			</wsdl:output>
+				<wsdl:fault name="RoleNotFoundFault">
+				<soap:fault use="literal" name="RoleNotFoundFault"/>
+			</wsdl:fault>
+			<wsdl:fault name="RemoteFault">
+				<soap:fault use="literal" name="RemoteFault"/>
+			</wsdl:fault>
+			<wsdl:fault name="RBACFault">
+				<soap:fault use="literal" name="RBACFault"/>
+			</wsdl:fault>
+			<wsdl:fault name="IllegalArgumentFault">
+				<soap:fault use="literal" name="IllegalArgumentFault"/>
+			</wsdl:fault>
+		</wsdl:operation>
 		<wsdl:operation name="getUserProperties">
 			<soap:operation soapAction="getUserProperties" />
 			<wsdl:input>

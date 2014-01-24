@@ -75,9 +75,23 @@ public class RBACQueryConstants {
             RBAC_PREFIX);
 
         /**
+         * QName for getUserDescendantRoles Operation.
+         */
+        public static final QName USER_DESCENDANT_ROLES = new QName(
+            RBACQUERY_NS.getNamespaceURI(), "getUserDescendantRoles",
+            RBAC_PREFIX);
+
+        /**
          * QName for getAssignedRolesRequest.
          */
         public static final QName ASSIGNED_ROLES_REQUEST = new QName(
             RBACQUERY_NS.getNamespaceURI(), "getAssignedRolesRequest",
+            RBAC_PREFIX);
+
+        /**
+         * QName for getUserDescendantRolesRequest.
+         */
+        public static final QName USER_DESCEDANT_ROLES_REQUEST = new QName(
+            RBACQUERY_NS.getNamespaceURI(), "getUserDescendantRolesRequest",
             RBAC_PREFIX);
 }
