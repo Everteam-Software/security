@@ -13,6 +13,9 @@
 package org.intalio.tempo.security.ws;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
@@ -397,7 +400,58 @@ public class RBACQueryWS extends BaseWS {
 			}
     	return RBACQueryResponseMarshaller.getDescendantRolesResponse(roles);
     }
-    
+
+    /**
+     * Return the set of descendant roles for a given user.
+     * <p>
+     * This is valid only if the user exists.
+     *
+     * @param user user identifier
+     * @return identifiers of the descendant roles
+     */
+    public OMElement getUserDescendantRoles(OMElement requestEl)
+            throws AxisFault {
+
+        OMParser request = new OMParser(requestEl);
+        List<String> roles = new ArrayList<String>();
+
+        try {
+            String user = request.getRequiredString(RBACQueryConstants.USER);
+            initStatics();
+
+            RBACProvider usersRBACProvider = _securityProvider
+                    .getRBACProvider(IdentifierUtils.getRealm(user));
+            RBACQuery usersRBACquery = usersRBACProvider.getQuery();
+
+            String[] assignedRoles = usersRBACquery.assignedRoles(user);
+
+            for (String assignedRole : assignedRoles) {
+                String[] descendantRoles = usersRBACquery
+                        .descendantRoles(assignedRole);
+
+                if (descendantRoles != null) {
+                    roles.addAll(Arrays.asList(descendantRoles));
+                }
+            }
+        } catch (RoleNotFoundException e) {
+            throw new Fault(e,
+                    RBACQueryResponseMarshaller
+                            .getRoleNotFoundExceptionResponse(e));
+        } catch (RemoteException e) {
+            throw new Fault(e,
+                    RBACQueryResponseMarshaller.getRemoteExceptionResponse(e));
+        } catch (RBACException e) {
+            throw new Fault(e,
+                    RBACQueryResponseMarshaller.getRBACExceptionResponse(e));
+        } catch (IllegalArgumentException e) {
+            throw new Fault(e,
+                    RBACQueryResponseMarshaller.getIllegalArgumentException(e));
+        }
+
+        return RBACQueryResponseMarshaller.getDescendantRolesResponse(roles
+                .toArray(new String[roles.size()]));
+    }
+
     /**
      * Return the set of properties assigned to a user.
      * <p>
