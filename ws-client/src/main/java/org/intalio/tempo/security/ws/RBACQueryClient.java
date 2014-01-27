@@ -72,7 +72,13 @@ public class RBACQueryClient {
         request.addChild(elementText(RBACQueryConstants.ROLE, role));
         OMParser response = invoke(
                 RBACQueryConstants.ASSIGNED_USERS.getLocalPart(), request);
-        return response.getRequiredStringArray(RBACQueryConstants.USER);
+        String[] users = {};
+        try {
+            users = response.getRequiredStringArray(RBACQueryConstants.USER);
+        } catch (IllegalArgumentException e) {
+            logger.debug("No users found for role "+role);
+        }
+        return users;
     }
     
     /**
