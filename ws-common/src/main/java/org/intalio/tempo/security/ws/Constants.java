@@ -40,4 +40,12 @@ public class Constants {
     public static final OMNamespace RBACADMIN_NS = OM_FACTORY
             .createOMNamespace("http://tempo.intalio.org/security/RBACAdminService/", "RBACAdmin");
 
+    public static final String GET_USER_ERROR = "Error occured while getting users";
+    public static final String GET_ROLE_ERROR = "Error occured while getting roles";
+    public static final String MODIFY_USER_ERROR = "Error occured while modifying user for ";
+    public static final String MODIFY_ROLE_ERROR = "Error occured while modifying role for ";
+    public static final String GET_REALM_ERROR = "Error occured while getting realms";
+    public static final String GET_ATTRIBUTES_ERROR = "Error occured while getting attributes for ";
+    public static final String GET_PROPERTIES_ERROR = "Error occured while getting properties for ";
+
 }
