@@ -78,10 +78,10 @@ public class RBACAdminWS extends BaseWS {
                 LOG.debug("Executed synchronized block");
             }
         } catch (RBACException e) {
-            LOG.error("Error occured while modifying user for user: " + user + " action " + action + " realm: " + realm, e);
+            LOG.error(Constants.MODIFY_USER_ERROR + "user: " + user + " action " + action + " realm: " + realm, e);
             throw new Fault(e, getRBACExceptionResponse(e));
         } catch (RemoteException e) {
-            LOG.error("Error occured while modifying user for user: " + user + " action " + action + " realm: " + realm, e);
+            LOG.error(Constants.MODIFY_USER_ERROR + "user: " + user + " action " + action + " realm: " + realm, e);
             throw new Fault(e, getRemoteExceptionResponse(e));
         }
         return getResponseElement(RBACAdminConstants.SUCCESS);
@@ -139,10 +139,10 @@ public class RBACAdminWS extends BaseWS {
                 LOG.debug("Executed synchronized block");
             }
         } catch (RBACException e) {
-            LOG.debug("Error occured while modifying role for role: " + role + " action " + action + " realm: " + realm, e);
+            LOG.debug(Constants.MODIFY_ROLE_ERROR + "role: " + role + " action " + action + " realm: " + realm, e);
             throw new Fault(e, getRBACExceptionResponse(e));
         } catch (RemoteException e) {
-            LOG.debug("Error occured while modifying role for role: " + role + " action " + action + " realm: " + realm, e);
+            LOG.debug(Constants.MODIFY_ROLE_ERROR + "role: " + role + " action " + action + " realm: " + realm, e);
             throw new Fault(e, getRemoteExceptionResponse(e));
         }
         return getResponseElement(RBACAdminConstants.SUCCESS);
@@ -158,10 +158,10 @@ public class RBACAdminWS extends BaseWS {
         try {
             realms = _securityProvider.getRealms();
         } catch (AuthenticationException e) {
-            LOG.error("Error occured while gettings realms", e);
+            LOG.error(Constants.GET_REALM_ERROR, e);
             throw new Fault(e, getAuthenticationExceptionResponse(e));
         } catch (RBACException e) {
-            LOG.error("Error occured while gettings realms", e);
+            LOG.error(Constants.GET_REALM_ERROR, e);
             throw new Fault(e, getRBACExceptionResponse(e));
         }
         OMElement response = OM_FACTORY.createOMElement(RBACAdminConstants.REALMS);
@@ -206,13 +206,13 @@ public class RBACAdminWS extends BaseWS {
                 }
             }
         } catch (RBACException e) {
-            LOG.error("Error occured while gettings roles", e);
+            LOG.error(Constants.GET_ROLE_ERROR, e);
             throw new Fault(e, getRBACExceptionResponse(e));
         } catch (RemoteException e) {
-            LOG.error("Error occured while gettings roles", e);
+            LOG.error(Constants.GET_ROLE_ERROR, e);
             throw new Fault(e, getRemoteExceptionResponse(e));
         } catch (AuthenticationException e) {
-            LOG.error("Error occured while gettings roles", e);
+            LOG.error(Constants.GET_ROLE_ERROR, e);
             throw new Fault(e, getAuthenticationExceptionResponse(e));
         }
         return response;
@@ -251,13 +251,13 @@ public class RBACAdminWS extends BaseWS {
                 }
             }
         } catch (RBACException e) {
-            LOG.error("Error occured while gettings users", e);
+            LOG.error(Constants.GET_USER_ERROR, e);
             throw new Fault(e, getRBACExceptionResponse(e));
         } catch (RemoteException e) {
-            LOG.error("Error occured while gettings users", e);
+            LOG.error(Constants.GET_USER_ERROR, e);
             throw new Fault(e, getRemoteExceptionResponse(e));
         } catch (AuthenticationException e) {
-            LOG.error("Error occured while gettings users", e);
+            LOG.error(Constants.GET_USER_ERROR, e);
             throw new Fault(e, getAuthenticationExceptionResponse(e));
         }
         return response;
@@ -276,10 +276,10 @@ public class RBACAdminWS extends BaseWS {
         try {
             attributes = _securityProvider.getAttributes(element);
         } catch (RBACException e) {
-            LOG.error("Error occured while gettings attributes for " + element, e);
+            LOG.error(Constants.GET_ATTRIBUTES_ERROR + element, e);
             throw new Fault(e, getRBACExceptionResponse(e));
         } catch (Exception e) {
-            LOG.error("Error occured while gettings attributes for " + element, e);
+            LOG.error(Constants.GET_ATTRIBUTES_ERROR + element, e);
         }
         LOG.debug("Got set Attributes of sze " + attributes.size());
         OMElement response = OM_FACTORY.createOMElement(RBACAdminConstants.ATTRIBUTES);
@@ -309,11 +309,11 @@ public class RBACAdminWS extends BaseWS {
                 properties = _securityProvider.getRBACProvider(realm).getQuery().roleProperties(role);
             }
         } catch (RBACException e) {
-            LOG.error("Error occured while gettings properties for user: " + user + " role " + role + " realm: "
+            LOG.error(Constants.GET_PROPERTIES_ERROR + "user: " + user + " role " + role + " realm: "
                     + realm, e);
             throw new Fault(e, getRBACExceptionResponse(e));
         } catch (RemoteException e) {
-            LOG.error("Error occured while gettings properties for user: " + user + " role " + role + " realm: "
+            LOG.error(Constants.GET_PROPERTIES_ERROR + "user: " + user + " role " + role + " realm: "
                     + realm, e);
             throw new Fault(e, getRemoteExceptionResponse(e));
         }
