@@ -110,7 +110,7 @@ public class RBACAdminWS extends BaseWS {
                     } else if (action.equals(RBACAdminConstants.EDIT_ACTION)
                             || action.equals(RBACAdminConstants.DELETE_ACTION)) {
                         RoleNotFoundException e = new RoleNotFoundException("Role: " + role + " was not found.");
-                        LOG.error("Role: " + role + " was not found.");
+                        LOG.debug("Role: " + role + " was not found.");
                         throw new Fault(e, getRoleNotFoundExceptionResponse(e));
                     }
                 } else {
@@ -125,24 +125,24 @@ public class RBACAdminWS extends BaseWS {
                             RoleExistsException e = new RoleExistsException(
                                     "Cannot delete role : " + role
                                             + " is assigned to some user");
-                            LOG.error("Cannot delete role : " + role
+                            LOG.debug("Cannot delete role : " + role
                                     + " is assigned to some user");
                             throw new Fault(e,
                                     getRoleExistsExceptionResponse(e));
                         }
                     } else if (action.equals(RBACAdminConstants.ADD_ACTION)) {
                         RoleExistsException e = new RoleExistsException("Role: " + role + " already exists");
-                        LOG.error("Role: " + role + " already exists");
+                        LOG.debug("Role: " + role + " already exists");
                         throw new Fault(e, getRoleExistsExceptionResponse(e));
                     }
                 }
                 LOG.debug("Executed synchronized block");
             }
         } catch (RBACException e) {
-            LOG.error("Error occured while modifying role for role: " + role + " action " + action + " realm: " + realm, e);
+            LOG.debug("Error occured while modifying role for role: " + role + " action " + action + " realm: " + realm, e);
             throw new Fault(e, getRBACExceptionResponse(e));
         } catch (RemoteException e) {
-            LOG.error("Error occured while modifying role for role: " + role + " action " + action + " realm: " + realm, e);
+            LOG.debug("Error occured while modifying role for role: " + role + " action " + action + " realm: " + realm, e);
             throw new Fault(e, getRemoteExceptionResponse(e));
         }
         return getResponseElement(RBACAdminConstants.SUCCESS);
