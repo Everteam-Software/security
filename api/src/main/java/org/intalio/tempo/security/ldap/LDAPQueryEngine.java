@@ -551,7 +551,7 @@ public class LDAPQueryEngine {
 
     static class DNStriper implements Inverter {
         public String invert( String s ) {
-            int dn = s.indexOf(",dc=");
+            int dn = s.toLowerCase().indexOf(",dc=");
             if ( dn==-1 )
                 throw new IllegalArgumentException("Invalid format "+s);
             return s.substring(dn+1);
