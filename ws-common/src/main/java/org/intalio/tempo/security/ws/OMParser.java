@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.management.Query;
 import javax.xml.namespace.QName;
 
 import org.apache.axiom.om.OMElement;
@@ -110,5 +109,71 @@ public class OMParser {
             abastractMap.put(id.getText(), props.toArray(new Property[props.size()]));
         }
         return abastractMap;
+    }
+
+    public Map<String, Map<String, Property[]>> getRequiredRoleMap(QName role) {
+        Map<String, Map<String, Property[]>> roles = new HashMap<String, Map<String, Property[]>>();
+
+        Iterator<OMElement> itr = _element.getChildElements();
+
+        while (itr.hasNext()) {
+            OMElement roleElement = itr.next();
+            if (roleElement.getQName().equals(role)) {
+                Map<String, Property[]> roleProperties = new HashMap<String, Property[]>();
+                OMElement roleNameElement = roleElement
+                        .getFirstChildWithName(new QName(roleElement
+                                .getNamespace().getNamespaceURI(), "name"));
+                String roleName = roleNameElement.getText();
+
+                Iterator<OMElement> userElements = roleElement
+                        .getChildElements();
+                while (userElements.hasNext()) {
+                    OMElement userElement = userElements.next();
+                    if (userElement.getQName().equals(RBACQueryConstants.USER)) {
+                        OMElement userNameElement = userElement
+                                .getFirstChildWithName(new QName(userElement
+                                        .getNamespace().getNamespaceURI(),
+                                        "name"));
+                        String userName = userNameElement.getText();
+
+                        Iterator<OMElement> iterProp = userElement
+                                .getChildElements();
+                        ArrayList<Property> props = new ArrayList<Property>();
+                        while (iterProp.hasNext()) {
+                            OMElement prop = iterProp.next();
+
+                            if (prop.getQName().equals(
+                                    new QName(prop.getNamespace()
+                                            .getNamespaceURI(), "property"))) {
+                                OMElement name = prop
+                                        .getFirstChildWithName(new QName(prop
+                                                .getNamespace()
+                                                .getNamespaceURI(), "name"));
+                                if (name == null)
+                                    throw new IllegalArgumentException(
+                                            "Missing property name: " + prop);
+                                OMElement value = prop
+                                        .getFirstChildWithName(new QName(prop
+                                                .getNamespace()
+                                                .getNamespaceURI(), "value"));
+                                if (value == null)
+                                    throw new IllegalArgumentException(
+                                            "Missing property value: " + prop);
+
+                                props.add(new Property(name.getText(), value
+                                        .getText()));
+                            }
+                        }
+
+                        roleProperties.put(userName,
+                                props.toArray(new Property[props.size()]));
+                    }
+                }
+
+                roles.put(roleName, roleProperties);
+            }
+        }
+
+        return roles;
     }
 }

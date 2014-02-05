@@ -19,6 +19,8 @@ public class RBACQueryConstants {
 	        new QName(RBACQUERY_NS.getNamespaceURI(), "getRoleOperationsOnObjectResponse", RBAC_PREFIX);
 	    public static final QName USER_OPERATIONS_ON_OBJECT_RESPONSE =
 	        new QName(RBACQUERY_NS.getNamespaceURI(), "getUserOperationsOnObjectResponse", RBAC_PREFIX);
+	    public static final QName GET_ROLES_USERS_RESPONSE =
+	            new QName(RBACQUERY_NS.getNamespaceURI(), "getRolesAndUsersResponse", RBAC_PREFIX);
 
 	    public static final QName AUTHORIZED_USERS_RESPONSE =
 	        new QName(RBACQUERY_NS.getNamespaceURI(), "getAuthorizedUsersResponse", RBAC_PREFIX);
@@ -42,8 +44,8 @@ public class RBACQueryConstants {
 	        new QName(RBACQUERY_NS.getNamespaceURI(), "RBACFault", RBAC_PREFIX);
 	    public static final QName ILLEGAL_ARGUMENT_EXCEPTION =
 	        new QName(RBACQUERY_NS.getNamespaceURI(), "IllegalArgumentFault", RBAC_PREFIX);
-	    
-	    
+
+
 	    public static final QName USER = new QName(RBACQUERY_NS.getNamespaceURI(), "user", RBAC_PREFIX);
 	    public static final QName ROLE = new QName(RBACQUERY_NS.getNamespaceURI(), "role", RBAC_PREFIX);
 	    public static final QName PROPERTY = new QName(RBACQUERY_NS.getNamespaceURI(), "property", RBAC_PREFIX);
@@ -94,4 +96,17 @@ public class RBACQueryConstants {
         public static final QName USER_DESCEDANT_ROLES_REQUEST = new QName(
             RBACQUERY_NS.getNamespaceURI(), "getUserDescendantRolesRequest",
             RBAC_PREFIX);
+
+        /**
+         * QName for AuthenticationFault
+         */
+        public static final QName AUTHENTICATION_EXCEPTION = new QName(
+            RBACQUERY_NS.getNamespaceURI(), "AuthenticationFault",
+            RBAC_PREFIX);
+
+        /**
+         * QName for getRolesAndUsersRequest
+         */
+        public static final QName ROLES_AND_USERS_REQUEST =
+                new QName(RBACQUERY_NS.getNamespaceURI(), "getRolesAndUsersRequest", RBAC_PREFIX);
 }

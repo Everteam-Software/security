@@ -15,11 +15,14 @@ package org.intalio.tempo.security.ws;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.intalio.tempo.security.Property;
+import org.intalio.tempo.security.authentication.AuthenticationException;
 import org.intalio.tempo.security.rbac.ObjectNotFoundException;
 import org.intalio.tempo.security.rbac.RBACException;
 import org.intalio.tempo.security.rbac.RBACQuery;
@@ -72,6 +75,55 @@ public class RBACQueryWS extends BaseWS {
        
 
         return RBACQueryResponseMarshaller.getAssignedUsersResponse(users);
+    }
+
+    /**This gets the existing roles
+     * @param requestEl
+     * @return
+     * @throws AxisFault
+     */
+    public OMElement getRoles(OMElement requestEl) throws AxisFault {
+        Map<String, Map<String, Property[]>> roleDetails = new HashMap<String, Map<String, Property[]>>();
+
+        RBACQuery query = null;
+
+        try {
+            for (String realm : _securityProvider.getRealms()) {
+                query = _securityProvider.getRBACProvider(realm).getQuery();
+                if (realm != null && !realm.equals("")) {
+                    String[] roles = query.getRoles(realm);
+                    if (roles != null) {
+                        for (String role : roles) {
+                            Map<String, Property[]> roleProperties = new HashMap<String, Property[]>();
+
+                            String[] users = query.assignedUsers(role);
+                            for (String user : users) {
+                                Property[] properties = query
+                                        .userProperties(user);
+                                roleProperties.put(user, properties);
+                            }
+
+                            roleDetails.put(role, roleProperties);
+                        }
+                    }
+                }
+            }
+        } catch (RBACException e) {
+            LOG.error("Error occured while gettings roles", e);
+            throw new Fault(e,
+                    RBACQueryResponseMarshaller.getRBACExceptionResponse(e));
+        } catch (RemoteException e) {
+            LOG.error("Error occured while gettings roles", e);
+            throw new Fault(e,
+                    RBACQueryResponseMarshaller.getRemoteExceptionResponse(e));
+        } catch (AuthenticationException e) {
+            LOG.error("Error occured while gettings roles", e);
+            throw new Fault(e,
+                    RBACQueryResponseMarshaller
+                            .getAuthenticationExceptionResponse(e));
+        }
+
+        return RBACQueryResponseMarshaller.getRoleAndUserResponse(roleDetails);
     }
 
     /**
