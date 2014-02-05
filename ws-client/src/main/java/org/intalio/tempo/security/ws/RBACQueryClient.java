@@ -13,6 +13,9 @@ package org.intalio.tempo.security.ws;
 
 import static org.intalio.tempo.security.ws.Constants.OM_FACTORY;
 
+import java.util.Map;
+import java.util.Map.Entry;
+
 
 import javax.xml.namespace.QName;
 
@@ -20,6 +23,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.ServiceClient;
+import org.intalio.tempo.security.Property;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,6 +115,22 @@ public class RBACQueryClient {
                 request);
 
         return response.getRequiredStringArray(RBACQueryConstants.ROLE);
+    }
+
+    /**
+     * call operation getRoles.
+     * @return map of roles and user details
+     * @throws AxisFault service Exception
+     */
+    public final Map<String, Map<String, Property[]>> getRolesAndUsers()
+            throws AxisFault {
+        OMElement request = element(RBACQueryConstants.ROLES_AND_USERS_REQUEST);
+
+        OMParser response = invoke(
+                RBACQueryConstants.ROLES_AND_USERS_REQUEST.getLocalPart(),
+                request);
+
+        return response.getRequiredRoleMap(RBACQueryConstants.ROLE);
     }
 
     /**

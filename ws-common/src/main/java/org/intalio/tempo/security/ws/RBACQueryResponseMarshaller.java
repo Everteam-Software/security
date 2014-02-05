@@ -3,9 +3,12 @@ package org.intalio.tempo.security.ws;
 import static org.intalio.tempo.security.ws.Constants.OM_FACTORY;
 
 import java.rmi.RemoteException;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.axiom.om.OMElement;
 import org.intalio.tempo.security.Property;
+import org.intalio.tempo.security.authentication.AuthenticationException;
 import org.intalio.tempo.security.rbac.ObjectNotFoundException;
 import org.intalio.tempo.security.rbac.RBACException;
 import org.intalio.tempo.security.rbac.RoleNotFoundException;
@@ -121,6 +124,55 @@ public class RBACQueryResponseMarshaller {
         return response;
     }
 
+    public static OMElement getRoleAndUserResponse(
+            Map<String, Map<String, Property[]>> roleDetails) {
+        OMElement responseElement = OM_FACTORY
+                .createOMElement(RBACQueryConstants.GET_ROLES_USERS_RESPONSE);
+
+        for (Entry<String, Map<String, Property[]>> role : roleDetails
+                .entrySet()) {
+            String roleName = role.getKey();
+            Map<String, Property[]> roleProeprties = role.getValue();
+
+            OMElement roleElement = OM_FACTORY.createOMElement(
+                    RBACQueryConstants.ROLE, responseElement);
+            OMElement roleNameElement = OM_FACTORY.createOMElement(
+                    RBACQueryConstants.NAME, roleElement);
+
+            roleNameElement.setText(roleName);
+
+            for (Entry<String, Property[]> user : roleProeprties.entrySet()) {
+                String userName = user.getKey();
+                Property[] userProperties = user.getValue();
+
+                OMElement userElement = OM_FACTORY.createOMElement(
+                        RBACQueryConstants.USER, roleElement);
+                OMElement userNameElement = OM_FACTORY.createOMElement(
+                        RBACQueryConstants.NAME, userElement);
+
+                userNameElement.setText(userName);
+
+                for (Property userProperty : userProperties) {
+                    String propertyName = userProperty.getName();
+                    String propertyValue = (String) userProperty.getValue();
+
+                    OMElement propertyElement = OM_FACTORY.createOMElement(
+                            RBACQueryConstants.PROPERTY, userElement);
+                    OMElement propertyNameElement = OM_FACTORY.createOMElement(
+                            RBACQueryConstants.NAME, propertyElement);
+                    OMElement propertyValueElement = OM_FACTORY
+                            .createOMElement(RBACQueryConstants.VALUE,
+                                    propertyElement);
+
+                    propertyValueElement.setText(propertyValue);
+                    propertyNameElement.setText(propertyName);
+                }
+            }
+        }
+
+        return responseElement;
+    }
+
     public static OMElement getRolePropertiesResponse(Property[] properties) {
         OMElement response = OM_FACTORY.createOMElement(RBACQueryConstants.GET_ROLE_PROPERTIES_RESPONSE);
 
@@ -169,6 +221,14 @@ public class RBACQueryResponseMarshaller {
 
     public static OMElement getIllegalArgumentException(IllegalArgumentException e) {
         OMElement response = OM_FACTORY.createOMElement(RBACQueryConstants.ILLEGAL_ARGUMENT_EXCEPTION);
+        response.setText(e.getMessage());
+        return response;
+    }
+
+    public static OMElement getAuthenticationExceptionResponse(
+            AuthenticationException e) {
+        OMElement response = OM_FACTORY
+                .createOMElement(RBACQueryConstants.AUTHENTICATION_EXCEPTION);
         response.setText(e.getMessage());
         return response;
     }
