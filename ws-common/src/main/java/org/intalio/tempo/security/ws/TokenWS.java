@@ -54,7 +54,7 @@ public class TokenWS extends BaseWS {
         } catch (Exception except) {
             if (LOG.isDebugEnabled())
                 LOG.debug("authenticateUser:\n" + requestEl, except);
-            LOG.error("User : " + user + " , Password : " + password);
+            LOG.error("Authentication failed for user: " + user);
             throw new RuntimeException(except);
         }
 
