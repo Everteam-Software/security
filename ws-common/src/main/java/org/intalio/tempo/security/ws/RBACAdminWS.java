@@ -119,17 +119,7 @@ public class RBACAdminWS extends BaseWS {
                             usersRBACAdmin.setRoleProperties(role, request.getProperties(RBACAdminConstants.DETAILS));
                         }
                     } else if (action.equals(RBACAdminConstants.DELETE_ACTION)) {
-                        if (!checkRoleAssigned(role, usersRBACProvider)) {
-                            usersRBACAdmin.deleteRole(role);
-                        } else {
-                            RoleExistsException e = new RoleExistsException(
-                                    "Cannot delete role : " + role
-                                            + " is assigned to some user");
-                            LOG.debug("Cannot delete role : " + role
-                                    + " is assigned to some user");
-                            throw new Fault(e,
-                                    getRoleExistsExceptionResponse(e));
-                        }
+                        usersRBACAdmin.deleteRole(role);
                     } else if (action.equals(RBACAdminConstants.ADD_ACTION)) {
                         RoleExistsException e = new RoleExistsException("Role: " + role + " already exists");
                         LOG.debug("Role: " + role + " already exists");
@@ -400,22 +390,6 @@ public class RBACAdminWS extends BaseWS {
         return exists;
     }
 
-    private static boolean checkRoleAssigned(String role,
-            RBACProvider usersRBACProvider) {
-        boolean assigned = true;
-        try {
-            if (_securityProvider instanceof SimpleSecurityProvider) {
-                String[] roles = usersRBACProvider.getQuery().assignedUsers(
-                        role);
-                if (roles == null || roles.length == 0) {
-                    assigned = false;
-                }
-            }
-        } catch (Exception e) {
-            assigned = false;
-        }
-        return assigned;
-    }
     private static OMElement elementProperty(String name, String Value) {
         OMElement prop = element(RBACAdminConstants.PROPERTY);
         prop.addChild(elementText(RBACAdminConstants.NAME, name));

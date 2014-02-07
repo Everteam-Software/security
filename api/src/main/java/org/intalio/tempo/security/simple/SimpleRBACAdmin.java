@@ -88,7 +88,39 @@ public class SimpleRBACAdmin implements RBACAdmin {
     @Override
     public void deleteRole(String role) throws RoleNotFoundException, RBACException, RemoteException {
         OMDocument document = deleteElement(ROLE, role);
+        modifyAssignedUsers(role, document);
         updateConfigFile(document);
+    }
+
+    private void modifyAssignedUsers(String role, OMDocument document) {
+        String elementValue = _realm + "\\" + role;
+        OMElement root = document.getOMDocumentElement();
+        Iterator<OMElement> itr = root.getChildrenWithLocalName("realm");
+        while (itr.hasNext()) {
+            OMElement realm = itr.next();
+            Iterator<OMElement> itrUser = realm.getChildrenWithLocalName(USER);
+            while (itrUser.hasNext()) {
+                OMElement userElement = itrUser.next();
+                Iterator<OMElement> itrAssignedRoles = userElement
+                        .getChildrenWithLocalName("assignRole");
+                while (itrAssignedRoles.hasNext()) {
+                    OMElement assignedRole = itrAssignedRoles.next();
+                    if (_CASESENSITIVE) {
+                        if (assignedRole.getText().equals(elementValue)
+                                || assignedRole.getText().equals(role)) {
+                            itrAssignedRoles.remove();
+                        }
+                    } else {
+                        if (assignedRole.getText().equalsIgnoreCase(
+                                elementValue)
+                                || assignedRole.getText()
+                                        .equalsIgnoreCase(role)) {
+                            itrAssignedRoles.remove();
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @Override
