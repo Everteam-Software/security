@@ -98,11 +98,11 @@ public class SimpleRBACAdmin implements RBACAdmin {
         Iterator<OMElement> itr = root.getChildrenWithLocalName("realm");
         while (itr.hasNext()) {
             OMElement realm = itr.next();
-            Iterator<OMElement> itrUser = realm.getChildrenWithLocalName(USER);
+            Iterator<OMElement> itrUser = realm.getChildElements();
             while (itrUser.hasNext()) {
                 OMElement userElement = itrUser.next();
                 Iterator<OMElement> itrAssignedRoles = userElement
-                        .getChildrenWithLocalName("assignRole");
+                        .getChildElements();
                 while (itrAssignedRoles.hasNext()) {
                     OMElement assignedRole = itrAssignedRoles.next();
                     if (_CASESENSITIVE) {
