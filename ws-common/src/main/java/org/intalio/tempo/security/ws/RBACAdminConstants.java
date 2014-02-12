@@ -10,6 +10,7 @@ public class RBACAdminConstants {
     public static final String DELETE_ACTION = "delete";
     public static final String EDIT_ACTION = "edit";
     public static final String SUCCESS = "success";
+    public static final String DELETE_EXCEPTION = "OBJECT_CLASS_VIOLATION";
     public static final QName NAME = new QName(RBACADMIN_NS.getNamespaceURI(), "name", RBAC_ADMIN_PREFIX);
 
     public static final QName VALUE = new QName(RBACADMIN_NS.getNamespaceURI(), "value", RBAC_ADMIN_PREFIX);
