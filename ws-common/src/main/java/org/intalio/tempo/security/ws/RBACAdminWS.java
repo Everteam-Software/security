@@ -68,7 +68,12 @@ public class RBACAdminWS extends BaseWS {
                         Property[] props = request.getProperties(RBACAdminConstants.DETAILS);
                         usersRBACAdmin.setUserProperties(user, props);
                     } else if (action.equals(RBACAdminConstants.DELETE_ACTION)) {
-                        usersRBACAdmin.deleteUser(user);
+                        try {
+                            usersRBACAdmin.deleteUser(user);
+                        } catch (RBACException e) {
+                            if(RBACAdminConstants.DELETE_EXCEPTION.equals(e.getMessage()))
+                                return getResponseElement(RBACAdminConstants.DELETE_EXCEPTION);
+                        }
                     } else if (action.equals(RBACAdminConstants.ADD_ACTION)) {
                         UserExistsException e = new UserExistsException("User: " + user + " already exists");
                         LOG.error("User: " + user + " already exists");

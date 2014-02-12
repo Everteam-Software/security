@@ -17,10 +17,13 @@ import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.BasicAttributes;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.ModificationItem;
+import javax.naming.directory.NoSuchAttributeException;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
 import org.intalio.tempo.security.Property;
+import org.intalio.tempo.security.ldap.LDAPQueryEngine.IDStriper;
+import org.intalio.tempo.security.ldap.LDAPQueryEngine.Inverter;
 import org.intalio.tempo.security.rbac.RBACAdmin;
 import org.intalio.tempo.security.rbac.RBACException;
 import org.intalio.tempo.security.rbac.RoleNotFoundException;
@@ -31,6 +34,8 @@ import org.slf4j.LoggerFactory;
 public class LDAPRBACAdmin implements RBACAdmin {
 
     protected final static Logger LOG = LoggerFactory.getLogger(LDAPRBACAdmin.class);
+
+    private final static Inverter ID_STRIPER    = new IDStriper();
 
     private String _baseDN;
     private String _realm;
@@ -61,6 +66,10 @@ public class LDAPRBACAdmin implements RBACAdmin {
     @Override
     public void deleteUser(String user) throws RBACException, RemoteException {
         String dn = getUserId(user);
+        List<String> roles =  getRolesAndValidate(user);
+        for(String role: roles) {
+            deassignUser(user, role);
+        }
         removeSubContext(dn);
     }
 
@@ -86,8 +95,65 @@ public class LDAPRBACAdmin implements RBACAdmin {
 
     @Override
     public void deassignUser(String user, String role) throws UserNotFoundException, RoleNotFoundException, RBACException, RemoteException {
-        // TODO Auto-generated method stub
+        DirContext root = null;
+        try {
+            root = _provider.getRootContext();
+            DirContext context = getContext(root, _baseDN);
+            ModificationItem[] mods = new ModificationItem[1];
 
+            Attribute mod = new BasicAttribute(
+                    _env.get(LDAPProperties.SECURITY_LDAP_ROLE_USERS),
+                    getUserId(user) + "," + _baseDN);
+            mods[0] = new ModificationItem(DirContext.REMOVE_ATTRIBUTE, mod);
+            context.modifyAttributes(getRoleId(role), mods);
+            context.close();
+        } catch (NoSuchAttributeException e) {
+            LOG.error(e.getMessage());
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+        } finally {
+            close(root);
+        }
+    }
+
+    /*
+     * Function to get user roles. If user is the only uniqueMember to a role
+     * it throws RBACException with message OBJECT_CLASS_VIOLATION
+     */
+    private List<String> getRolesAndValidate(String user) throws RBACException {
+        List<String> roles = new ArrayList<String>();
+        DirContext root = null;
+        try {
+            root = _provider.getRootContext();
+            DirContext context = getContext(root, _baseDN);
+            String filter = new StringBuffer()
+                    .append("(&(objectClass=groupOfUniqueNames)")
+                    .append("("
+                            + _env.get(LDAPProperties.SECURITY_LDAP_ROLE_USERS)
+                            + "=")
+                    .append(getUserId(user) + "," + _baseDN + "))").toString();
+            SearchControls cons = new SearchControls();
+            cons.setSearchScope(SearchControls.ONELEVEL_SCOPE);
+            String roleBase = (String) _env
+                    .get(LDAPProperties.SECURITY_LDAP_ROLE_BASE);
+            NamingEnumeration<SearchResult> results = context.search(roleBase,
+                    filter, cons);
+            while (results.hasMore()) {
+                SearchResult result = (SearchResult) results.next();
+                Attribute fields = result.getAttributes().get(
+                        _env.get(LDAPProperties.SECURITY_LDAP_ROLE_USERS));
+                if (fields != null && fields.size() == 1) {
+                    throw new RBACException("OBJECT_CLASS_VIOLATION");
+                }
+                roles.add(ID_STRIPER.invert(result.getName()));
+            }
+            context.close();
+        } catch (NamingException e) {
+            LOG.error("Error occured while getting roles", e);
+        } finally {
+            close(root);
+        }
+        return roles;
     }
 
     @Override
