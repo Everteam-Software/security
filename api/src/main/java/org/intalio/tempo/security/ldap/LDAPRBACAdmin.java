@@ -57,7 +57,7 @@ public class LDAPRBACAdmin implements RBACAdmin {
     @Override
     public void addUser(String user, Property[] properties) throws RBACException, RemoteException {
         Attributes attr = getAttributes(properties);
-        attr.put(LDAPProperties.SECURITY_LDAP_USER_ID, user);
+        attr.put(_env.get(LDAPProperties.SECURITY_LDAP_USER_ID), user);
         String dn = getUserId(user);
         createSubContext(dn, attr);
 
@@ -76,7 +76,7 @@ public class LDAPRBACAdmin implements RBACAdmin {
     @Override
     public void addRole(String role, Property[] properties) throws RoleNotFoundException, RBACException, RemoteException {
         Attributes attr = getAttributes(properties);
-        attr.put(LDAPProperties.SECURITY_LDAP_ROLE_ID, role);
+        attr.put(_env.get(LDAPProperties.SECURITY_LDAP_ROLE_ID), role);
         String dn = getRoleId(role);
         createSubContext(dn, attr);
     }
@@ -127,7 +127,7 @@ public class LDAPRBACAdmin implements RBACAdmin {
             root = _provider.getRootContext();
             DirContext context = getContext(root, _baseDN);
             String filter = new StringBuffer()
-                    .append("(&(objectClass=groupOfUniqueNames)")
+                    .append("(&((|(objectClass=group)(objectClass=groupOfUniqueNames)))")
                     .append("("
                             + _env.get(LDAPProperties.SECURITY_LDAP_ROLE_USERS)
                             + "=")
