@@ -41,9 +41,9 @@ public class LoginFilter implements javax.servlet.Filter {
         if (request instanceof HttpServletRequest) {
             HttpServletRequest req = (HttpServletRequest) request;
             HttpServletResponse resp = (HttpServletResponse) response;
-
-            if (req.getRequestURI().endsWith("/login.htm")
-                    || req.getRequestURI().endsWith("/login")) {
+            String uri =req.getRequestURI();
+            if (uri.startsWith("/login.htm") || uri.startsWith("/login")
+                    || uri.equals("/")) {
                 // don't protect login page
                 chain.doFilter(request, response);
                 return;
@@ -101,6 +101,7 @@ public class LoginFilter implements javax.servlet.Filter {
 
     private String generateUrl(String loginUrl, HttpServletRequest req)
             throws UnsupportedEncodingException {
+        if(loginUrl == null) return "";
         StringBuilder urlBuilder = new StringBuilder(loginUrl);
         try {
             urlBuilder.append("?prevAction=");
