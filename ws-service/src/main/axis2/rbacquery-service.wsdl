@@ -120,15 +120,23 @@
 			<xsd:element name="getRolePropertiesResponse" type="tns:PropertiesType"/>
 			<xsd:element name="getRolesAndUsersRequest"/>
 			<xsd:element name="getRolesAndUsersResponse">
-				<xsd:complexType name="role">
+				<xsd:complexType>
 					<xsd:sequence>
-						<xsd:element name="name" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
-						<xsd:complexType name="user">
-							<xsd:sequence>
-								<xsd:element name="name" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
-								<xsd:element name="properties" type="tns:PropertiesType"/>
-							</xsd:sequence>
-						</xsd:complexType>
+						<xsd:element name="role" minOccurs="0" maxOccurs="unbounded">
+							<xsd:complexType>
+								<xsd:sequence>
+									<xsd:element name="name" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+									<xsd:element name="user"  minOccurs="0" maxOccurs="unbounded">
+									<xsd:complexType >
+										<xsd:sequence>
+											<xsd:element name="name" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+											<xsd:element name="property" type="tns:PropertyType" minOccurs="0" maxOccurs="unbounded"/>
+										</xsd:sequence>
+									</xsd:complexType>
+									</xsd:element>
+								</xsd:sequence>
+							</xsd:complexType>
+						</xsd:element>
 					</xsd:sequence>
 				</xsd:complexType>
 			</xsd:element>
@@ -138,6 +146,7 @@
 			<xsd:element name="RemoteFault" type="xsd:string"/>
 			<xsd:element name="RBACFault" type="xsd:string"/>
 			<xsd:element name="IllegalArgumentFault" type="xsd:string"/>
+			<xsd:element name="AuthenticationFault" type="xsd:string"/>
 		</xsd:schema>
 	</wsdl:types>
 

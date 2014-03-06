@@ -115,9 +115,9 @@
 			<xsd:element name="UserNotFoundFault" type="xsd:string" />
 			<xsd:element name="RoleExistsFault" type="xsd:string" />
 			<xsd:element name="RoleNotFoundFault" type="xsd:string" />
-			<xsd:element name="getRealms" type="xsd:string" maxOccurs="1" minOccurs="0"/>
-			<xsd:element name="getRoles" type="xsd:string" maxOccurs="1" minOccurs="0"/>
-			<xsd:element name="getUsers" type="xsd:string" maxOccurs="1" minOccurs="0"/>
+			<xsd:element name="getRealms" type="xsd:string" maxOccurs="1"/>
+			<xsd:element name="getRoles" type="xsd:string" maxOccurs="1"/>
+			<xsd:element name="getUsers" type="xsd:string" maxOccurs="1"/>
 			<xsd:element name="getPropertiesResponse">
 				<xsd:complexType>
 					<xsd:sequence>
