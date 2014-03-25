@@ -28,6 +28,7 @@ import javax.naming.directory.SearchResult;
 
 import org.intalio.tempo.security.Property;
 import org.intalio.tempo.security.rbac.UserNotFoundException;
+import org.intalio.tempo.security.util.IdentifierUtils;
 import org.intalio.tempo.security.util.StringArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -245,8 +246,7 @@ public class LDAPQueryEngine {
             // one by one, and find all ascendants
             todo.remove(subject);
             newItems.clear();
-
-            String search = id+"="+subject;
+            String search = id+"="+IdentifierUtils.stripRealm(subject);
             short found = findFilteredFields(base, search, field, base, sc, newItems);
             if (firstLoop) {
                 firstLoop = false;
