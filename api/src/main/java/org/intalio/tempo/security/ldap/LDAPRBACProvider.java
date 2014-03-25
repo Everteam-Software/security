@@ -169,7 +169,9 @@ class LDAPRBACProvider implements RBACProvider, LDAPProperties {
 
     private String[] prefix(String[] result) {
         for (int i = 0; i < result.length; i++) {
-            result[i] = _realm + "\\" + result[i];
+            if(result[i].indexOf("\\") == -1) {
+                result[i] = _realm + "\\" + result[i];
+            }
         }
         return result;
     }
