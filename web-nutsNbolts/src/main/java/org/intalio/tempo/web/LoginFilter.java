@@ -41,8 +41,8 @@ public class LoginFilter implements javax.servlet.Filter {
         if (request instanceof HttpServletRequest) {
             HttpServletRequest req = (HttpServletRequest) request;
             HttpServletResponse resp = (HttpServletResponse) response;
-            String uri =req.getRequestURI();
-            if ( uri.startsWith("/login") ) {
+            String uri = req.getRequestURI();
+            if ( uri.equals("/intalio") || uri.startsWith("/intalio/login") ) {
                 // don't protect login page
                 chain.doFilter(request, response);
                 return;
