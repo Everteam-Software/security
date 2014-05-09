@@ -14,6 +14,8 @@ package org.intalio.tempo.web;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -36,14 +38,16 @@ public class LoginFilter implements javax.servlet.Filter {
     private static final String TRUE = "true";
     private static final String AJAX = "ajax";
 
+    private List<String> excludeURL = new ArrayList<String>();
+
     public void doFilter(ServletRequest request, ServletResponse response,
             FilterChain chain) throws IOException, ServletException {
         if (request instanceof HttpServletRequest) {
             HttpServletRequest req = (HttpServletRequest) request;
             HttpServletResponse resp = (HttpServletResponse) response;
             String uri = req.getRequestURI();
-            if ( uri.equals("/intalio") || uri.startsWith("/intalio/login") ) {
-                // don't protect login page
+
+            if (checkExcludeURL(uri) ) {
                 chain.doFilter(request, response);
                 return;
             }
@@ -117,11 +121,27 @@ public class LoginFilter implements javax.servlet.Filter {
     }
 
     public void init(FilterConfig config) throws ServletException {
-        // nothing
+     // nothing 
     }
 
     public void destroy() {
         // nothing
     }
 
+    private boolean checkExcludeURL (String urlString) {
+        boolean matches = false;
+        for(String url:excludeURL) {
+            matches = urlString.matches(url);
+            if (matches) break;
+        }
+        return matches;
+    }
+
+    public List<String> getExcludeURL() {
+        return excludeURL;
+    }
+
+    public void setExcludeURL(List<String> excludeURL) {
+        this.excludeURL = excludeURL;
+    }
 }
