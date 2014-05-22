@@ -16,6 +16,8 @@
 package org.intalio.tempo.workflow;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisService;
@@ -28,7 +30,7 @@ public class SpringInit implements ServiceLifeCycle {
 
     private static final Logger LOG = Logger.getLogger(SpringInit.class);
 
-    public static SysPropApplicationContextLoader CONTEXT;
+    public static Map<String, SysPropApplicationContextLoader> CONTEXT_MAP = new HashMap<String, SysPropApplicationContextLoader>();
     
     /**
      * Called by Axis2 during deployment
@@ -45,30 +47,42 @@ public class SpringInit implements ServiceLifeCycle {
             try {
                 thread.setContextClassLoader(service.getClassLoader());
                 Parameter loadAllBeansOnStartup = service.getParameter("LoadAllBeansOnStartup");
+                if (null != CONTEXT_MAP.get(service.getName())) {
+                    LOG.warn("StartUp called again for service:"
+                            + service.getName()
+                            + ". Overwriting previous service context.");
+                }
                 if(loadAllBeansOnStartup != null && ((String) loadAllBeansOnStartup.getValue()).equalsIgnoreCase("true")){
                     //WF-1574: it will load all beans on startup, as we need to load audit configuration.
-                    CONTEXT = new SysPropApplicationContextLoader(configFile, true);
+                    CONTEXT_MAP.put(service.getName(),
+                            new SysPropApplicationContextLoader(configFile,
+                                    true));
                 } else {
-                    CONTEXT = new SysPropApplicationContextLoader(configFile);
+                    SysPropApplicationContextLoader contextLoader = new SysPropApplicationContextLoader(
+                            configFile);
+                    CONTEXT_MAP.put(service.getName(), contextLoader);
                     Parameter load = service.getParameter("LoadOnStartup");
                     if (load != null && ((String) load.getValue()).equalsIgnoreCase("true")) {
                         Parameter bean = service.getParameter("SpringBeanName");
                         if (bean == null) throw new IllegalArgumentException("Missing 'SpringBeanName' parameter");
                         String beanName = (String) bean.getValue();
                         try {
-                            CONTEXT.getBean(beanName);
+                            contextLoader.getBean(beanName);
                         } catch (Exception e) {
                             throw new IllegalArgumentException("Unable to initialize bean '"+beanName+"'", e);
                         }
                     }
                 }
+                LOG.info("Service context created successfully for service:"
+                        + service.getName());
             } catch (IOException except) {
                 throw new RuntimeException(except);
             } finally {
                 thread.setContextClassLoader(oldClassLoader);
             }
         } catch (Exception except) {
-            LOG.error("Error while loading Spring context file: "+configFile, except);
+            LOG.error("Error while loading Spring context file: "+configFile+". Removing service context for service:"+service.getName(), except);
+            CONTEXT_MAP.remove(service.getName());
         }
     }
 
@@ -76,6 +90,7 @@ public class SpringInit implements ServiceLifeCycle {
      * Called by Axis2 during undeployment 
      */
     public void shutDown(ConfigurationContext ctxIgnore, AxisService ignore) {
-        CONTEXT = null;
+        LOG.info("Shutdown was called for service:"+ignore.getName()+". Service context removed for this spring initialised service.");
+        CONTEXT_MAP.remove(ignore.getName());
     }
 }
