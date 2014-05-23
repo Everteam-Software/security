@@ -372,7 +372,7 @@
 
 	<wsdl:service name="RBACAdminService">
 		<wsdl:port name="RBACAdminService" binding="tns:RBACAdminSOAP">
-			<soap:address location="http://localhost:8080/axis2/services/RBACAdminService" />
+			<soap:address location="http://localhost:8080/intalio/ode/processes/RBACAdminService" />
 		</wsdl:port>
 	</wsdl:service>
 </wsdl:definitions>
