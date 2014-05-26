@@ -38,6 +38,7 @@ public class LoginFilter implements javax.servlet.Filter {
     private static final String TRUE = "true";
     private static final String AJAX = "ajax";
 
+    private String welcomePage = "index.htm";
     private List<String> excludeURL = new ArrayList<String>();
 
     public void doFilter(ServletRequest request, ServletResponse response,
@@ -58,6 +59,11 @@ public class LoginFilter implements javax.servlet.Filter {
             if (secureSession != null) {
                 if (secureSession.equals(secureCookie)) {
                     // already authenticated
+                    if(uri.matches("/intalio") || uri.matches("/intalio/")) {
+                        resp.sendRedirect(welcomePage);
+                        return;
+                    }
+
                     chain.doFilter(request, response);
                     return;
                 }
@@ -143,5 +149,13 @@ public class LoginFilter implements javax.servlet.Filter {
 
     public void setExcludeURL(List<String> excludeURL) {
         this.excludeURL = excludeURL;
+    }
+
+    public String getWelcomePage() {
+        return welcomePage;
+    }
+
+    public void setWelcomePage(String welcomePage) {
+        this.welcomePage = welcomePage;
     }
 }

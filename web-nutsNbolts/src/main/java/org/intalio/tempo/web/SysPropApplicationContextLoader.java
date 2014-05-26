@@ -19,6 +19,7 @@ import java.io.IOException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.SystemPropertyUtils;
@@ -40,6 +41,7 @@ public class SysPropApplicationContextLoader {
     private String _appContextFile;
 
     private static final String FILE_PREFIX = "file:";
+    private static final String CLASSPATH_PREFIX = "classpath:";
 
     /**
      * Construct an ApplicationContextLoader and load the application context file.
@@ -61,10 +63,18 @@ public class SysPropApplicationContextLoader {
         if (loadDefinitionOnStartup) {
             _beanFactory = new ClassPathXmlApplicationContext(_appContextFile);
         } else {
+            Resource configResource = null;
+
             if (_appContextFile.startsWith(FILE_PREFIX)) {
                 _appContextFile = _appContextFile.substring(FILE_PREFIX.length());
+                configResource = new FileSystemResource(_appContextFile);
+            } else if(_appContextFile.startsWith(CLASSPATH_PREFIX)) {
+                _appContextFile = _appContextFile.substring(CLASSPATH_PREFIX.length());
+                configResource = new ClassPathResource(_appContextFile);
+            } else {
+                configResource = new FileSystemResource(_appContextFile);
             }
-            Resource configResource = new FileSystemResource(_appContextFile);
+
             _beanFactory = new XmlBeanFactory(configResource);
         }
     }
