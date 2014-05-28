@@ -329,7 +329,7 @@
 
 	<wsdl:service name="TokenService">
 		<wsdl:port name="Service" binding="tns:TokenServiceSOAP">
-			<soap:address location="http://localhost:8080/axis2/services/TokenService" />
+			<soap:address location="http://localhost:8080/intalio/ode/processes/TokenService" />
 		</wsdl:port>
 	</wsdl:service>
 </wsdl:definitions>
