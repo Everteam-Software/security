@@ -1,7 +1,7 @@
 package org.intalio.tempo.security.database;
 
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -177,7 +177,7 @@ public class DatabaseSecurityProvider implements SecurityProvider {
      */
     @Override
     public Set<String> getAttributes(String forObject) throws RBACException {
-        Set<String> properties = new HashSet<String>();
+        Set<String> properties = new LinkedHashSet<String>();
         if (forObject.equalsIgnoreCase("user")) {
             properties.add(RBACConstants.PROPERTY_DISPLAY_NAME);
             properties.add(RBACConstants.PROPERTY_EMAIL);
