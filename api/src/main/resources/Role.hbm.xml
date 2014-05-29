@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="org.intalio.tempo.security.database.model.Role" table="security_role" >
+        <id name="id" type="int">
+            <column name="role_id" />
+            <generator class="native" />
+        </id>
+        <many-to-one name="realm" class="org.intalio.tempo.security.database.model.Realm" fetch="select">
+            <column name="realm_id" not-null="true" />
+        </many-to-one>
+        <property name="identifier" type="string">
+            <column name="identifier" length="100" not-null="true" />
+        </property>
+        <property name="description" type="string">
+            <column name="description" length="255" />
+        </property>
+        <set name="userRoles" table="security_user_role" inverse="true" cascade="save-update" lazy="true" fetch="select">
+            <key>
+                <column name="role_id" not-null="true" />
+            </key>
+            <many-to-many column="user_id" class="org.intalio.tempo.security.database.model.User" />
+        </set>
+        <set name="roleHierarchies" inverse="true" cascade="save-update" lazy="false" fetch="select">
+            <key>
+                <column name="role_id" not-null="true" />
+            </key>
+            <one-to-many class="org.intalio.tempo.security.database.model.RoleHierarchy" />
+        </set>
+    </class>
+</hibernate-mapping>
