@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+<query name="findRealm"><![CDATA[from Realm r where r.identifier = :realmname]]> </query>
+<query name="findRealms"><![CDATA[from Realm r ]]> </query>
+<query name="findUserOfRealm"><![CDATA[from User u where u.identifier= :username and u.realm.identifier = :realmname]]> </query>
+<query name="findUser"><![CDATA[from User u where u.identifier= :username]]> </query>
+<query name="findUsersOfRealm"><![CDATA[from User u where u.realm.identifier = :realmname]]> </query>
+<query name="allUsers"><![CDATA[from User u]]> </query>
+<query name="findRoleOfRealm"><![CDATA[from Role s where LOWER(s.identifier) = LOWER(:role) and s.realm.identifier = :realmname]]></query>
+<query name="findRole"><![CDATA[from Role s where LOWER(s.identifier) = LOWER(:role)]]></query>
+<query name="findRolesOfRealm"><![CDATA[from Role r WHERE r.realm.identifier = :realmname]]></query>
+<query name="findRoleHierarchies"><![CDATA[from RoleHierarchy rh where LOWER(rh.descendantRole.identifier) = LOWER(:role)]]> </query>
+<query name="findRoleHierarchy"><![CDATA[from RoleHierarchy rh where rh.role.identifier = :role and rh.descendantRole.identifier= :descendantRole]]> </query>
+<query name="findAscDescRoleHierarchies"><![CDATA[from RoleHierarchy rh where rh.role.identifier = :role or rh.descendantRole.identifier= :descendantRole]]> </query>
+</hibernate-mapping>

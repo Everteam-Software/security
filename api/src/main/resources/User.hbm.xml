@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="org.intalio.tempo.security.database.model.User" table="security_user" >
+        <id name="id" type="int">
+            <column name="user_id" />
+            <generator class="native" />
+        </id>
+        <many-to-one name="realm" class="org.intalio.tempo.security.database.model.Realm" fetch="select">
+            <column name="realm_id" not-null="true" />
+        </many-to-one>
+        <property name="identifier" type="string">
+            <column name="identifier" length="100" not-null="true" />
+        </property>
+        <property name="firstName" type="string">
+            <column name="first_Name" length="100" />
+        </property>
+        <property name="lastName" type="string">
+            <column name="last_Name" length="100" not-null="true" />
+        </property>
+        <property name="displayName" type="string">
+            <column name="display_name" length="255" />
+        </property>
+        <property name="email" type="string">
+            <column name="email" length="255" />
+        </property>
+        <property name="password" type="string">
+            <column name="password" length="255" not-null="true" />
+        </property>
+        <set name="userRoles" table="security_user_role" inverse="false" cascade="all" lazy="true" fetch="select">
+            <key>
+                <column name="user_id" not-null="true" />
+            </key>
+            <many-to-many column="role_id" class="org.intalio.tempo.security.database.model.Role" />
+        </set>
+    </class>
+</hibernate-mapping>

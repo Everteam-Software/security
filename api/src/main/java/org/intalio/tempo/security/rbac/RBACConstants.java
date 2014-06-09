@@ -45,7 +45,22 @@ public class RBACConstants
     public static final String PROPERTY_DESCENDANT_ROLE = "descendantRole";
 
     /**
-    * Password property
+    * User password property
     */
    public static final String PROPERTY_PASSWORD = "password";
+
+   /**
+    * User first name property
+    */
+   public static final String PROPERTY_FIRST_NAME = "firstName";
+
+   /**
+    * User last name property
+    */
+   public static final String PROPERTY_LAST_NAME = "lastName";
+
+   /**
+    * User display name property
+    */
+   public static final String PROPERTY_DISPLAY_NAME = "displayName";
 }
