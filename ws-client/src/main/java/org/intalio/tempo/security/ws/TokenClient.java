@@ -126,6 +126,8 @@ public class TokenClient implements TokenService {
                         .setProperty(org.apache.axis2.transport.http.HTTPConstants.CHUNKED, Boolean.FALSE);
             response = serviceClient.sendReceive(request);
             response.build();
+            _logger.debug("Invoked service for authentication");
+            return new OMParser(response);
         } catch (AxisFault e) {
             _logger.error("Service was called with this option " + serviceClient.getServiceContext());
             throw e;
@@ -137,8 +139,6 @@ public class TokenClient implements TokenService {
                     _logger.error("Error while cleanup");
                 }
         }
-        _logger.debug("Invoked service for authentication");
-        return new OMParser(response);
     }
 
 
