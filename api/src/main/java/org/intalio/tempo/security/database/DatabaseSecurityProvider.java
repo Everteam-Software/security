@@ -29,7 +29,6 @@ public class DatabaseSecurityProvider implements SecurityProvider {
     private static Logger log = Logger
             .getLogger(DatabaseSecurityProvider.class);
 
-    private String _filename;
     private String _name = "database";
     private String _defaultrealm = "";
     private Set<String> _workflowAdminUsers;
@@ -71,19 +70,12 @@ public class DatabaseSecurityProvider implements SecurityProvider {
     }
 
     public void init() throws AuthenticationException, RBACException {
-        checkFilename();
-
         initializehibernate();
     }
 
     public void initialize(Object config) throws AuthenticationException,
             RBACException {
-        checkFilename();
         initializehibernate();
-    }
-
-    public void setPropertiesfile(String filename) {
-        _filename = filename;
     }
 
     public void setDefaultrealm(String defaultrealm) {
@@ -119,13 +111,6 @@ public class DatabaseSecurityProvider implements SecurityProvider {
             } catch (Exception ex) {
                 log.error("Error occurred while closing session", ex);
             }
-        }
-    }
-
-    private void checkFilename() {
-        if (_filename == null) {
-            throw new IllegalStateException(
-                    "Missing configuration property 'configFile'");
         }
     }
 

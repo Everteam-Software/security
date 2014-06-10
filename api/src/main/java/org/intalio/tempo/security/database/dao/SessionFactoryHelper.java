@@ -18,10 +18,11 @@ public class SessionFactoryHelper {
 
     private static Logger log = Logger.getLogger(SessionFactoryHelper.class);
 
-    private static final SessionFactory sessionFactory ;
+    private final SessionFactory sessionFactory;
     public static final String CONFIG_DIR_PROPERTY = "org.intalio.tempo.configDirectory";
     protected static File _configFile;
-    static {
+
+    public SessionFactoryHelper(String jndiName) {
         try {
             /*
              * Build a SessionFactory object from session-factory configuration
@@ -33,20 +34,28 @@ public class SessionFactoryHelper {
             log.debug("Initializing configuration.");
             String configDir = System.getProperty(CONFIG_DIR_PROPERTY);
             if (configDir == null) {
-                throw new RuntimeException("System property " + CONFIG_DIR_PROPERTY + " not defined.");
+                throw new RuntimeException("System property "
+                        + CONFIG_DIR_PROPERTY + " not defined.");
             }
-            _configFile = new File(configDir + File.separator + "security-provider" + File.separator + "hibernate.cfg.xml");
-            if(!_configFile.exists())
-                throw new RuntimeException("File " + _configFile + " does not exists.");
-            sessionFactory = new Configuration().configure(_configFile)
-                    .buildSessionFactory();
+            _configFile = new File(configDir + File.separator
+                    + "security-provider" + File.separator
+                    + "hibernate.cfg.xml");
+            if (!_configFile.exists())
+                throw new RuntimeException("File " + _configFile
+                        + " does not exists.");
+            Configuration configuration = new Configuration();
+            if(jndiName != null && !jndiName.equals(""))
+                configuration.setProperty("hibernate.connection.datasource",
+                        jndiName);
+            configuration.configure(_configFile);
+            sessionFactory = configuration.buildSessionFactory();
         } catch (Exception e) {
             log.error("Error in creating SessionFactory object." + e);
             throw new ExceptionInInitializerError(e);
         }
     }
 
-    public static SessionFactory getSessionFactory() {
+    public SessionFactory getSessionFactory() {
         return sessionFactory;
     }
 }
