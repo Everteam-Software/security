@@ -174,7 +174,7 @@ public class DatabaseSecurityProvider implements SecurityProvider {
         if (forObject.equalsIgnoreCase("user")) {
             properties.add(RBACConstants.PROPERTY_DISPLAY_NAME);
             properties.add(RBACConstants.PROPERTY_EMAIL);
-            properties.add(RBACConstants.PROPERTY_PASSWORD);
+            properties.add(RBACConstants.PROPERTY_USER_PASSWORD);
             properties.add(RBACConstants.PROPERTY_ASSIGN_ROLES);
             properties.add(RBACConstants.PROPERTY_FIRST_NAME);
             properties.add(RBACConstants.PROPERTY_LAST_NAME);
