@@ -52,15 +52,20 @@ public class RBACConstants
    /**
     * User first name property
     */
-   public static final String PROPERTY_FIRST_NAME = "firstName";
+   public static final String PROPERTY_FIRST_NAME = "firstname";
 
    /**
     * User last name property
     */
-   public static final String PROPERTY_LAST_NAME = "lastName";
+   public static final String PROPERTY_LAST_NAME = "lastname";
 
    /**
     * User display name property
     */
    public static final String PROPERTY_DISPLAY_NAME = "displayName";
+
+   /**
+    * User database password property
+    */
+   public static final String PROPERTY_USER_PASSWORD = "userPassword";
 }

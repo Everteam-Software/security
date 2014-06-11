@@ -40,16 +40,12 @@ public class DAO {
 
     private static Logger log = Logger.getLogger(DAO.class);
 
-    private static final SessionFactory _sessionFactory;
+    private final SessionFactory _sessionFactory;
     private Session _session;
 
-    static {
-        try {
-            _sessionFactory = SessionFactoryHelper.getSessionFactory();
-        } catch (Throwable ex) {
-            log.error("Initial SessionFactory creation failed." + ex);
-            throw new ExceptionInInitializerError(ex);
-        }
+    public DAO(String jndiName){
+        SessionFactoryHelper factoryHelper = new SessionFactoryHelper(jndiName);
+        _sessionFactory = factoryHelper.getSessionFactory();
     }
 
     /**

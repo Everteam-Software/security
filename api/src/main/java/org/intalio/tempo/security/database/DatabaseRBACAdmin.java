@@ -75,7 +75,7 @@ public class DatabaseRBACAdmin implements RBACAdmin {
                 Property prop = properties[i];
                 if (prop.getName().equals(RBACConstants.PROPERTY_DISPLAY_NAME))
                     user.setDisplayName((String) prop.getValue());
-                else if (prop.getName().equals(RBACConstants.PROPERTY_PASSWORD)) {
+                else if (prop.getName().equals(RBACConstants.PROPERTY_USER_PASSWORD)) {
                     BasicTextEncryptor encryptor = new BasicTextEncryptor();
                     // setPassword uses hash to encrypt password which should be
                     // same as hash of encryptor
@@ -388,7 +388,7 @@ public class DatabaseRBACAdmin implements RBACAdmin {
                 Property prop = properties[i];
                 if (prop.getName().equals(RBACConstants.PROPERTY_DISPLAY_NAME))
                     user.setDisplayName((String) prop.getValue());
-                else if (prop.getName().equals(RBACConstants.PROPERTY_PASSWORD)) {
+                else if (prop.getName().equals(RBACConstants.PROPERTY_USER_PASSWORD)) {
                     BasicTextEncryptor encryptor = new BasicTextEncryptor();
                     // setPassword uses hash to encrypt password which should be
                     // same as hash of encryptor
