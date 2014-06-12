@@ -18,10 +18,13 @@ public class RoleHierarchy implements Serializable {
 
     private static final long serialVersionUID = 448674951541065372L;
     public static final String FIND_ROLE_HIERARCHIES = "findRoleHierarchies";
+    public static final String FIND_ROLE_HIERARCHIES_CASE_INSENSITIVE = "findRoleHierarchiesCaseInsensitive";
     public static final String FIND_ROLE_HIERARCHY = "findRoleHierarchy";
+    public static final String FIND_ROLE_HIERARCHY_CASE_INSENSITIVE = "findRoleHierarchyCaseInsensitive";
     public static final String ROLE_NAME = "role";
     public static final String DESENDANT_ROLE_NAME = "descendantRole";
     public static final String FIND_ASC_DESC_ROLE_HIERARCHIES = "findAscDescRoleHierarchies";
+    public static final String FIND_ASC_DESC_ROLE_HIERARCHIES_CASE_INSENSITIVE = "findAscDescRoleHierarchiesCaseInsensitive";
 
     private Role role;
     private Role descendantRole;

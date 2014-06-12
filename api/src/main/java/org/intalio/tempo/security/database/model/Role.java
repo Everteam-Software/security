@@ -23,8 +23,8 @@ public class Role implements Serializable {
     public static final String REALM_NAME = "realmname";
     public static final String FIND_ROLES_OF_REALM = "findRolesOfRealm";
     public static final String FIND_ROLE_OF_REALM = "findRoleOfRealm";
-    public static final String FIND_ROLE = "findRole";
     public static final String WORKFLOW_ADMIN_ROLES = "workflowAdminRoles";
+    public static final String FIND_ROLE_OF_REALM_CASE_INSENSITIVE = "findRoleOfRealmCaseInsensitive";
 
     private int id;
     private Realm realm;

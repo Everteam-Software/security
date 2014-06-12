@@ -14,11 +14,13 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.hibernate.Session;
 import org.intalio.tempo.security.authentication.AuthenticationException;
 import org.intalio.tempo.security.authentication.provider.AuthenticationProvider;
 import org.intalio.tempo.security.database.dao.DAO;
 import org.intalio.tempo.security.database.model.Realm;
 import org.intalio.tempo.security.database.util.DatabaseHelperUtil;
+import org.intalio.tempo.security.impl.Realms;
 import org.intalio.tempo.security.provider.SecurityProvider;
 import org.intalio.tempo.security.rbac.RBACConstants;
 import org.intalio.tempo.security.rbac.RBACException;
@@ -84,11 +86,11 @@ public class DatabaseSecurityProvider implements SecurityProvider {
     }
 
     private void initializehibernate() {
-
         List<Realm> allrealms;
+        Session session = null;
         try {
-            _dao.getSession();
-            allrealms = _dao.getRealms();
+            session = _dao.getSession();
+            allrealms = _dao.getRealms(session);
             _rbacMap = new HashMap<String, RBACProvider>();
             _authMap = new HashMap<String, AuthenticationProvider>();
             for (Realm r : allrealms) {
@@ -107,7 +109,7 @@ public class DatabaseSecurityProvider implements SecurityProvider {
             log.error("Error while fetching realms", e);
         } finally {
             try {
-                _dao.closeSession();
+                _dao.closeSession(session);
             } catch (Exception ex) {
                 log.error("Error occurred while closing session", ex);
             }
@@ -139,10 +141,15 @@ public class DatabaseSecurityProvider implements SecurityProvider {
      * java.lang.String)
      */
     public RBACProvider getRBACProvider(String realm) throws RBACException {
-        if (!_rbacMap.containsKey(realm))
+        String realmName = null;
+        if (Realms.isCaseSensitive())
+            realmName = realm;
+        else
+            realmName = realm.toLowerCase();
+        if (!_rbacMap.containsKey(realmName))
             throw new RBACException("Realm, " + realm
-                    + ", is not supported by this Security Provider!");
-        return (RBACProvider) _rbacMap.get(realm);
+                    + ", is not supported by Database Security Provider!");
+        return (RBACProvider) _rbacMap.get(realmName);
     }
 
     /*

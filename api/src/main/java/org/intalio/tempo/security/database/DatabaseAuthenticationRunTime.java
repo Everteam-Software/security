@@ -11,6 +11,7 @@ package org.intalio.tempo.security.database;
 import java.rmi.RemoteException;
 
 import org.apache.log4j.Logger;
+import org.hibernate.Session;
 import org.intalio.tempo.security.Property;
 import org.intalio.tempo.security.authentication.AuthenticationConstants;
 import org.intalio.tempo.security.authentication.AuthenticationException;
@@ -51,11 +52,12 @@ public class DatabaseAuthenticationRunTime implements AuthenticationRuntime {
         Property password = null;
         Property autheticatepassword = null;
         String decryptedPassword = "";
+        Session session = null;
         try {
-            _dao.getSession();
+            session = _dao.getSession();
             autheticatepassword = PropertyUtils.getProperty(
                     _dao.getUserCredentials(
-                            IdentifierUtils.stripRealm(userName), _realm),
+                            IdentifierUtils.stripRealm(userName), _realm, session),
                     AuthenticationConstants.PROPERTY_PASSWORD);
             BasicTextEncryptor encryptor = new BasicTextEncryptor();
             // setPassword uses hash to decrypt password which should be same as
@@ -70,7 +72,7 @@ public class DatabaseAuthenticationRunTime implements AuthenticationRuntime {
             log.error("Error occured while authentication", e);
         } finally {
             try {
-                _dao.closeSession();
+                _dao.closeSession(session);
             } catch (Exception ex) {
                 log.error("Error while closing session", ex);
             }

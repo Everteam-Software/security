@@ -3,15 +3,21 @@
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
 <query name="findRealm"><![CDATA[from Realm r where r.identifier = :realmname]]> </query>
+<query name="findRealmCaseInsensitive"><![CDATA[from Realm r where LOWER(r.identifier) = LOWER(:realmname)]]> </query>
 <query name="findRealms"><![CDATA[from Realm r ]]> </query>
 <query name="findUserOfRealm"><![CDATA[from User u where u.identifier= :username and u.realm.identifier = :realmname]]> </query>
+<query name="findUserOfRealmCaseInsensitive"><![CDATA[from User u where LOWER(u.identifier) = LOWER(:username) and LOWER(u.realm.identifier) = LOWER(:realmname)]]> </query>
 <query name="findUser"><![CDATA[from User u where u.identifier= :username]]> </query>
+<query name="findUserCaseInsensitive"><![CDATA[from User u where LOWER(u.identifier) = LOWER(:username)]]> </query>
 <query name="findUsersOfRealm"><![CDATA[from User u where u.realm.identifier = :realmname]]> </query>
 <query name="allUsers"><![CDATA[from User u]]> </query>
-<query name="findRoleOfRealm"><![CDATA[from Role s where LOWER(s.identifier) = LOWER(:role) and s.realm.identifier = :realmname]]></query>
-<query name="findRole"><![CDATA[from Role s where LOWER(s.identifier) = LOWER(:role)]]></query>
+<query name="findRoleOfRealm"><![CDATA[from Role r where r.identifier = :role and r.realm.identifier = :realmname]]></query>
+<query name="findRoleOfRealmCaseInsensitive"><![CDATA[from Role r WHERE LOWER(r.identifier) = LOWER(:role) and LOWER(r.realm.identifier) = LOWER(:realmname)]]></query>
 <query name="findRolesOfRealm"><![CDATA[from Role r WHERE r.realm.identifier = :realmname]]></query>
-<query name="findRoleHierarchies"><![CDATA[from RoleHierarchy rh where LOWER(rh.descendantRole.identifier) = LOWER(:role)]]> </query>
+<query name="findRoleHierarchies"><![CDATA[from RoleHierarchy rh where rh.descendantRole.identifier = :role]]> </query>
+<query name="findRoleHierarchiesCaseInsensitive"><![CDATA[from RoleHierarchy rh where LOWER(rh.descendantRole.identifier) = LOWER(:role)]]> </query>
 <query name="findRoleHierarchy"><![CDATA[from RoleHierarchy rh where rh.role.identifier = :role and rh.descendantRole.identifier= :descendantRole]]> </query>
+<query name="findRoleHierarchyCaseInsensitive"><![CDATA[from RoleHierarchy rh where LOWER(rh.role.identifier) = LOWER(:role) and LOWER(rh.descendantRole.identifier) = LOWER(:descendantRole)]]> </query>
 <query name="findAscDescRoleHierarchies"><![CDATA[from RoleHierarchy rh where rh.role.identifier = :role or rh.descendantRole.identifier= :descendantRole]]> </query>
+<query name="findAscDescRoleHierarchiesCaseInsensitive"><![CDATA[from RoleHierarchy rh where LOWER(rh.role.identifier) = LOWER(:role) or LOWER(rh.descendantRole.identifier) = LOWER(:descendantRole)]]> </query>
 </hibernate-mapping>
