@@ -21,9 +21,11 @@ public class User implements Serializable {
     private static final long serialVersionUID = -8716663220156247920L;
     public static final String USER_NAME = "username";
     public static final String FIND_USER_OF_REALM = "findUserOfRealm";
+    public static final String FIND_USER_OF_REALM_CASE_INSENSITIVE = "findUserOfRealmCaseInsensitive";
     public static final String FIND_USERS_OF_REALM = "findUsersOfRealm";
     public static final String REALM_NAME = "realmname";
     public static final String FIND_USER = "findUser";
+    public static final String FIND_USER_CASE_INSENSITIVE = "findUserCaseInsensitive";
     public static final String WORKFLOW_ADMIN_USERS = "workflowAdminUsers";
 
     private int id;

@@ -22,6 +22,7 @@ public class Realm implements java.io.Serializable {
 
     private static final long serialVersionUID = 5962144842145793217L;
     public static final String FIND_REALM = "findRealm";
+    public static final String FIND_REALM_CASE_INSENSITIVE = "findRealmCaseInsensitive";
     public static final String FIND_REALMS = "findRealms";
     public static final String REALM_NAME = "realmname";
 

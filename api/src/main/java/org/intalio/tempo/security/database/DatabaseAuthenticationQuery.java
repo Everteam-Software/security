@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.hibernate.Session;
 import org.intalio.tempo.security.Property;
 import org.intalio.tempo.security.authentication.AuthenticationException;
 import org.intalio.tempo.security.authentication.AuthenticationQuery;
@@ -54,10 +55,11 @@ public class DatabaseAuthenticationQuery implements AuthenticationQuery {
     public Property[] getUserCredentials(String username)
             throws AuthenticationException, RemoteException {
         Property[] properties = null;
+        Session session = null;
         try {
-            _dao.getSession();
+            session = _dao.getSession();
             properties = _dao.getUserCredentials(
-                    IdentifierUtils.stripRealm(username), _realm);
+                    IdentifierUtils.stripRealm(username), _realm, session);
         } catch (UserNotFoundException ue) {
             log.error("User not found: " + username, ue);
             throw new UserNotFoundException("User not found: " + username);
@@ -69,7 +71,7 @@ public class DatabaseAuthenticationQuery implements AuthenticationQuery {
                             + username, e);
         } finally {
             try {
-                _dao.closeSession();
+                _dao.closeSession(session);
             } catch (Exception ex) {
                 log.error("Error while closing session", ex);
             }
@@ -91,10 +93,11 @@ public class DatabaseAuthenticationQuery implements AuthenticationQuery {
         boolean isAdmin = false;
         Set<String> authorizedRoles = null;
         String[] authorizedRoleNames = null;
+        Session session = null;
         try {
-            _dao.getSession();
+            session = _dao.getSession();
             userRoles = _dao.authorizedRoles(
-                    IdentifierUtils.stripRealm(userName), _realm);
+                    IdentifierUtils.stripRealm(userName), _realm, session);
             authorizedRoles = new HashSet<String>();
             for (Role useRole : userRoles) {
                 String userRoleName = DatabaseHelperUtil.normalize(useRole
@@ -113,9 +116,9 @@ public class DatabaseAuthenticationQuery implements AuthenticationQuery {
             authorizedRoleNames = authorizedRoles
                     .toArray(new String[authorizedRoles.size()]);
             Set<String> workflowAdminRoles = _dao
-                    .getWorkflowAdminRoles(_provider.getWorkflowAdminRoles());
+                    .getWorkflowAdminRoles(_provider.getWorkflowAdminRoles(), session);
             Set<String> workflowAdminUsers = _dao
-                    .getWorkflowAdminUsers(_provider.getWorkflowAdminUsers());
+                    .getWorkflowAdminUsers(_provider.getWorkflowAdminUsers(), session);
             for (int i = 0; i < authorizedRoleNames.length
                     && workflowAdminRoles != null; i++) {
                 isAdmin = workflowAdminRoles.contains(authorizedRoleNames[i]);
@@ -132,7 +135,7 @@ public class DatabaseAuthenticationQuery implements AuthenticationQuery {
                             + userName, e);
         } finally {
             try {
-                _dao.closeSession();
+                _dao.closeSession(session);
             } catch (Exception e) {
                 log.error("Error while closing session", e);
             }
