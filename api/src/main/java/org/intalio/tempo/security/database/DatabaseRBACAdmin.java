@@ -64,53 +64,80 @@ public class DatabaseRBACAdmin implements RBACAdmin {
         Set<Role> userRoles = null;
         try {
             session = _dao.getSession();
-            transaction = session.beginTransaction();
-            checkValidRoles(properties);
-            User user = new User();
-            userRoles = user.getUserRoles();
-            user.setIdentifier(userName);
-            Realm realm = _dao.getRealm(_realm);
-            user.setRealm(realm);
-            for (int i = 0; i < properties.length; i++) {
-                Property prop = properties[i];
-                if (prop.getName().equals(RBACConstants.PROPERTY_DISPLAY_NAME))
-                    user.setDisplayName((String) prop.getValue());
-                else if (prop.getName().equals(RBACConstants.PROPERTY_USER_PASSWORD)) {
-                    BasicTextEncryptor encryptor = new BasicTextEncryptor();
-                    // setPassword uses hash to encrypt password which should be
-                    // same as hash of encryptor
-                    encryptor
-                            .setPassword(DatabaseHelperUtil.ENCRYPTED_PASSWORD);
-                    String decryptPassword = encryptor.encrypt((String) prop
-                            .getValue());
-                    user.setPassword(decryptPassword);
-                } else if (prop.getName().equals(RBACConstants.PROPERTY_EMAIL))
-                    user.setEmail((String) prop.getValue());
-                else if (prop.getName().equals(
-                        RBACConstants.PROPERTY_FIRST_NAME))
-                    user.setFirstName((String) prop.getValue());
-                else if (prop.getName()
-                        .equals(RBACConstants.PROPERTY_LAST_NAME))
-                    user.setLastName((String) prop.getValue());
-                else if (prop.getName().equals(
-                        RBACConstants.PROPERTY_ASSIGN_ROLES))
-                    userRoles.add(getAssignedRoles(_dao,
-                            (String) prop.getValue()));
+            checkValidRoles(properties, session);
+            if (isUserExists(userName, session)) {
+                throw new RBACException("User already exists in database");
+            } else {
+                transaction = session.beginTransaction();
+                User user = new User();
+                userRoles = user.getUserRoles();
+                user.setIdentifier(userName);
+                Realm realm = _dao.getRealm(_realm, session);
+                user.setRealm(realm);
+                for (int i = 0; i < properties.length; i++) {
+                    Property prop = properties[i];
+                    if (prop.getName().equals(
+                            RBACConstants.PROPERTY_DISPLAY_NAME))
+                        user.setDisplayName((String) prop.getValue());
+                    else if (prop.getName().equals(
+                            RBACConstants.PROPERTY_USER_PASSWORD)) {
+                        BasicTextEncryptor encryptor = new BasicTextEncryptor();
+                        // setPassword uses hash to encrypt password which
+                        // should be
+                        // same as hash of encryptor
+                        encryptor
+                                .setPassword(DatabaseHelperUtil.ENCRYPTED_PASSWORD);
+                        String decryptPassword = encryptor
+                                .encrypt((String) prop.getValue());
+                        user.setPassword(decryptPassword);
+                    } else if (prop.getName().equals(
+                            RBACConstants.PROPERTY_EMAIL))
+                        user.setEmail((String) prop.getValue());
+                    else if (prop.getName().equals(
+                            RBACConstants.PROPERTY_FIRST_NAME))
+                        user.setFirstName((String) prop.getValue());
+                    else if (prop.getName().equals(
+                            RBACConstants.PROPERTY_LAST_NAME))
+                        user.setLastName((String) prop.getValue());
+                    else if (prop.getName().equals(
+                            RBACConstants.PROPERTY_ASSIGN_ROLES))
+                        userRoles.add(getAssignedRoles(_dao,
+                                (String) prop.getValue(), session));
+                }
+                _dao.save(user, session);
+                transaction.commit();
             }
-            _dao.save(user);
-            transaction.commit();
         } catch (Exception e) {
-            transaction.rollback();
+            if (transaction != null)
+                transaction.rollback();
             log.error("Error occured while adding user " + userName, e);
             throw new RBACException("Error occured while adding user "
                     + userName, e);
         } finally {
             try {
-                _dao.closeSession();
+                _dao.closeSession(session);
             } catch (Exception e) {
                 log.error("Error while closing session", e);
             }
         }
+    }
+
+    /**
+     * @param userName
+     * @param session
+     * @return
+     */
+    private boolean isUserExists(String userName, Session session) {
+        User user = null;
+        try {
+            user = _dao.getUser(_realm, userName, session);
+            if (user != null)
+                return true;
+        } catch (Exception e) {
+            log.error("Error occurred while checking existance of user "
+                    + userName, e);
+        }
+        return false;
     }
 
     /**
@@ -119,11 +146,12 @@ public class DatabaseRBACAdmin implements RBACAdmin {
      * @return
      * @throws RBACException
      */
-    private Role getAssignedRoles(DAO dao, String assignRole)
+    private Role getAssignedRoles(DAO dao, String assignRole, Session session)
             throws RBACException {
         Role role = null;
         try {
-            role = dao.getRole(IdentifierUtils.stripRealm(assignRole));
+            role = dao.getRole(IdentifierUtils.getRealm(assignRole),
+                    IdentifierUtils.stripRealm(assignRole), session);
         } catch (Exception e) {
             log.error("Error occurred while fetching assigned role "
                     + assignRole, e);
@@ -147,10 +175,10 @@ public class DatabaseRBACAdmin implements RBACAdmin {
         try {
             session = _dao.getSession();
             transaction = session.beginTransaction();
-            user = _dao.getUser(userName);
+            user = _dao.getUser(_realm, userName, session);
             roles = user.getUserRoles();
             roles.clear();
-            _dao.delete(user);
+            _dao.delete(user, session);
             transaction.commit();
         } catch (Exception e) {
             transaction.rollback();
@@ -159,7 +187,7 @@ public class DatabaseRBACAdmin implements RBACAdmin {
                     + userName, e);
         } finally {
             try {
-                _dao.closeSession();
+                _dao.closeSession(session);
             } catch (Exception e) {
                 log.error("Error while closing session", e);
             }
@@ -180,37 +208,61 @@ public class DatabaseRBACAdmin implements RBACAdmin {
         Transaction transaction = null;
         try {
             session = _dao.getSession();
-            transaction = session.beginTransaction();
-            checkValidRoles(properties);
-            Set<RoleHierarchy> roleHierarchies = new HashSet<RoleHierarchy>();
-            Role role = new Role();
-            role.setIdentifier(roleName);
-            Realm realm = _dao.getRealm(_realm);
-            role.setRealm(realm);
-            for (int i = 0; i < properties.length; i++) {
-                Property prop = properties[i];
-                if (prop.getName().equals(RBACConstants.PROPERTY_DESCRIPTION))
-                    role.setDescription((String) prop.getValue());
-                else if (prop.getName().equals(
-                        RBACConstants.PROPERTY_DESCENDANT_ROLE))
-                    roleHierarchies.add(getDescendantRoles(_dao,
-                            (String) prop.getValue(), role));
+            checkValidRoles(properties, session);
+            if (isRoleExists(roleName, session)) {
+                throw new RBACException("Role already exists in database");
+            } else {
+                transaction = session.beginTransaction();
+                Set<RoleHierarchy> roleHierarchies = new HashSet<RoleHierarchy>();
+                Role role = new Role();
+                role.setIdentifier(roleName);
+                Realm realm = _dao.getRealm(_realm, session);
+                role.setRealm(realm);
+                for (int i = 0; i < properties.length; i++) {
+                    Property prop = properties[i];
+                    if (prop.getName().equals(
+                            RBACConstants.PROPERTY_DESCRIPTION))
+                        role.setDescription((String) prop.getValue());
+                    else if (prop.getName().equals(
+                            RBACConstants.PROPERTY_DESCENDANT_ROLE))
+                        roleHierarchies.add(getDescendantRoles(_dao,
+                                (String) prop.getValue(), role, session));
+                }
+                role.setRoleHierarchies(roleHierarchies);
+                _dao.save(role, session);
+                transaction.commit();
             }
-            role.setRoleHierarchies(roleHierarchies);
-            _dao.save(role);
-            transaction.commit();
         } catch (Exception e) {
-            transaction.rollback();
+            if (transaction != null)
+                transaction.rollback();
             log.error("Error occured while adding role " + roleName, e);
             throw new RBACException("Error occured while adding role "
                     + roleName, e);
         } finally {
             try {
-                _dao.closeSession();
+                _dao.closeSession(session);
             } catch (Exception e) {
                 log.error("Error while closing session", e);
             }
         }
+    }
+
+    /**
+     * @param roleName
+     * @param session
+     * @return
+     */
+    private boolean isRoleExists(String roleName, Session session) {
+        Role role = null;
+        try {
+            role = _dao.getRole(roleName, _realm, session);
+            if (role != null)
+                return true;
+        } catch (Exception e) {
+            log.error("Error occurred while checking existance of role "
+                    + roleName, e);
+        }
+        return false;
     }
 
     /**
@@ -221,12 +273,14 @@ public class DatabaseRBACAdmin implements RBACAdmin {
      * @throws RBACException
      */
     private RoleHierarchy getDescendantRoles(DAO dao,
-            String descendantRoleName, Role role) throws RBACException {
+            String descendantRoleName, Role role, Session session)
+            throws RBACException {
         Role descendantRole;
         RoleHierarchy roleHierarchy = null;
         try {
-            descendantRole = dao.getRole(IdentifierUtils
-                    .stripRealm(descendantRoleName));
+            descendantRole = dao.getRole(
+                    IdentifierUtils.getRealm(descendantRoleName),
+                    IdentifierUtils.stripRealm(descendantRoleName), session);
             roleHierarchy = new RoleHierarchy();
             roleHierarchy.setRole(role);
             roleHierarchy.setDescendantRole(descendantRole);
@@ -238,14 +292,15 @@ public class DatabaseRBACAdmin implements RBACAdmin {
     }
 
     private RoleHierarchy getRoleHierarchy(DAO dao, String descendantRoleName,
-            Role role) throws RBACException {
+            Role role, Session session) throws RBACException {
         Role descendantRole;
         RoleHierarchy roleHierarchy = null;
         try {
-            descendantRole = dao.getRole(IdentifierUtils
-                    .stripRealm(descendantRoleName));
+            descendantRole = dao.getRole(
+                    IdentifierUtils.getRealm(descendantRoleName),
+                    IdentifierUtils.stripRealm(descendantRoleName), session);
             roleHierarchy = dao.getRoleHierarchy(role.getIdentifier(),
-                    descendantRole.getIdentifier());
+                    descendantRole.getIdentifier(), session);
             if (roleHierarchy == null) {
                 roleHierarchy = new RoleHierarchy();
                 roleHierarchy.setRole(role);
@@ -275,20 +330,20 @@ public class DatabaseRBACAdmin implements RBACAdmin {
         try {
             session = _dao.getSession();
             transaction = session.beginTransaction();
-            Role role = _dao.getRole(roleName);
+            Role role = _dao.getRole(_realm, roleName, session);
             users = _dao.authorizedUsers(role.getIdentifier(), role.getRealm()
-                    .getIdentifier());
+                    .getIdentifier(), session);
             for (User user : users) {
                 assignedRoles = user.getUserRoles();
                 assignedRoles.remove(role);
-                _dao.saveOrUpdate(user);
+                _dao.saveOrUpdate(user, session);
             }
             roleHierarchies = _dao.getAscDescRoleHierarchy(
-                    role.getIdentifier(), role.getIdentifier());
+                    role.getIdentifier(), role.getIdentifier(), session);
             for (RoleHierarchy roleHierarchy : roleHierarchies) {
-                _dao.delete(roleHierarchy);
+                _dao.delete(roleHierarchy, session);
             }
-            _dao.delete(role);
+            _dao.delete(role, session);
             transaction.commit();
         } catch (Exception e) {
             log.error("Error occurred while deleting role " + roleName, e);
@@ -296,7 +351,7 @@ public class DatabaseRBACAdmin implements RBACAdmin {
                     + roleName, e);
         } finally {
             try {
-                _dao.closeSession();
+                _dao.closeSession(session);
             } catch (Exception ex) {
                 log.error("Error occurred while closing session", ex);
             }
@@ -380,15 +435,16 @@ public class DatabaseRBACAdmin implements RBACAdmin {
         try {
             session = _dao.getSession();
             transaction = session.beginTransaction();
-            checkValidRoles(properties);
-            user = _dao.getUser(userName);
+            checkValidRoles(properties, session);
+            user = _dao.getUser(_realm, userName, session);
             userRoles = user.getUserRoles();
             userRoles.clear();
             for (int i = 0; i < properties.length; i++) {
                 Property prop = properties[i];
                 if (prop.getName().equals(RBACConstants.PROPERTY_DISPLAY_NAME))
                     user.setDisplayName((String) prop.getValue());
-                else if (prop.getName().equals(RBACConstants.PROPERTY_USER_PASSWORD)) {
+                else if (prop.getName().equals(
+                        RBACConstants.PROPERTY_USER_PASSWORD)) {
                     BasicTextEncryptor encryptor = new BasicTextEncryptor();
                     // setPassword uses hash to encrypt password which should be
                     // same as hash of encryptor
@@ -408,9 +464,9 @@ public class DatabaseRBACAdmin implements RBACAdmin {
                 else if (prop.getName().equals(
                         RBACConstants.PROPERTY_ASSIGN_ROLES))
                     userRoles.add(getAssignedRoles(_dao,
-                            (String) prop.getValue()));
+                            (String) prop.getValue(), session));
             }
-            _dao.saveOrUpdate(user);
+            _dao.saveOrUpdate(user, session);
             transaction.commit();
         } catch (Exception e) {
             transaction.rollback();
@@ -419,7 +475,7 @@ public class DatabaseRBACAdmin implements RBACAdmin {
                     + userName, e);
         } finally {
             try {
-                _dao.closeSession();
+                _dao.closeSession(session);
             } catch (Exception ex) {
                 log.error("Error occurred while closing session", ex);
             }
@@ -443,8 +499,8 @@ public class DatabaseRBACAdmin implements RBACAdmin {
         try {
             session = _dao.getSession();
             transaction = session.beginTransaction();
-            checkValidRoles(properties);
-            Role role = _dao.getRole(roleName);
+            checkValidRoles(properties, session);
+            Role role = _dao.getRole(_realm, roleName, session);
             roleHierarchies = role.getRoleHierarchies();
             hierarchies = new HashSet<RoleHierarchy>();
             role.setIdentifier(roleName);
@@ -455,15 +511,15 @@ public class DatabaseRBACAdmin implements RBACAdmin {
                 else if (prop.getName().equals(
                         RBACConstants.PROPERTY_DESCENDANT_ROLE))
                     hierarchies.add(getRoleHierarchy(_dao,
-                            (String) prop.getValue(), role));
+                            (String) prop.getValue(), role, session));
             }
             for (RoleHierarchy roleHierarchy : roleHierarchies) {
                 if (!hierarchies.contains(roleHierarchy))
-                    _dao.delete(roleHierarchy);
+                    _dao.delete(roleHierarchy, session);
             }
             roleHierarchies.clear();
             roleHierarchies.addAll(hierarchies);
-            _dao.saveOrUpdate(role);
+            _dao.saveOrUpdate(role, session);
             transaction.commit();
         } catch (Exception e) {
             transaction.rollback();
@@ -472,20 +528,20 @@ public class DatabaseRBACAdmin implements RBACAdmin {
                     + roleName, e);
         } finally {
             try {
-                _dao.closeSession();
+                _dao.closeSession(session);
             } catch (Exception ex) {
                 log.error("Error occurred while closing session", ex);
             }
         }
     }
 
-    private void checkValidRoles(Property[] props) throws RemoteException,
-            RBACException {
+    private void checkValidRoles(Property[] props, Session session)
+            throws RemoteException, RBACException {
         for (Property prop : props) {
             if (prop.getName().equals(RBACConstants.PROPERTY_ASSIGN_ROLES)
                     || prop.getName().equals(
                             RBACConstants.PROPERTY_DESCENDANT_ROLE)) {
-                if (!checkRoleExists(prop.getValue().toString()))
+                if (!checkRoleExists(prop.getValue().toString(), session))
                     throw new RBACException("Mentioned role: "
                             + prop.getValue().toString() + " does not exists");
             }
@@ -498,12 +554,13 @@ public class DatabaseRBACAdmin implements RBACAdmin {
      * @throws RemoteException
      * @throws RBACException
      */
-    private boolean checkRoleExists(String roleName) throws RemoteException,
-            RBACException {
+    private boolean checkRoleExists(String roleName, Session session)
+            throws RemoteException, RBACException {
         boolean exists = true;
         try {
-            List<Property> properties = _dao.roleProperties(IdentifierUtils
-                    .stripRealm(roleName));
+            List<Property> properties = _dao.roleProperties(
+                    IdentifierUtils.getRealm(roleName),
+                    IdentifierUtils.stripRealm(roleName), session);
             Property[] props = properties.toArray(new Property[properties
                     .size()]);
             if (props == null || props.length == 0) {

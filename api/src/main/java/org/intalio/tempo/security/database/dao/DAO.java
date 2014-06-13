@@ -25,6 +25,7 @@ import org.intalio.tempo.security.database.model.Role;
 import org.intalio.tempo.security.database.model.RoleHierarchy;
 import org.intalio.tempo.security.database.model.User;
 import org.intalio.tempo.security.database.util.DatabaseHelperUtil;
+import org.intalio.tempo.security.impl.Realms;
 import org.intalio.tempo.security.rbac.RBACConstants;
 import org.intalio.tempo.security.rbac.RBACException;
 import org.intalio.tempo.security.rbac.RoleNotFoundException;
@@ -41,9 +42,8 @@ public class DAO {
     private static Logger log = Logger.getLogger(DAO.class);
 
     private final SessionFactory _sessionFactory;
-    private Session _session;
 
-    public DAO(String jndiName){
+    public DAO(String jndiName) {
         SessionFactoryHelper factoryHelper = new SessionFactoryHelper(jndiName);
         _sessionFactory = factoryHelper.getSessionFactory();
     }
@@ -54,8 +54,8 @@ public class DAO {
      * @return
      * @throws Exception
      */
-    public Property[] getUserCredentials(String userName, String realmName)
-            throws Exception {
+    public Property[] getUserCredentials(String userName, String realmName,
+            Session _session) throws Exception {
         User usr = null;
         try {
             Query query = _session.getNamedQuery(User.FIND_USER_OF_REALM)
@@ -74,8 +74,10 @@ public class DAO {
 
             return new Property[] { name, password };
         } catch (Exception re) {
-            log.error("Error While fetching user credential of user " + userName, re);
-            throw new Exception("Error While fetching user credential of user " + userName, re);
+            log.error("Error While fetching user credential of user "
+                    + userName, re);
+            throw new Exception("Error While fetching user credential of user "
+                    + userName, re);
         }
     }
 
@@ -85,7 +87,7 @@ public class DAO {
      * @throws Exception
      */
     @SuppressWarnings("unchecked")
-    public List<User> getUsers(String realm) throws Exception {
+    public List<User> getUsers(String realm, Session _session) throws Exception {
         try {
             List<User> users = _session.getNamedQuery(User.FIND_USERS_OF_REALM)
                     .setString(User.REALM_NAME, realm).list();
@@ -103,7 +105,7 @@ public class DAO {
      * @throws Exception
      */
     @SuppressWarnings("unchecked")
-    public List<Role> getRoles(String realm) throws Exception {
+    public List<Role> getRoles(String realm, Session _session) throws Exception {
         try {
             List<Role> roles = _session.getNamedQuery(Role.FIND_ROLES_OF_REALM)
                     .setString(Role.REALM_NAME, realm).list();
@@ -120,13 +122,22 @@ public class DAO {
      * @return
      * @throws Exception
      */
-    public List<Property> roleProperties(String roleName) throws Exception {
+    public List<Property> roleProperties(String realmName, String roleName,
+            Session _session) throws Exception {
         Role role = null;
         List<Property> properties = null;
+        Query query = null;
         try {
             properties = new ArrayList<Property>();
-            Query query = _session.getNamedQuery(Role.FIND_ROLE).setString(
-                    Role.ROLE_NAME, roleName);
+            if (Realms.isCaseSensitive())
+                query = _session.getNamedQuery(Role.FIND_ROLE_OF_REALM)
+                        .setString(Role.ROLE_NAME, roleName)
+                        .setString(Role.REALM_NAME, realmName);
+            else
+                query = _session
+                        .getNamedQuery(Role.FIND_ROLE_OF_REALM_CASE_INSENSITIVE)
+                        .setString(Role.ROLE_NAME, roleName)
+                        .setString(Role.REALM_NAME, realmName);
             role = (Role) query.uniqueResult();
             if (role != null) {
                 String description = role.getDescription();
@@ -167,15 +178,22 @@ public class DAO {
      * @return
      * @throws Exception
      */
-    public List<Property> userProperties(String userName, String realmName)
-            throws Exception {
+    public List<Property> userProperties(String userName, String realmName,
+            Session _session) throws Exception {
         User usr = null;
         List<Property> properties = null;
+        Query query = null;
         try {
             properties = new ArrayList<Property>();
-            Query query = _session.getNamedQuery(User.FIND_USER_OF_REALM)
-                    .setString(User.USER_NAME, userName)
-                    .setString(User.REALM_NAME, realmName);
+            if (Realms.isCaseSensitive())
+                query = _session.getNamedQuery(User.FIND_USER_OF_REALM)
+                        .setString(User.USER_NAME, userName)
+                        .setString(User.REALM_NAME, realmName);
+            else
+                query = _session
+                        .getNamedQuery(User.FIND_USER_OF_REALM_CASE_INSENSITIVE)
+                        .setString(User.USER_NAME, userName)
+                        .setString(User.REALM_NAME, realmName);
             usr = (User) query.uniqueResult();
             if (usr != null) {
                 String name = usr.getDisplayName();
@@ -223,7 +241,8 @@ public class DAO {
      * @param object
      * @throws Exception
      */
-    public void saveOrUpdate(final Object object) throws Exception {
+    public void saveOrUpdate(final Object object, Session _session)
+            throws Exception {
         try {
             _session.saveOrUpdate(object);
         } catch (Exception re) {
@@ -236,7 +255,7 @@ public class DAO {
      * @param object
      * @throws Exception
      */
-    public void save(final Object object) throws Exception {
+    public void save(final Object object, Session _session) throws Exception {
         try {
             _session.save(object);
         } catch (Exception re) {
@@ -249,7 +268,7 @@ public class DAO {
      * @param object
      * @throws Exception
      */
-    public void delete(final Object object) throws Exception {
+    public void delete(final Object object, Session _session) throws Exception {
         try {
             _session.delete(object);
         } catch (Exception re) {
@@ -263,11 +282,17 @@ public class DAO {
      * @return
      * @throws Exception
      */
-    public Realm getRealm(String realmName) throws Exception {
+    public Realm getRealm(String realmName, Session _session) throws Exception {
         Realm realm = null;
+        Query query = null;
         try {
-            Query query = _session.getNamedQuery(Realm.FIND_REALM).setString(
-                    Realm.REALM_NAME, realmName);
+            if (Realms.isCaseSensitive())
+                query = _session.getNamedQuery(Realm.FIND_REALM).setString(
+                        Realm.REALM_NAME, realmName);
+            else
+                query = _session.getNamedQuery(
+                        Realm.FIND_REALM_CASE_INSENSITIVE).setString(
+                        Realm.REALM_NAME, realmName);
             realm = (Realm) query.uniqueResult();
             if (realm == null) {
                 throw new RBACException("Realm not found " + realmName);
@@ -280,55 +305,13 @@ public class DAO {
     }
 
     /**
-     * @param roleName
-     * @return
-     * @throws Exception
-     */
-    public Role getRole(String roleName) throws Exception {
-        Role role = null;
-        try {
-            Query query = _session.getNamedQuery(Role.FIND_ROLE).setString(
-                    Role.ROLE_NAME, roleName);
-            role = (Role) query.uniqueResult();
-            if (role == null) {
-                throw new RBACException("Role not found " + roleName);
-            }
-        } catch (Exception re) {
-            log.error("Error while fetching role " + roleName, re);
-            throw new Exception("Error while fetching role " + roleName, re);
-        }
-        return role;
-    }
-
-    /**
-     * @param userName
-     * @return
-     * @throws Exception
-     */
-    public User getUser(String userName) throws Exception {
-        User user = null;
-        try {
-            Query query = _session.getNamedQuery(User.FIND_USER).setString(
-                    User.USER_NAME, userName);
-            user = (User) query.uniqueResult();
-            if (user == null) {
-                throw new RBACException("User not found " + userName);
-            }
-        } catch (Exception re) {
-            log.error("Error while fetching user " + userName, re);
-            throw new Exception("Error while fetching user " + userName, re);
-        }
-        return user;
-    }
-
-    /**
      * @param userName
      * @param realmName
      * @return
      * @throws Exception
      */
-    public Set<Role> authorizedRoles(String userName, String realmName)
-            throws Exception {
+    public Set<Role> authorizedRoles(String userName, String realmName,
+            Session _session) throws Exception {
         User user = null;
         Set<Role> userRoles = null;
         try {
@@ -341,8 +324,11 @@ public class DAO {
             }
             userRoles = user.getUserRoles();
         } catch (Exception re) {
-            log.error("Error while fetching authorized roles of user " + userName, re);
-            throw new Exception("Error while fetching authorized roles of user " + userName, re);
+            log.error("Error while fetching authorized roles of user "
+                    + userName, re);
+            throw new Exception(
+                    "Error while fetching authorized roles of user " + userName,
+                    re);
         }
         return userRoles;
     }
@@ -352,15 +338,28 @@ public class DAO {
      * @return
      * @throws Exception
      */
-    public Set<String> getWorkflowAdminRoles(Set<String> workflowRoles)
-            throws Exception {
+    public Set<String> getWorkflowAdminRoles(Set<String> workflowRoles,
+            Session _session) throws Exception {
         Query query = null;
         Role role = null;
         Set<String> workflowAdminRoles = new HashSet<String>();
         try {
             for (String roleName : workflowRoles) {
-                query = _session.getNamedQuery(Role.FIND_ROLE).setString(
-                        Role.ROLE_NAME, IdentifierUtils.stripRealm(roleName));
+                if (Realms.isCaseSensitive())
+                    query = _session
+                            .getNamedQuery(Role.FIND_ROLE_OF_REALM)
+                            .setString(Role.ROLE_NAME,
+                                    IdentifierUtils.stripRealm(roleName))
+                            .setString(Role.REALM_NAME,
+                                    IdentifierUtils.getRealm(roleName));
+                else
+                    query = _session
+                            .getNamedQuery(
+                                    Role.FIND_ROLE_OF_REALM_CASE_INSENSITIVE)
+                            .setString(Role.ROLE_NAME,
+                                    IdentifierUtils.stripRealm(roleName))
+                            .setString(Role.REALM_NAME,
+                                    IdentifierUtils.getRealm(roleName));
                 role = (Role) query.uniqueResult();
                 if (role == null)
                     throw new RBACException("Role not found " + roleName);
@@ -380,15 +379,21 @@ public class DAO {
      * @return
      * @throws Exception
      */
-    public Set<String> getWorkflowAdminUsers(Set<String> workflowUsers)
-            throws Exception {
+    public Set<String> getWorkflowAdminUsers(Set<String> workflowUsers,
+            Session _session) throws Exception {
         Query query = null;
         User user = null;
         Set<String> workflowAdminUsers = new HashSet<String>();
         try {
             for (String userName : workflowAdminUsers) {
-                query = _session.getNamedQuery(User.FIND_USER).setString(
-                        User.USER_NAME, userName);
+                if (Realms.isCaseSensitive())
+                    query = _session.getNamedQuery(User.FIND_USER).setString(
+                            User.USER_NAME, userName);
+                else
+                    query = _session.getNamedQuery(
+                            User.FIND_USER_CASE_INSENSITIVE).setString(
+                            User.USER_NAME, userName);
+
                 user = (User) query.uniqueResult();
                 if (user == null)
                     throw new RBACException("User not found " + userName);
@@ -408,10 +413,11 @@ public class DAO {
      * @throws Exception
      */
     public Session getSession() throws Exception {
+        Session _session = null;
         try {
             _session = _sessionFactory.openSession();
         } catch (Exception re) {
-            log.warn("Exception while saving object", re);
+            log.warn("Exception while opening session", re);
             throw new Exception("Exception while opening session", re);
         }
         return _session;
@@ -420,12 +426,14 @@ public class DAO {
     /**
      * @throws Exception
      */
-    public void closeSession() throws Exception {
+    public void closeSession(Session _session) throws Exception {
         try {
-            if (_session != null)
+            if (_session != null) {
+                _session.flush();
                 _session.close();
+            }
         } catch (Exception re) {
-            log.warn("Exception while saving object", re);
+            log.warn("Exception while closing session", re);
             throw new Exception("Exception while closing session", re);
         }
     }
@@ -436,17 +444,23 @@ public class DAO {
      * @return
      * @throws Exception
      */
-    public List<String> assignedUsers(String roleName, String realmName)
-            throws Exception {
+    public List<String> assignedUsers(String roleName, String realmName,
+            Session _session) throws Exception {
         Set<User> users = null;
         List<String> assignedUsers = null;
         Role role = null;
         Query query = null;
         try {
             assignedUsers = new ArrayList<String>();
-            query = _session.getNamedQuery(Role.FIND_ROLE_OF_REALM)
-                    .setString(Role.ROLE_NAME, roleName)
-                    .setString(Role.REALM_NAME, realmName);
+            if (Realms.isCaseSensitive())
+                query = _session.getNamedQuery(Role.FIND_ROLE_OF_REALM)
+                        .setString(Role.ROLE_NAME, roleName)
+                        .setString(Role.REALM_NAME, realmName);
+            else
+                query = _session
+                        .getNamedQuery(Role.FIND_ROLE_OF_REALM_CASE_INSENSITIVE)
+                        .setString(Role.ROLE_NAME, roleName)
+                        .setString(Role.REALM_NAME, realmName);
             role = (Role) query.uniqueResult();
             if (role == null) {
                 throw new RoleNotFoundException("Role not found" + roleName
@@ -474,8 +488,8 @@ public class DAO {
      * @return
      * @throws Exception
      */
-    public List<String> assignedRoles(String userName, String realmName)
-            throws Exception {
+    public List<String> assignedRoles(String userName, String realmName,
+            Session _session) throws Exception {
         Set<Role> roles = null;
         List<String> assignedRole = null;
         User user = null;
@@ -511,15 +525,23 @@ public class DAO {
      * @return
      * @throws Exception
      */
-    public List<String> descendantRoles(String roleName) throws Exception {
+    public List<String> descendantRoles(String realmName, String roleName,
+            Session _session) throws Exception {
         Set<RoleHierarchy> roleHierarchies = null;
         List<String> descendantRoles = null;
         Role role = null;
         Query query = null;
         try {
             descendantRoles = new ArrayList<String>();
-            query = _session.getNamedQuery(Role.FIND_ROLE).setString(
-                    Role.ROLE_NAME, roleName);
+            if (Realms.isCaseSensitive())
+                query = _session.getNamedQuery(Role.FIND_ROLE_OF_REALM)
+                        .setString(Role.ROLE_NAME, roleName)
+                        .setString(Role.REALM_NAME, realmName);
+            else
+                query = _session
+                        .getNamedQuery(Role.FIND_ROLE_OF_REALM_CASE_INSENSITIVE)
+                        .setString(Role.ROLE_NAME, roleName)
+                        .setString(Role.REALM_NAME, realmName);
             role = (Role) query.uniqueResult();
             if (role == null) {
                 throw new RoleNotFoundException("Role not found" + roleName);
@@ -549,14 +571,21 @@ public class DAO {
      * @return
      * @throws Exception
      */
-    public Set<User> authorizedUsers(String roleName, String realmName)
-            throws Exception {
+    public Set<User> authorizedUsers(String roleName, String realmName,
+            Session _session) throws Exception {
         Role role = null;
         Set<User> users = null;
+        Query query = null;
         try {
-            Query query = _session.getNamedQuery(Role.FIND_ROLE_OF_REALM)
-                    .setString(Role.ROLE_NAME, roleName)
-                    .setString(Role.REALM_NAME, realmName);
+            if (Realms.isCaseSensitive())
+                query = _session.getNamedQuery(Role.FIND_ROLE_OF_REALM)
+                        .setString(Role.ROLE_NAME, roleName)
+                        .setString(Role.REALM_NAME, realmName);
+            else
+                query = _session
+                        .getNamedQuery(Role.FIND_ROLE_OF_REALM_CASE_INSENSITIVE)
+                        .setString(Role.ROLE_NAME, roleName)
+                        .setString(Role.REALM_NAME, realmName);
             role = (Role) query.uniqueResult();
             if (role == null) {
                 throw new RBACException("Role not found " + roleName);
@@ -578,12 +607,19 @@ public class DAO {
      * @throws Exception
      */
     @SuppressWarnings("unchecked")
-    public List<RoleHierarchy> ascendantRoles(String roleName) throws Exception {
+    public List<RoleHierarchy> ascendantRoles(String roleName, Session _session)
+            throws Exception {
         List<RoleHierarchy> roleHierarchies = null;
         Query query = null;
         try {
-            query = _session.getNamedQuery(RoleHierarchy.FIND_ROLE_HIERARCHIES)
-                    .setString(RoleHierarchy.ROLE_NAME, roleName);
+            if (Realms.isCaseSensitive())
+                query = _session.getNamedQuery(
+                        RoleHierarchy.FIND_ROLE_HIERARCHIES).setString(
+                        RoleHierarchy.ROLE_NAME, roleName);
+            else
+                query = _session.getNamedQuery(
+                        RoleHierarchy.FIND_ROLE_HIERARCHIES_CASE_INSENSITIVE)
+                        .setString(RoleHierarchy.ROLE_NAME, roleName);
             roleHierarchies = query.list();
         } catch (Exception re) {
             log.error("Error while fetching ascendant roles of role "
@@ -599,7 +635,8 @@ public class DAO {
      * @return
      * @throws Exception
      */
-    public List<String> topRoles(String realmName) throws Exception {
+    public List<String> topRoles(String realmName, Session _session)
+            throws Exception {
         Realm realm = null;
         List<String> topRoles = null;
         List<String> descendantRoles = null;
@@ -607,8 +644,13 @@ public class DAO {
         Query query = null;
         try {
             topRoles = new ArrayList<String>();
-            query = _session.getNamedQuery(Realm.FIND_REALM).setString(
-                    Realm.REALM_NAME, realmName);
+            if (Realms.isCaseSensitive())
+                query = _session.getNamedQuery(Realm.FIND_REALM).setString(
+                        Realm.REALM_NAME, realmName);
+            else
+                query = _session.getNamedQuery(
+                        Realm.FIND_REALM_CASE_INSENSITIVE).setString(
+                        Realm.REALM_NAME, realmName);
             realm = (Realm) query.uniqueResult();
             topRoles = new ArrayList<String>();
             descendantRoles = new ArrayList<String>();
@@ -640,7 +682,7 @@ public class DAO {
      * @throws Exception
      */
     @SuppressWarnings("unchecked")
-    public List<Realm> getRealms() throws Exception {
+    public List<Realm> getRealms(Session _session) throws Exception {
         List<Realm> realms = null;
         Query query = null;
         try {
@@ -659,20 +701,29 @@ public class DAO {
      * @return
      * @throws Exception
      */
-    public RoleHierarchy getRoleHierarchy(String roleName, String descendantRole)
-            throws Exception {
+    public RoleHierarchy getRoleHierarchy(String roleName,
+            String descendantRole, Session _session) throws Exception {
         RoleHierarchy roleHierarchy = null;
+        Query query = null;
         try {
-            Query query = _session
-                    .getNamedQuery(RoleHierarchy.FIND_ROLE_HIERARCHY)
-                    .setString(RoleHierarchy.ROLE_NAME, roleName)
-                    .setString(RoleHierarchy.DESENDANT_ROLE_NAME,
-                            descendantRole);
+            if (Realms.isCaseSensitive())
+                query = _session
+                        .getNamedQuery(RoleHierarchy.FIND_ROLE_HIERARCHY)
+                        .setString(RoleHierarchy.ROLE_NAME, roleName)
+                        .setString(RoleHierarchy.DESENDANT_ROLE_NAME,
+                                descendantRole);
+            else
+                query = _session
+                        .getNamedQuery(
+                                RoleHierarchy.FIND_ROLE_HIERARCHY_CASE_INSENSITIVE)
+                        .setString(RoleHierarchy.ROLE_NAME, roleName)
+                        .setString(RoleHierarchy.DESENDANT_ROLE_NAME,
+                                descendantRole);
             roleHierarchy = (RoleHierarchy) query.uniqueResult();
         } catch (Exception re) {
-            log.error("Error while fetching RoleHierarchy of role " + roleName,
+            log.error("Error while fetching role hierarchy of role " + roleName,
                     re);
-            throw new Exception("Error while fetching RoleHierarchy of role "
+            throw new Exception("Error while fetching role hierarchy of role "
                     + roleName, re);
         }
         return roleHierarchy;
@@ -686,23 +737,89 @@ public class DAO {
      */
     @SuppressWarnings("unchecked")
     public List<RoleHierarchy> getAscDescRoleHierarchy(String roleName,
-            String descendantRole) throws Exception {
+            String descendantRole, Session _session) throws Exception {
         List<RoleHierarchy> roleHierarchies = null;
+        Query query = null;
         try {
-            Query query = _session
-                    .getNamedQuery(RoleHierarchy.FIND_ASC_DESC_ROLE_HIERARCHIES)
-                    .setString(RoleHierarchy.ROLE_NAME, roleName)
-                    .setString(RoleHierarchy.DESENDANT_ROLE_NAME,
-                            descendantRole);
+            if (Realms.isCaseSensitive())
+                query = _session
+                        .getNamedQuery(
+                                RoleHierarchy.FIND_ASC_DESC_ROLE_HIERARCHIES)
+                        .setString(RoleHierarchy.ROLE_NAME, roleName)
+                        .setString(RoleHierarchy.DESENDANT_ROLE_NAME,
+                                descendantRole);
+            else
+                query = _session
+                        .getNamedQuery(
+                                RoleHierarchy.FIND_ASC_DESC_ROLE_HIERARCHIES_CASE_INSENSITIVE)
+                        .setString(RoleHierarchy.ROLE_NAME, roleName)
+                        .setString(RoleHierarchy.DESENDANT_ROLE_NAME,
+                                descendantRole);
             roleHierarchies = query.list();
         } catch (Exception re) {
             log.error(
-                    "Error while fetching ascendant and descendant RoleHierarchy of role "
+                    "Error while fetching ascendant and descendant role hierarchy of role "
                             + roleName, re);
             throw new Exception(
-                    "Error while fetching ascendant and descendant RoleHierarchy of role "
+                    "Error while fetching ascendant and descendant role hierarchy of role "
                             + roleName, re);
         }
         return roleHierarchies;
+    }
+
+    /**
+     * @param userName
+     * @param realmName
+     * @return
+     * @throws Exception
+     */
+    public User getUser(String realmName, String userName, Session _session)
+            throws Exception {
+        User user = null;
+        Query query = null;
+        try {
+            if (Realms.isCaseSensitive())
+                query = _session.getNamedQuery(User.FIND_USER_OF_REALM)
+                        .setString(User.USER_NAME, userName)
+                        .setString(User.REALM_NAME, realmName);
+            else
+                query = _session
+                        .getNamedQuery(User.FIND_USER_OF_REALM_CASE_INSENSITIVE)
+                        .setString(User.USER_NAME, userName)
+                        .setString(User.REALM_NAME, realmName);
+            user = (User) query.uniqueResult();
+        } catch (Exception re) {
+            log.error("Error while fetching user" + userName, re);
+            throw new Exception("Error while user" + userName, re);
+        }
+        return user;
+    }
+
+    /**
+     * @param realmName
+     * @param roleName
+     * @return
+     * @throws Exception
+     */
+    public Role getRole(String realmName, String roleName, Session _session)
+            throws Exception {
+        Role role = null;
+        Query query = null;
+        try {
+            if (Realms.isCaseSensitive())
+                query = _session.getNamedQuery(Role.FIND_ROLE_OF_REALM)
+                        .setString(Role.ROLE_NAME, roleName)
+                        .setString(Role.REALM_NAME, realmName);
+            else
+                query = _session
+                        .getNamedQuery(Role.FIND_ROLE_OF_REALM_CASE_INSENSITIVE)
+                        .setString(Role.ROLE_NAME, roleName)
+                        .setString(Role.REALM_NAME, realmName);
+            role = (Role) query.uniqueResult();
+        } catch (Exception re) {
+            log.error("Error while fetching role " + roleName, re);
+            throw new Exception("Error while fetching role " + roleName, re);
+        }
+        return role;
     }
 }
