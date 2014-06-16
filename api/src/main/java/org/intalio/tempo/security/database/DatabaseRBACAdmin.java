@@ -299,8 +299,9 @@ public class DatabaseRBACAdmin implements RBACAdmin {
             descendantRole = dao.getRole(
                     IdentifierUtils.getRealm(descendantRoleName),
                     IdentifierUtils.stripRealm(descendantRoleName), session);
-            roleHierarchy = dao.getRoleHierarchy(role.getIdentifier(),
-                    descendantRole.getIdentifier(), session);
+            roleHierarchy = dao.getRoleHierarchy(role.getRealm()
+                    .getIdentifier(), role.getIdentifier(), descendantRole
+                    .getIdentifier(), session);
             if (roleHierarchy == null) {
                 roleHierarchy = new RoleHierarchy();
                 roleHierarchy.setRole(role);
@@ -326,7 +327,6 @@ public class DatabaseRBACAdmin implements RBACAdmin {
         Transaction transaction = null;
         Set<User> users = null;
         Set<Role> assignedRoles = null;
-        List<RoleHierarchy> roleHierarchies = null;
         try {
             session = _dao.getSession();
             transaction = session.beginTransaction();
@@ -338,11 +338,7 @@ public class DatabaseRBACAdmin implements RBACAdmin {
                 assignedRoles.remove(role);
                 _dao.saveOrUpdate(user, session);
             }
-            roleHierarchies = _dao.getAscDescRoleHierarchy(
-                    role.getIdentifier(), role.getIdentifier(), session);
-            for (RoleHierarchy roleHierarchy : roleHierarchies) {
-                _dao.delete(roleHierarchy, session);
-            }
+            _dao.deleteAscDescRoleHierarchy(role.getId(), session);
             _dao.delete(role, session);
             transaction.commit();
         } catch (Exception e) {
