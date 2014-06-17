@@ -98,6 +98,9 @@
 				</xsd:complexType>
 			</xsd:element>
 			<xsd:element name="isRoleCaseSensitive">
+				<xsd:complexType>
+					<xsd:sequence />
+				</xsd:complexType>
 			</xsd:element>
 			<xsd:element name="isRoleCaseSensitiveResponse">
 				<xsd:complexType>
