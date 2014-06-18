@@ -22,6 +22,8 @@ import java.util.Set;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
+import javax.naming.directory.Attribute;
+import javax.naming.directory.Attributes;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 
@@ -33,6 +35,8 @@ import org.intalio.tempo.security.rbac.RBACException;
 import org.intalio.tempo.security.rbac.provider.RBACProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.intalio.bpms.license.IntalioSigner;
 
 /**
  * An implementation of SecurityProvider that is backed by a LDAP directory
@@ -131,6 +135,10 @@ public class LDAPSecurityProvider implements SecurityProvider {
         DirContext root = null;
         try {
             root = getRootContext();
+
+            if (!IntalioSigner.hasOption("enterprise")) {
+                detectServerType(root);
+            }
         } catch ( NamingException ne ) {
             throw new AuthenticationException("Error creating initial context!",ne);
         } finally {
@@ -140,6 +148,86 @@ public class LDAPSecurityProvider implements SecurityProvider {
         initRealms(_env);
     }
     
+    private void detectServerType(DirContext context) {
+        try {
+            Attributes attrs = context.getAttributes("", new String[] {
+                    "vendorVersion", "vendorName", "highestCommittedUSN",
+                    "rootDomainNamingContext", "structuralObjectClass",
+                    "forestFunctionality", "isGlobalCatalogReady" });
+            String vendorName = getStringAttrValue(attrs, "vendorName");
+            if (null != vendorName) {
+                vendorName = vendorName.toLowerCase();
+                if (vendorName.contains("ibm")) {
+                    String msg = "Intalio|bpms license present in server does not support Microsoft Active Directory"
+                            + ". Server will shutdown now. Please contact support@intalio.com "
+                            + "for assistance, or sign up for Enterprise Edition trial "
+                            + "(http://www.intalio.com/try-intaliobpms-enterprise-edition-free-for-45-days/).";
+                    LOG.error(msg);
+                    System.exit(0);
+                }
+
+                if (vendorName.contains("novell")) {
+                    String msg = "Intalio|bpms license present in server does not support Microsoft Active Directory"
+                            + ". Server will shutdown now. Please contact support@intalio.com "
+                            + "for assistance, or sign up for Enterprise Edition trial "
+                            + "(http://www.intalio.com/try-intaliobpms-enterprise-edition-free-for-45-days/).";
+                    LOG.error(msg);
+                    System.exit(0);
+                }
+
+                if (vendorName.contains("unboundid")) {
+                }
+            }
+
+            String vendorVersion = getStringAttrValue(attrs, "vendorVersion");
+            if (vendorVersion != null) {
+                vendorVersion = vendorVersion.toLowerCase();
+                if (vendorVersion.contains("opends")) {
+                }
+                if (vendorVersion.contains("opendj")) {
+                }
+                if (vendorVersion.contains("sun")
+                        && vendorVersion.contains("directory")) {
+                }
+            } else {
+                String hUSN = getStringAttrValue(attrs, "highestCommittedUSN");
+                String sOC = getStringAttrValue(attrs, "structuralObjectClass");
+
+                if (hUSN != null) {
+                    // Windows Active Directory
+
+                    String msg = "Intalio|bpms license present in server does not support Microsoft Active Directory"
+                            + ". Server will shutdown now. Please contact support@intalio.com "
+                            + "for assistance, or sign up for Enterprise Edition trial "
+                            + "(http://www.intalio.com/try-intaliobpms-enterprise-edition-free-for-45-days/).";
+                    LOG.error(msg);
+                    System.exit(0);
+                } else if (sOC != null
+                        && sOC.equalsIgnoreCase("OpenLDAProotDSE")) {
+                }
+            }
+        } catch (NamingException e) {
+            // No need to handle this exception
+        }
+    }
+
+    public static String getStringAttrValue(Attributes ldapAttrs,
+            String ldapAttrName) {
+        Attribute attr = ldapAttrs.get(ldapAttrName);
+        if (attr != null) {
+            try {
+                return (String) attr.get();
+            } catch (NamingException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return null;
+    }
+
+    public enum ServerType {
+        SUN_DSEE, OPENDS, OPENDJ, IBM, MSAD, MSAD_LDS, MSAD_GC, NOVELL, UNBOUNDID, OPENLDAP, UNKNOWN
+    }
+
     /**
      * @see org.intalio.tempo.security.provider.SecurityProvider#getName()
      */
