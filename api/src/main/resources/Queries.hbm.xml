@@ -16,8 +16,8 @@
 <query name="findRolesOfRealm"><![CDATA[from Role r WHERE r.realm.identifier = :realmname]]></query>
 <query name="findRoleHierarchies"><![CDATA[from RoleHierarchy rh where rh.descendantRole.identifier = :role]]> </query>
 <query name="findRoleHierarchiesCaseInsensitive"><![CDATA[from RoleHierarchy rh where LOWER(rh.descendantRole.identifier) = LOWER(:role)]]> </query>
-<query name="findRoleHierarchy"><![CDATA[from RoleHierarchy rh where rh.role.identifier = :role and rh.descendantRole.identifier= :descendantRole]]> </query>
-<query name="findRoleHierarchyCaseInsensitive"><![CDATA[from RoleHierarchy rh where LOWER(rh.role.identifier) = LOWER(:role) and LOWER(rh.descendantRole.identifier) = LOWER(:descendantRole)]]> </query>
-<query name="findAscDescRoleHierarchies"><![CDATA[from RoleHierarchy rh where rh.role.identifier = :role or rh.descendantRole.identifier= :descendantRole]]> </query>
-<query name="findAscDescRoleHierarchiesCaseInsensitive"><![CDATA[from RoleHierarchy rh where LOWER(rh.role.identifier) = LOWER(:role) or LOWER(rh.descendantRole.identifier) = LOWER(:descendantRole)]]> </query>
+<query name="findRoleHierarchy"><![CDATA[from RoleHierarchy rh where rh.role.realm.identifier = :realmname and rh.role.identifier = :role and rh.descendantRole.identifier= :descendantRole]]> </query>
+<query name="findRoleHierarchyCaseInsensitive"><![CDATA[from RoleHierarchy rh where LOWER(rh.role.realm.identifier) = LOWER(:realmname) and LOWER(rh.role.identifier) = LOWER(:role) and LOWER(rh.descendantRole.identifier) = LOWER(:descendantRole)]]> </query>
+<query name="deleteRoleHierarchy"><![CDATA[DELETE from RoleHierarchy rh where rh.role.id = :roleId or rh.descendantRole.id = :descRoleId]]>
+</query>
 </hibernate-mapping>

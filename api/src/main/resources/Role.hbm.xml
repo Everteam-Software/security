@@ -22,7 +22,7 @@
             </key>
             <many-to-many column="user_id" class="org.intalio.tempo.security.database.model.User" />
         </set>
-        <set name="roleHierarchies" inverse="true" cascade="save-update" lazy="false" fetch="select">
+        <set name="roleHierarchies" inverse="true" cascade="save-update" lazy="true" fetch="select">
             <key>
                 <column name="role_id" not-null="true" />
             </key>

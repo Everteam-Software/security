@@ -417,7 +417,6 @@ public class DAO {
         try {
             _session = _sessionFactory.openSession();
         } catch (Exception re) {
-            log.warn("Exception while opening session", re);
             throw new Exception("Exception while opening session", re);
         }
         return _session;
@@ -434,7 +433,6 @@ public class DAO {
             }
         } catch (Exception re) {
             log.warn("Exception while closing session", re);
-            throw new Exception("Exception while closing session", re);
         }
     }
 
@@ -701,7 +699,7 @@ public class DAO {
      * @return
      * @throws Exception
      */
-    public RoleHierarchy getRoleHierarchy(String roleName,
+    public RoleHierarchy getRoleHierarchy(String realmName, String roleName,
             String descendantRole, Session _session) throws Exception {
         RoleHierarchy roleHierarchy = null;
         Query query = null;
@@ -709,6 +707,7 @@ public class DAO {
             if (Realms.isCaseSensitive())
                 query = _session
                         .getNamedQuery(RoleHierarchy.FIND_ROLE_HIERARCHY)
+                        .setString(RoleHierarchy.REALM_NAME, realmName)
                         .setString(RoleHierarchy.ROLE_NAME, roleName)
                         .setString(RoleHierarchy.DESENDANT_ROLE_NAME,
                                 descendantRole);
@@ -716,6 +715,7 @@ public class DAO {
                 query = _session
                         .getNamedQuery(
                                 RoleHierarchy.FIND_ROLE_HIERARCHY_CASE_INSENSITIVE)
+                        .setString(RoleHierarchy.REALM_NAME, realmName)
                         .setString(RoleHierarchy.ROLE_NAME, roleName)
                         .setString(RoleHierarchy.DESENDANT_ROLE_NAME,
                                 descendantRole);
@@ -727,44 +727,6 @@ public class DAO {
                     + roleName, re);
         }
         return roleHierarchy;
-    }
-
-    /**
-     * @param roleName
-     * @param descendantRole
-     * @return
-     * @throws Exception
-     */
-    @SuppressWarnings("unchecked")
-    public List<RoleHierarchy> getAscDescRoleHierarchy(String roleName,
-            String descendantRole, Session _session) throws Exception {
-        List<RoleHierarchy> roleHierarchies = null;
-        Query query = null;
-        try {
-            if (Realms.isCaseSensitive())
-                query = _session
-                        .getNamedQuery(
-                                RoleHierarchy.FIND_ASC_DESC_ROLE_HIERARCHIES)
-                        .setString(RoleHierarchy.ROLE_NAME, roleName)
-                        .setString(RoleHierarchy.DESENDANT_ROLE_NAME,
-                                descendantRole);
-            else
-                query = _session
-                        .getNamedQuery(
-                                RoleHierarchy.FIND_ASC_DESC_ROLE_HIERARCHIES_CASE_INSENSITIVE)
-                        .setString(RoleHierarchy.ROLE_NAME, roleName)
-                        .setString(RoleHierarchy.DESENDANT_ROLE_NAME,
-                                descendantRole);
-            roleHierarchies = query.list();
-        } catch (Exception re) {
-            log.error(
-                    "Error while fetching ascendant and descendant role hierarchy of role "
-                            + roleName, re);
-            throw new Exception(
-                    "Error while fetching ascendant and descendant role hierarchy of role "
-                            + roleName, re);
-        }
-        return roleHierarchies;
     }
 
     /**
@@ -822,4 +784,28 @@ public class DAO {
         }
         return role;
     }
+
+    /**
+     * @param roleId
+     * @param _session
+     * @throws Exception
+     */
+    public void deleteAscDescRoleHierarchy(int roleId, Session _session)
+            throws Exception {
+        Query query = null;
+        try {
+            query = _session.getNamedQuery(RoleHierarchy.DELETE_ROLE_HIERARCHY)
+                    .setInteger(RoleHierarchy.ROLE_ID, roleId)
+                    .setInteger(RoleHierarchy.DESC_ROLE_ID, roleId);
+            query.executeUpdate();
+        } catch (Exception re) {
+            log.error(
+                    "Error while deleting ascendant and descendant role hierarchy of role id "
+                            + roleId, re);
+            throw new Exception(
+                    "Error while deleting ascendant and descendant role hierarchy of role id "
+                            + roleId, re);
+        }
+    }
+
 }

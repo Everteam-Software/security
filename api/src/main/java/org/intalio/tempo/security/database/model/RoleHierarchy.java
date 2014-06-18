@@ -23,8 +23,10 @@ public class RoleHierarchy implements Serializable {
     public static final String FIND_ROLE_HIERARCHY_CASE_INSENSITIVE = "findRoleHierarchyCaseInsensitive";
     public static final String ROLE_NAME = "role";
     public static final String DESENDANT_ROLE_NAME = "descendantRole";
-    public static final String FIND_ASC_DESC_ROLE_HIERARCHIES = "findAscDescRoleHierarchies";
-    public static final String FIND_ASC_DESC_ROLE_HIERARCHIES_CASE_INSENSITIVE = "findAscDescRoleHierarchiesCaseInsensitive";
+    public static final String REALM_NAME = "realmname";
+    public static final String ROLE_ID = "roleId";
+    public static final String DESC_ROLE_ID = "descRoleId";
+    public static final String DELETE_ROLE_HIERARCHY = "deleteRoleHierarchy";
 
     private Role role;
     private Role descendantRole;

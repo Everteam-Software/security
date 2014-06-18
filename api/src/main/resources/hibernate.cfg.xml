@@ -4,12 +4,6 @@
 		"http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
 <hibernate-configuration>
     <session-factory>
-        <property name="hibernate.connection.driver_class">org.apache.derby.jdbc.ClientDriver</property>
-        <property name="hibernate.connection.password">APP</property>
-        <property name="hibernate.connection.url">jdbc:derby://localhost:1527/BPMSDB</property>
-        <property name="hibernate.connection.username">APP</property>
-        <property name="hibernate.dialect">org.hibernate.dialect.DerbyDialect</property>
-        <property name="hibernate.current_session_context_class">org.hibernate.context.ThreadLocalSessionContext</property>
         <property name="show_sql">false</property>
         <mapping resource="User.hbm.xml"/>
         <mapping resource="Role.hbm.xml"/>
