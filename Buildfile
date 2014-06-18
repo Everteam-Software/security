@@ -16,7 +16,7 @@ define "security" do
 
   desc "Security Framework"
   define "api" do
-    compile.with AXIOM, CAS_CLIENT, DOM4J, CASTOR, LOG4J, SLF4J[:api], SLF4J[:log4j12], SLF4J[:jcl104overslf4j], SPRING[:core], XERCES[:impl], XERCES[:parserapi], OPENSSO_CLIENT_SDK, SERVLET_API,JASYPT
+    compile.with AXIOM, CAS_CLIENT, DOM4J, CASTOR, LOG4J, SLF4J[:api], SLF4J[:log4j12], SLF4J[:jcl104overslf4j], SPRING[:core], XERCES[:impl], XERCES[:parserapi], OPENSSO_CLIENT_SDK, SERVLET_API,JASYPT, INTALIO_LICENSE
 
     test.exclude "*BaseSuite"
     test.exclude "*FuncTestSuite"
