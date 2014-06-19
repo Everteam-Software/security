@@ -71,6 +71,10 @@ public class LDAPSecurityProvider implements SecurityProvider {
     
     private Map<String,LDAPAuthenticationProvider> _auths;
 
+    private static final String invalidLicenseMessage = "Your Intalio|bpms server license does not support ?. " +
+            "Server is going to shut down now. Please contact support@intalio.com for assistance, " +
+            "or sign up for Enterprise Edition trial (http://www.intalio.com/try-intaliobpms-enterprise-" +
+            "edition-free-for-45-days/).";
     /**
      * Constructor
      */
@@ -158,20 +162,12 @@ public class LDAPSecurityProvider implements SecurityProvider {
             if (null != vendorName) {
                 vendorName = vendorName.toLowerCase();
                 if (vendorName.contains("ibm")) {
-                    String msg = "Intalio|bpms license present in server does not support Microsoft Active Directory"
-                            + ". Server will shutdown now. Please contact support@intalio.com "
-                            + "for assistance, or sign up for Enterprise Edition trial "
-                            + "(http://www.intalio.com/try-intaliobpms-enterprise-edition-free-for-45-days/).";
-                    LOG.error(msg);
+                    LOG.error(invalidLicenseMessage.replace("?", "IBM Ldap Server"));
                     System.exit(0);
                 }
 
                 if (vendorName.contains("novell")) {
-                    String msg = "Intalio|bpms license present in server does not support Microsoft Active Directory"
-                            + ". Server will shutdown now. Please contact support@intalio.com "
-                            + "for assistance, or sign up for Enterprise Edition trial "
-                            + "(http://www.intalio.com/try-intaliobpms-enterprise-edition-free-for-45-days/).";
-                    LOG.error(msg);
+                    LOG.error(invalidLicenseMessage.replace("?", "Novell Ldap Server"));
                     System.exit(0);
                 }
 
@@ -196,11 +192,7 @@ public class LDAPSecurityProvider implements SecurityProvider {
                 if (hUSN != null) {
                     // Windows Active Directory
 
-                    String msg = "Intalio|bpms license present in server does not support Microsoft Active Directory"
-                            + ". Server will shutdown now. Please contact support@intalio.com "
-                            + "for assistance, or sign up for Enterprise Edition trial "
-                            + "(http://www.intalio.com/try-intaliobpms-enterprise-edition-free-for-45-days/).";
-                    LOG.error(msg);
+                    LOG.error(invalidLicenseMessage.replace("?", "Microsoft Active Directory"));
                     System.exit(0);
                 } else if (sOC != null
                         && sOC.equalsIgnoreCase("OpenLDAProotDSE")) {
