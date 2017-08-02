@@ -314,6 +314,7 @@ implements AuthenticationProvider, LDAPProperties {
 
                 copyProperty(env, "javax.security.sasl.qop");
                 copyProperty(env, "java.naming.security.sasl.realm");
+		copyProperty(env, "java.naming.referral");
                 copyProperty(env, "javax.security.sasl.strength");
 
                 if (_principleSyntax.equals("url")) {
